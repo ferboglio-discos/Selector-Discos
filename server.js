@@ -10,7 +10,6 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.post('/api/recomendar', async (req, res) => {
   const { prompt } = req.body;
   if (!prompt) return res.status(400).json({ error: 'Falta el prompt' });
-
   try {
     const response = await fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
@@ -25,7 +24,6 @@ app.post('/api/recomendar', async (req, res) => {
         messages: [{ role: 'user', content: prompt }]
       })
     });
-
     const data = await response.json();
     if (data.error) return res.status(500).json({ error: data.error.message });
     const text = data.content.map(c => c.text || '').join('');
@@ -39,5 +37,5 @@ app.get('*', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 10000;
 app.listen(PORT, () => console.log(`Servidor corriendo en puerto ${PORT}`));
