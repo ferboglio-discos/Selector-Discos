@@ -7,6 +7,31 @@ app.use(cors());
 app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public')));
 
+app.get('/api/clima', async (req, res) => {
+  const city = req.query.city || 'Rosario del Tala';
+  try {
+    const geoRes = await fetch(`https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(city)}&count=1&language=es&format=json`);
+    const geoData = await geoRes.json();
+    if (!geoData.results?.length) return res.status(404).json({ error: 'Ciudad no encontrada' });
+    const { latitude, longitude, name } = geoData.results[0];
+    const wRes = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&current=temperature_2m,weather_code,wind_speed_10m,relative_humidity_2m&timezone=auto`);
+    const wData = await wRes.json();
+    const cur = wData.current;
+    const temp = Math.round(cur.temperature_2m);
+    const wc = cur.weather_code;
+    let desc, emoji;
+    if (wc === 0) { desc = 'Despejado'; emoji = '☀️'; }
+    else if (wc <= 3) { desc = 'Parcialmente nublado'; emoji = '⛅'; }
+    else if (wc <= 48) { desc = 'Nublado'; emoji = '☁️'; }
+    else if (wc <= 67) { desc = 'Lluvia'; emoji = '🌧️'; }
+    else if (wc <= 77) { desc = 'Nieve'; emoji = '🌨️'; }
+    else { desc = 'Tormenta'; emoji = '⛈️'; }
+    res.json({ temp, desc, emoji, humidity: cur.relative_humidity_2m, wind: Math.round(cur.wind_speed_10m), city: name });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 app.post('/api/recomendar', async (req, res) => {
   const { prompt } = req.body;
   if (!prompt) return res.status(400).json({ error: 'Falta el prompt' });
