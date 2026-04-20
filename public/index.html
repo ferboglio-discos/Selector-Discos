@@ -56,6 +56,19 @@
     .temp-row label { margin: 0; white-space: nowrap; }
     .temp-display { font-size: 20px; font-weight: 500; min-width: 55px; }
     input[type="range"] { flex: 1; accent-color: #2c2c2a; }
+    .weather-auto { display: flex; align-items: center; gap: 10px; padding: 10px 0; }
+    .weather-temp-big { font-size: 28px; font-weight: 500; }
+    .weather-info { flex: 1; }
+    .weather-desc { font-size: 13px; color: var(--text2); }
+    .weather-city { font-size: 12px; color: var(--text3); }
+    .weather-refresh { padding: 6px 12px; background: var(--bg2); border: 0.5px solid var(--border); border-radius: var(--radius); font-size: 12px; cursor: pointer; color: var(--text2); }
+    .city-row { display: flex; gap: 8px; margin-top: 10px; align-items: flex-end; }
+    .city-row input { flex: 1; }
+    .city-row button { padding: 8px 14px; background: var(--bg2); border: 0.5px solid var(--border); border-radius: var(--radius); font-size: 13px; cursor: pointer; color: var(--text); white-space: nowrap; }
+    .genre-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+    .genre-btn { padding: 8px 6px; border: 0.5px solid var(--border); border-radius: var(--radius); background: var(--bg2); color: var(--text); font-size: 12px; cursor: pointer; text-align: center; line-height: 1.3; transition: all 0.15s; }
+    .genre-btn.selected { background: var(--amber-bg); border-color: #ba7517; color: var(--amber); }
+    .genre-none { font-size: 12px; color: var(--text3); margin-top: 8px; text-align: center; }
     .rec-btn { width: 100%; padding: 14px; background: #2c2c2a; color: #f1efe8; border: none; border-radius: var(--radius); font-size: 15px; font-weight: 500; cursor: pointer; margin-top: 4px; transition: background 0.15s; }
     .rec-btn:hover { background: #444441; }
     .rec-btn:disabled { opacity: 0.5; cursor: default; }
@@ -66,12 +79,6 @@
     .badge-blue { background: var(--blue-bg); color: var(--blue); }
     .badge-coral { background: #faece7; color: #712b13; }
     .context-chips { display: flex; flex-wrap: wrap; gap: 6px; }
-    .result-card { background: var(--bg); border: 0.5px solid var(--border); border-radius: var(--radius-lg); padding: 1.25rem 1.25rem 1.25rem 1.5rem; margin-bottom: 12px; }
-    .result-rank { font-size: 11px; color: var(--text3); margin-bottom: 4px; }
-    .result-album { font-size: 16px; font-weight: 500; margin-bottom: 2px; }
-    .result-artist { font-size: 14px; color: var(--text2); margin-bottom: 10px; }
-    .result-meta { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 10px; }
-    .result-body { font-size: 13px; color: var(--text2); line-height: 1.6; padding-top: 10px; border-top: 0.5px solid var(--border); }
     .spinner { display: inline-block; width: 16px; height: 16px; border: 2px solid var(--border2); border-top-color: var(--text2); border-radius: 50%; animation: spin 0.7s linear infinite; vertical-align: middle; margin-right: 8px; }
     @keyframes spin { to { transform: rotate(360deg); } }
     .empty-state { text-align: center; padding: 2rem; color: var(--text2); font-size: 14px; line-height: 1.7; }
@@ -105,6 +112,9 @@
     .pager span { font-size: 12px; color: var(--text2); }
     .streaming-box { background: var(--bg); border: 0.5px solid var(--border); border-radius: var(--radius-lg); padding: 1.25rem; margin-top: 16px; font-size: 14px; line-height: 1.8; color: var(--text); white-space: pre-wrap; min-height: 60px; }
     .streaming-box strong { font-weight: 600; }
+    .info-row { display: flex; align-items: center; gap: 8px; padding: 6px 0; border-bottom: 0.5px solid var(--border); font-size: 13px; }
+    .info-row:last-child { border-bottom: none; }
+    .info-label { color: var(--text2); width: 80px; flex-shrink: 0; }
   </style>
 </head>
 <body>
@@ -129,6 +139,7 @@
   </div>
 
   <div class="section active" id="sec-recomendar">
+
     <div class="card">
       <div class="card-title">Estado de ánimo</div>
       <div class="mood-grid">
@@ -140,52 +151,48 @@
         <button class="mood-btn" onclick="selectMood(this,'Introspectivo')"><span class="mood-icon">🌙</span>Introspectivo</button>
       </div>
     </div>
+
     <div class="card">
-      <div class="card-title">Clima ahora</div>
-      <div class="clima-grid">
-        <button class="clima-btn" onclick="selectClima(this,'Despejado','☀️')"><span class="clima-icon">☀️</span>Despejado</button>
-        <button class="clima-btn" onclick="selectClima(this,'Nublado','⛅')"><span class="clima-icon">⛅</span>Nublado</button>
-        <button class="clima-btn" onclick="selectClima(this,'Lluvia','🌧️')"><span class="clima-icon">🌧️</span>Lluvia</button>
-        <button class="clima-btn" onclick="selectClima(this,'Tormenta','⛈️')"><span class="clima-icon">⛈️</span>Tormenta</button>
-        <button class="clima-btn" onclick="selectClima(this,'Frío','🧊')"><span class="clima-icon">🧊</span>Frío</button>
-        <button class="clima-btn" onclick="selectClima(this,'Calor','🌡️')"><span class="clima-icon">🌡️</span>Calor</button>
-        <button class="clima-btn" onclick="selectClima(this,'Viento','💨')"><span class="clima-icon">💨</span>Viento</button>
-        <button class="clima-btn" onclick="selectClima(this,'Niebla','🌫️')"><span class="clima-icon">🌫️</span>Niebla</button>
+      <div class="card-title">Clima actual <span id="clima-status" style="font-weight:400;color:var(--text3);font-size:11px;text-transform:none;letter-spacing:0"></span></div>
+      <div id="clima-auto">
+        <div class="empty-state" style="padding:1rem">Obteniendo clima... <span class="spinner" style="margin:0"></span></div>
       </div>
-      <div class="temp-row">
-        <label>Temperatura</label>
-        <input type="range" id="temp-slider" min="-5" max="45" value="20" step="1"
-          oninput="state.temp=parseInt(this.value);document.getElementById('temp-val').textContent=this.value+'°C';updateContexto()"/>
-        <span class="temp-display" id="temp-val">20°C</span>
+      <div class="city-row">
+        <input type="text" id="city-input" placeholder="Cambiar ciudad..." value="Rosario del Tala"/>
+        <button onclick="fetchClima()">Actualizar</button>
       </div>
     </div>
+
     <div class="card">
-      <div class="card-title">Más parámetros</div>
-      <div class="grid-2">
-        <div><label>Ocasión</label>
-          <select id="ocasion">
-            <option value="">Sin especificar</option>
-            <option>Solo en casa</option><option>Con amigos</option>
-            <option>Cena romántica</option><option>Trabajo o estudio</option>
-            <option>Fiesta</option><option>Meditación</option>
-          </select>
-        </div>
-        <div><label>Duración</label>
-          <select id="duracion">
-            <option value="">Sin preferencia</option>
-            <option>30 minutos</option><option>1 hora</option><option>2 horas o más</option>
-          </select>
-        </div>
-      </div>
-      <div style="margin-top:10px">
-        <label>Nota adicional (opcional)</label>
-        <textarea id="nota-extra" placeholder="Ej: algo tranquilo para la sobremesa..."></textarea>
+      <div class="card-title">Género musical <span style="font-weight:400;color:var(--text3);font-size:11px;text-transform:none;letter-spacing:0">(opcional — sin selección busca en toda la biblioteca)</span></div>
+      <div class="genre-grid" id="genre-grid">
+        <div class="empty-state" style="padding:0.5rem;grid-column:1/-1;font-size:12px">Cargando géneros de tu biblioteca...</div>
       </div>
     </div>
+
+    <div class="card">
+      <div class="card-title">Ocasión</div>
+      <select id="ocasion">
+        <option value="">Sin especificar</option>
+        <option>Solo en casa</option>
+        <option>Con amigos</option>
+        <option>Cena romántica</option>
+        <option>Trabajo o estudio</option>
+        <option>Fiesta</option>
+        <option>Meditación</option>
+      </select>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Nota adicional (opcional)</div>
+      <textarea id="nota-extra" placeholder="Ej: algo tranquilo para la sobremesa..."></textarea>
+    </div>
+
     <div class="card">
       <div class="card-title">Contexto detectado</div>
-      <div id="contexto-display"><span style="font-size:13px;color:var(--text2)">Completá los campos arriba.</span></div>
+      <div id="contexto-display"><span style="font-size:13px;color:var(--text2)">Cargando...</span></div>
     </div>
+
     <button class="rec-btn" id="btn-rec" onclick="recomendar()">Recomendar discos</button>
     <div id="resultado"></div>
   </div>
@@ -197,7 +204,7 @@
         <input type="file" id="xlsx-input" accept=".xlsx,.xls" onchange="importarExcel(this)"/>
         <span style="font-size:28px;display:block;margin-bottom:8px">📊</span>
         <div style="font-size:14px;font-weight:500;margin-bottom:4px">Arrastrá tu Excel o tocá aquí</div>
-        <div style="font-size:12px;color:var(--text2)">Formato .xlsx</div>
+        <div style="font-size:12px;color:var(--text2)">Formato .xlsx · columnas: Album, Artista, Genero, Tipo, Año</div>
       </div>
       <div id="import-result"></div>
     </div>
@@ -210,7 +217,7 @@
           <select id="new-genre">
             <option>Rock</option><option>Jazz</option><option>Clásica</option><option>Pop</option>
             <option>Blues</option><option>Folk</option><option>Electrónica</option>
-            <option>Tango</option><option>Folklore</option><option>Otro</option>
+            <option>Tango</option><option>Folklore</option><option>Rock progresivo</option><option>Otro</option>
           </select>
         </div>
         <div><label>Tipo</label>
@@ -240,23 +247,37 @@ const PAGE_SIZE = 15;
 let currentPage = 0;
 let state = {
   library: JSON.parse(localStorage.getItem('vinyl_library') || '[]'),
-  mood: null, clima: null, climaEmoji: null, temp: 20
+  mood: null,
+  genero: null,
+  weather: null
 };
+
 function saveLibrary() { try { localStorage.setItem('vinyl_library', JSON.stringify(state.library)); } catch(e){} }
+
 function showTab(tab) {
   document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
   document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
   document.querySelector('[onclick="showTab(\''+tab+'\')"]').classList.add('active');
   document.getElementById('sec-' + tab).classList.add('active');
 }
+
 function selectMood(btn, mood) {
   document.querySelectorAll('.mood-btn').forEach(b => b.classList.remove('selected'));
   btn.classList.add('selected'); state.mood = mood; updateContexto();
 }
-function selectClima(btn, clima, emoji) {
-  document.querySelectorAll('.clima-btn').forEach(b => b.classList.remove('selected'));
-  btn.classList.add('selected'); state.clima = clima; state.climaEmoji = emoji; updateContexto();
+
+function selectGenero(btn, genero) {
+  if (state.genero === genero) {
+    btn.classList.remove('selected');
+    state.genero = null;
+  } else {
+    document.querySelectorAll('.genre-btn').forEach(b => b.classList.remove('selected'));
+    btn.classList.add('selected');
+    state.genero = genero;
+  }
+  updateContexto();
 }
+
 function getSeason() {
   const m = new Date().getMonth()+1;
   if([12,1,2].includes(m)) return {name:'Verano',emoji:'☀️'};
@@ -264,6 +285,7 @@ function getSeason() {
   if([6,7,8].includes(m)) return {name:'Invierno',emoji:'❄️'};
   return {name:'Primavera',emoji:'🌸'};
 }
+
 function getTimeOfDay() {
   const h = new Date().getHours();
   if(h>=6&&h<12) return {name:'Mañana',emoji:'🌅'};
@@ -272,124 +294,82 @@ function getTimeOfDay() {
   if(h>=19&&h<22) return {name:'Noche',emoji:'🌃'};
   return {name:'Madrugada',emoji:'🌙'};
 }
+
 function getDayType() { return [0,6].includes(new Date().getDay()) ? 'Fin de semana' : 'Día de semana'; }
+
 function updateContexto() {
   const s = getSeason(), tod = getTimeOfDay();
+  const w = state.weather;
   const chips = [
     '<span class="badge badge-purple">'+tod.emoji+' '+tod.name+'</span>',
     '<span class="badge badge-teal">'+s.emoji+' '+s.name+'</span>',
-    state.clima ? '<span class="badge badge-blue">'+state.climaEmoji+' '+state.clima+' · '+state.temp+'°C</span>' : '',
+    w ? '<span class="badge badge-blue">'+w.emoji+' '+w.desc+' · '+w.temp+'°C</span>' : '<span class="badge" style="background:var(--bg2);color:var(--text2)">Clima cargando...</span>',
     '<span class="badge badge-amber">'+getDayType()+'</span>',
     state.mood ? '<span class="badge badge-purple">'+state.mood+'</span>' : '',
+    state.genero ? '<span class="badge badge-coral">'+state.genero+'</span>' : '',
   ].filter(Boolean).join('');
   document.getElementById('contexto-display').innerHTML = '<div class="context-chips">'+chips+'</div>';
 }
-async function recomendar() {
+
+async function fetchClima() {
+  const city = document.getElementById('city-input').value.trim() || 'Rosario del Tala';
+  document.getElementById('clima-auto').innerHTML = '<div class="empty-state" style="padding:1rem">Obteniendo clima... <span class="spinner" style="margin:0"></span></div>';
+  try {
+    const res = await fetch('/api/clima?city='+encodeURIComponent(city));
+    const data = await res.json();
+    if (data.error) throw new Error(data.error);
+    state.weather = data;
+    document.getElementById('clima-auto').innerHTML =
+      '<div class="weather-auto">'+
+        '<span style="font-size:36px">'+data.emoji+'</span>'+
+        '<div class="weather-info">'+
+          '<div class="weather-temp-big">'+data.temp+'°C</div>'+
+          '<div class="weather-desc">'+data.desc+'</div>'+
+          '<div class="weather-city">'+data.city+' · Humedad '+data.humidity+'% · Viento '+data.wind+' km/h</div>'+
+        '</div>'+
+      '</div>';
+    updateContexto();
+  } catch(e) {
+    document.getElementById('clima-auto').innerHTML = '<div class="empty-state" style="padding:0.5rem;color:var(--red)">No se pudo obtener el clima. Verificá la ciudad.</div>';
+  }
+}
+
+function renderGeneros() {
+  const generos = [...new Set(state.library.map(d => d.genre).filter(Boolean))].sort();
+  const grid = document.getElementById('genre-grid');
+  if (!generos.length) {
+    grid.innerHTML = '<div class="empty-state" style="padding:0.5rem;grid-column:1/-1;font-size:12px">Cargá discos en tu biblioteca para ver los géneros disponibles.</div>';
+    return;
+  }
+  grid.innerHTML = generos.map(g =>
+    '<button class="genre-btn'+(state.genero===g?' selected':'')+'" onclick="selectGenero(this,\''+g.replace(/'/g,"\\'")+'\')" >'+g+'</button>'
+  ).join('');
+}
+
+function recomendar() {
   if (!state.library.length) { alert('Tu biblioteca está vacía.'); showTab('biblioteca'); return; }
   if (!state.mood) { alert('Seleccioná un estado de ánimo.'); return; }
+
   const btn = document.getElementById('btn-rec');
   const resultDiv = document.getElementById('resultado');
   btn.disabled = true;
   btn.innerHTML = '<span class="spinner"></span>Analizando tu biblioteca...';
   resultDiv.innerHTML = '';
+
   const s = getSeason(), tod = getTimeOfDay();
   const timeStr = new Date().toLocaleTimeString('es-AR', {hour:'2-digit', minute:'2-digit'});
-  const libraryText = state.library.map((d,i) =>
-    (i+1)+'. "'+d.album+'" de '+d.artist+(d.year?' ('+d.year+')':'')+(d.genre?', '+d.genre:'')+' ['+(d.type==='vinyl'?'Vinilo':'CD')+']'
-  ).join('\n');
-  const nota = document.getElementById('nota-extra').value.trim();
-  const prompt = 'Sos un sommelier musical experto. El usuario tiene esta biblioteca de discos:\n\n'+libraryText+'\n\nContexto actual:\n- Momento: '+tod.name+' ('+timeStr+'), '+getDayType()+'\n- Época: '+s.name+' (hemisferio sur, Buenos Aires)\n- Clima: '+(state.clima||'No especificado')+' · '+state.temp+'°C\n- Estado de ánimo: '+state.mood+'\n- Ocasión: '+(document.getElementById('ocasion').value||'Sin especificar')+'\n- Duración deseada: '+(document.getElementById('duracion').value||'Sin preferencia')+'\n'+(nota?'- Nota: '+nota:'')+'\n\nRecomendá los 3 discos más apropiados de la biblioteca para este momento exacto. Para cada uno:\n1. Nombre del álbum y artista\n2. Una razón musical y emocional específica de por qué encaja con este contexto (2-3 oraciones)\n3. Una sugerencia concreta de cómo escucharlo\n\nUsá un formato claro con numeración, negrita en el título del disco, y un tono cálido y experto.';
-  try {
-    const res = await fetch('/api/recomendar', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ prompt })
-    });
-    const data = await res.json();
-    if (data.error) throw new Error(data.error);
-    const html = data.resultado
-      .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
-      .replace(/\n\n/g, '</p><p>')
-      .replace(/\n/g, '<br/>');
-    resultDiv.innerHTML = '<div class="streaming-box"><p>'+html+'</p></div>';
-  } catch(e) {
-    resultDiv.innerHTML = '<div class="streaming-box" style="color:var(--red)">Error: '+e.message+'</div>';
+  const w = state.weather;
+
+  let libFiltrada = state.library;
+  if (state.genero) {
+    libFiltrada = state.library.filter(d => (d.genre||'').toLowerCase() === state.genero.toLowerCase());
+    if (!libFiltrada.length) {
+      resultDiv.innerHTML = '<div class="streaming-box" style="color:var(--red)">No hay discos del género "'+state.genero+'" en tu biblioteca.</div>';
+      btn.disabled = false;
+      btn.innerHTML = 'Recomendar discos';
+      return;
+    }
   }
-  btn.disabled = false;
-  btn.innerHTML = 'Recomendar discos';
-}
-function renderLibrary() {
-  const filter = (document.getElementById('lib-filter')?.value || '').toLowerCase();
-  const filtered = state.library.filter(d =>
-    !filter || d.album.toLowerCase().includes(filter) ||
-    d.artist.toLowerCase().includes(filter) ||
-    (d.genre||'').toLowerCase().includes(filter)
-  );
-  const totalPages = Math.ceil(filtered.length / PAGE_SIZE) || 1;
-  if (currentPage >= totalPages) currentPage = totalPages - 1;
-  const page = filtered.slice(currentPage * PAGE_SIZE, (currentPage+1) * PAGE_SIZE);
-  document.getElementById('lib-count').textContent = '('+state.library.length+' discos)';
-  const list = document.getElementById('library-list');
-  if (!state.library.length) { list.innerHTML = '<div class="empty-state">No hay discos.<br/>Importá un Excel o agregá manualmente.</div>'; document.getElementById('pager').innerHTML = ''; return; }
-  if (!page.length) { list.innerHTML = '<div class="empty-state">Sin resultados.</div>'; document.getElementById('pager').innerHTML = ''; return; }
-  list.innerHTML = page.map(d => {
-    const i = state.library.indexOf(d);
-    return '<div class="library-row"><div class="disc-icon">'+(d.type==='vinyl'?'⚫':'💿')+'</div><div class="disc-info"><div class="disc-title">'+d.album+'</div><div class="disc-sub">'+d.artist+(d.year?' · '+d.year:'')+(d.genre?' · '+d.genre:'')+'</div></div><span class="disc-type">'+(d.type==='vinyl'?'Vinilo':'CD')+'</span><button class="del-btn" onclick="eliminarDisco('+i+')">✕</button></div>';
-  }).join('');
-  const pager = document.getElementById('pager');
-  if (totalPages <= 1) { pager.innerHTML = ''; return; }
-  pager.innerHTML = '<button onclick="changePage(-1)" '+(currentPage===0?'disabled':'')+'>← Anterior</button><span>Página '+(currentPage+1)+' de '+totalPages+'</span><button onclick="changePage(1)" '+(currentPage>=totalPages-1?'disabled':'')+'>Siguiente →</button>';
-}
-function changePage(dir) { currentPage += dir; renderLibrary(); }
-function agregarDisco() {
-  const album = document.getElementById('new-album').value.trim();
-  const artist = document.getElementById('new-artist').value.trim();
-  if (!album || !artist) { alert('Completá álbum y artista.'); return; }
-  state.library.push({ album, artist, genre: document.getElementById('new-genre').value, type: document.getElementById('new-type').value, year: document.getElementById('new-year').value.trim() });
-  saveLibrary(); renderLibrary();
-  ['new-album','new-artist','new-year'].forEach(id => document.getElementById(id).value = '');
-}
-function eliminarDisco(i) { state.library.splice(i, 1); saveLibrary(); renderLibrary(); }
-function limpiarBiblioteca() {
-  if (!confirm('¿Vaciar toda la biblioteca? ('+state.library.length+' discos)')) return;
-  state.library = []; saveLibrary(); renderLibrary();
-}
-function importarExcel(input) {
-  const file = input.files[0]; if (!file) return;
-  const resultEl = document.getElementById('import-result');
-  resultEl.innerHTML = '<div class="import-result warning">Leyendo archivo...</div>';
-  const reader = new FileReader();
-  reader.onload = function(e) {
-    try {
-      const wb = XLSX.read(new Uint8Array(e.target.result), { type: 'array' });
-      const rows = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]], { defval: '' });
-      if (!rows.length) { resultEl.innerHTML = '<div class="import-result error">El archivo está vacío.</div>'; return; }
-      let added = 0, skipped = 0;
-      rows.forEach(row => {
-        const album = (row['Album']||row['album']||row['ALBUM']||'').toString().trim();
-        const artist = (row['Artista']||row['artista']||row['Artist']||row['artist']||'').toString().trim();
-        if (!album || !artist) { skipped++; return; }
-        const typeRaw = (row['Tipo']||row['tipo']||'vinyl').toString().trim().toLowerCase();
-        if (state.library.some(d => d.album.toLowerCase()===album.toLowerCase() && d.artist.toLowerCase()===artist.toLowerCase())) { skipped++; return; }
-        state.library.push({ album, artist, genre: (row['Genero']||row['genero']||row['Género']||'Otro').toString().trim()||'Otro', type: typeRaw==='cd'?'cd':'vinyl', year: (row['Año']||row['año']||row['Year']||'').toString().trim() });
-        added++;
-      });
-      saveLibrary(); renderLibrary();
-      resultEl.innerHTML = added > 0 ? '<div class="import-result success">✓ '+added+' discos importados.'+(skipped>0?' '+skipped+' omitidos.':'')+'</div>' : '<div class="import-result warning">Sin discos nuevos. '+skipped+' omitidos.</div>';
-    } catch(err) { resultEl.innerHTML = '<div class="import-result error">Error: '+err.message+'</div>'; }
-  };
-  reader.readAsArrayBuffer(file); input.value = '';
-}
-const zone = document.getElementById('import-zone');
-zone.addEventListener('dragover', e => { e.preventDefault(); zone.style.borderColor = '#7f77dd'; });
-zone.addEventListener('dragleave', () => { zone.style.borderColor = ''; });
-zone.addEventListener('drop', e => {
-  e.preventDefault(); zone.style.borderColor = '';
-  const file = e.dataTransfer.files[0];
-  if (file) { const dt = new DataTransfer(); dt.items.add(file); document.getElementById('xlsx-input').files = dt.files; importarExcel(document.getElementById('xlsx-input')); }
-});
-renderLibrary();
-updateContexto();
-</script>
-</body>
-</html>
+
+  const libraryText = libFiltrada.map((d,i) =>
+    (i+1)+'. "'+d.album+'" de '+d.artist+(d.year?' ('+d.year+')':'')+(d.genr
