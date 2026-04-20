@@ -7,6 +7,23 @@ app.use(cors());
 app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public')));
 
+let spotifyToken = null;
+let spotifyTokenExpiry = 0;
+
+async function getSpotifyToken() {
+  if (spotifyToken && Date.now() < spotifyTokenExpiry) return spotifyToken;
+  const creds = Buffer.from(process.env.SPOTIFY_CLIENT_ID + ':' + process.env.SPOTIFY_CLIENT_SECRET).toString('base64');
+  const res = await fetch('https://accounts.spotify.com/api/token', {
+    method: 'POST',
+    headers: { 'Authorization': 'Basic ' + creds, 'Content-Type': 'application/x-www-form-urlencoded' },
+    body: 'grant_type=client_credentials'
+  });
+  const data = await res.json();
+  spotifyToken = data.access_token;
+  spotifyTokenExpiry = Date.now() + (data.expires_in - 60) * 1000;
+  return spotifyToken;
+}
+
 app.get('/api/clima', async (req, res) => {
   const city = req.query.city || 'Buenos Aires';
   try {
@@ -28,6 +45,33 @@ app.get('/api/clima', async (req, res) => {
     else if (wc <= 77) { desc = 'Nieve'; emoji = '🌨️'; }
     else { desc = 'Tormenta'; emoji = '⛈️'; }
     res.json({ temp, desc, emoji, humidity: 0, wind: Math.round(cur.windspeed), city: name });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.get('/api/spotify/buscar', async (req, res) => {
+  const { album, artist } = req.query;
+  if (!album || !artist) return res.status(400).json({ error: 'Faltan parámetros' });
+  try {
+    const token = await getSpotifyToken();
+    const query = encodeURIComponent('album:' + album + ' artist:' + artist);
+    const r = await fetch('https://api.spotify.com/v1/search?q=' + query + '&type=album&limit=1&market=AR', {
+      headers: { 'Authorization': 'Bearer ' + token }
+    });
+    const data = await r.json();
+    if (!data.albums?.items?.length) {
+      const query2 = encodeURIComponent(album + ' ' + artist);
+      const r2 = await fetch('https://api.spotify.com/v1/search?q=' + query2 + '&type=album&limit=1&market=AR', {
+        headers: { 'Authorization': 'Bearer ' + token }
+      });
+      const data2 = await r2.json();
+      if (!data2.albums?.items?.length) return res.json({ found: false });
+      const item = data2.albums.items[0];
+      return res.json({ found: true, uri: item.uri, url: item.external_urls.spotify, name: item.name, artist: item.artists[0]?.name, image: item.images[1]?.url || item.images[0]?.url });
+    }
+    const item = data.albums.items[0];
+    res.json({ found: true, uri: item.uri, url: item.external_urls.spotify, name: item.name, artist: item.artists[0]?.name, image: item.images[1]?.url || item.images[0]?.url });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
