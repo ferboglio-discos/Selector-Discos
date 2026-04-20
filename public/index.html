@@ -372,4 +372,119 @@ function recomendar() {
   }
 
   const libraryText = libFiltrada.map((d,i) =>
-    (i+1)+'. "'+d.album+'" de '+d.artist+(d.year?' ('+d.year+')':'')+(d.genr
+    (i+1)+'. "'+d.album+'" de '+d.artist+(d.year?' ('+d.year+')':'')+(d.genre?', '+d.genre:'')+' ['+(d.type==='vinyl'?'Vinilo':'CD')+']'
+  ).join('\n');
+
+  const weatherText = w ? 'Clima: '+w.desc+', '+w.temp+'°C, humedad '+w.humidity+'%' : 'Clima no disponible';
+  const nota = document.getElementById('nota-extra').value.trim();
+  const generoTexto = state.genero ? 'Género filtrado: '+state.genero : 'Sin filtro de género (toda la biblioteca)';
+
+  const prompt = 'Sos un sommelier musical experto. El usuario tiene esta biblioteca de discos'+(state.genero?' (filtrada por género: '+state.genero+')':'')+': \n\n'+libraryText+'\n\nContexto actual:\n- Momento: '+tod.name+' ('+timeStr+'), '+getDayType()+'\n- Época: '+s.name+' (hemisferio sur, Buenos Aires)\n- '+weatherText+'\n- Estado de ánimo: '+state.mood+'\n- Ocasión: '+(document.getElementById('ocasion').value||'Sin especificar')+'\n- '+generoTexto+'\n'+(nota?'- Nota: '+nota:'')+'\n\nRecomendá los 3 discos más apropiados de esta biblioteca para este momento exacto. Para cada uno:\n1. Nombre del álbum y artista\n2. Una razón musical y emocional específica de por qué encaja con este contexto (2-3 oraciones)\n3. Una sugerencia concreta de cómo escucharlo\n\nUsá un formato claro con numeración, negrita en el título del disco, y un tono cálido y experto.';
+
+  fetch('/api/recomendar', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ prompt })
+  })
+  .then(r => r.json())
+  .then(data => {
+    if (data.error) throw new Error(data.error);
+    const html = data.resultado
+      .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+      .replace(/\n\n/g, '</p><p>')
+      .replace(/\n/g, '<br/>');
+    resultDiv.innerHTML = '<div class="streaming-box"><p>'+html+'</p></div>';
+  })
+  .catch(e => {
+    resultDiv.innerHTML = '<div class="streaming-box" style="color:var(--red)">Error: '+e.message+'</div>';
+  })
+  .finally(() => {
+    btn.disabled = false;
+    btn.innerHTML = 'Recomendar discos';
+  });
+}
+
+function renderLibrary() {
+  const filter = (document.getElementById('lib-filter')?.value || '').toLowerCase();
+  const filtered = state.library.filter(d =>
+    !filter || d.album.toLowerCase().includes(filter) ||
+    d.artist.toLowerCase().includes(filter) ||
+    (d.genre||'').toLowerCase().includes(filter)
+  );
+  const totalPages = Math.ceil(filtered.length / PAGE_SIZE) || 1;
+  if (currentPage >= totalPages) currentPage = totalPages - 1;
+  const page = filtered.slice(currentPage * PAGE_SIZE, (currentPage+1) * PAGE_SIZE);
+  document.getElementById('lib-count').textContent = '('+state.library.length+' discos)';
+  const list = document.getElementById('library-list');
+  if (!state.library.length) { list.innerHTML = '<div class="empty-state">No hay discos.<br/>Importá un Excel o agregá manualmente.</div>'; document.getElementById('pager').innerHTML = ''; return; }
+  if (!page.length) { list.innerHTML = '<div class="empty-state">Sin resultados.</div>'; document.getElementById('pager').innerHTML = ''; return; }
+  list.innerHTML = page.map(d => {
+    const i = state.library.indexOf(d);
+    return '<div class="library-row"><div class="disc-icon">'+(d.type==='vinyl'?'⚫':'💿')+'</div><div class="disc-info"><div class="disc-title">'+d.album+'</div><div class="disc-sub">'+d.artist+(d.year?' · '+d.year:'')+(d.genre?' · '+d.genre:'')+'</div></div><span class="disc-type">'+(d.type==='vinyl'?'Vinilo':'CD')+'</span><button class="del-btn" onclick="eliminarDisco('+i+')">✕</button></div>';
+  }).join('');
+  const pager = document.getElementById('pager');
+  if (totalPages <= 1) { pager.innerHTML = ''; return; }
+  pager.innerHTML = '<button onclick="changePage(-1)" '+(currentPage===0?'disabled':'')+'>← Anterior</button><span>Página '+(currentPage+1)+' de '+totalPages+'</span><button onclick="changePage(1)" '+(currentPage>=totalPages-1?'disabled':'')+'>Siguiente →</button>';
+}
+
+function changePage(dir) { currentPage += dir; renderLibrary(); }
+
+function agregarDisco() {
+  const album = document.getElementById('new-album').value.trim();
+  const artist = document.getElementById('new-artist').value.trim();
+  if (!album || !artist) { alert('Completá álbum y artista.'); return; }
+  state.library.push({ album, artist, genre: document.getElementById('new-genre').value, type: document.getElementById('new-type').value, year: document.getElementById('new-year').value.trim() });
+  saveLibrary(); renderLibrary(); renderGeneros();
+  ['new-album','new-artist','new-year'].forEach(id => document.getElementById(id).value = '');
+}
+
+function eliminarDisco(i) { state.library.splice(i, 1); saveLibrary(); renderLibrary(); renderGeneros(); }
+
+function limpiarBiblioteca() {
+  if (!confirm('¿Vaciar toda la biblioteca? ('+state.library.length+' discos)')) return;
+  state.library = []; saveLibrary(); renderLibrary(); renderGeneros();
+}
+
+function importarExcel(input) {
+  const file = input.files[0]; if (!file) return;
+  const resultEl = document.getElementById('import-result');
+  resultEl.innerHTML = '<div class="import-result warning">Leyendo archivo...</div>';
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    try {
+      const wb = XLSX.read(new Uint8Array(e.target.result), { type: 'array' });
+      const rows = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]], { defval: '' });
+      if (!rows.length) { resultEl.innerHTML = '<div class="import-result error">El archivo está vacío.</div>'; return; }
+      let added = 0, skipped = 0;
+      rows.forEach(row => {
+        const album = (row['Album']||row['album']||row['ALBUM']||'').toString().trim();
+        const artist = (row['Artista']||row['artista']||row['Artist']||row['artist']||'').toString().trim();
+        if (!album || !artist) { skipped++; return; }
+        const typeRaw = (row['Tipo']||row['tipo']||'vinyl').toString().trim().toLowerCase();
+        if (state.library.some(d => d.album.toLowerCase()===album.toLowerCase() && d.artist.toLowerCase()===artist.toLowerCase())) { skipped++; return; }
+        state.library.push({ album, artist, genre: (row['Genero']||row['genero']||row['Género']||'Otro').toString().trim()||'Otro', type: typeRaw==='cd'?'cd':'vinyl', year: (row['Año']||row['año']||row['Year']||'').toString().trim() });
+        added++;
+      });
+      saveLibrary(); renderLibrary(); renderGeneros();
+      resultEl.innerHTML = added > 0 ? '<div class="import-result success">✓ '+added+' discos importados.'+(skipped>0?' '+skipped+' omitidos.':'')+'</div>' : '<div class="import-result warning">Sin discos nuevos. '+skipped+' omitidos.</div>';
+    } catch(err) { resultEl.innerHTML = '<div class="import-result error">Error: '+err.message+'</div>'; }
+  };
+  reader.readAsArrayBuffer(file); input.value = '';
+}
+
+const zone = document.getElementById('import-zone');
+zone.addEventListener('dragover', e => { e.preventDefault(); zone.style.borderColor = '#7f77dd'; });
+zone.addEventListener('dragleave', () => { zone.style.borderColor = ''; });
+zone.addEventListener('drop', e => {
+  e.preventDefault(); zone.style.borderColor = '';
+  const file = e.dataTransfer.files[0];
+  if (file) { const dt = new DataTransfer(); dt.items.add(file); document.getElementById('xlsx-input').files = dt.files; importarExcel(document.getElementById('xlsx-input')); }
+});
+
+renderLibrary();
+renderGeneros();
+updateContexto();
+fetchClima();
+</script>
+</body>
+</html>
