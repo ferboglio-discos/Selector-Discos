@@ -9,21 +9,26 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 app.get('/api/clima', async (req, res) => {
   const city = req.query.city || 'Buenos Aires';
-  console.log('Buscando clima para:', city);
   try {
     const geoRes = await fetch(`https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(city)}&count=1&language=es&format=json`);
     const geoData = await geoRes.json();
-    console.log('Geo:', JSON.stringify(geoData));
     if (!geoData.results?.length) return res.status(404).json({ error: 'Ciudad no encontrada' });
     const { latitude, longitude, name } = geoData.results[0];
-    const url = `https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&current_weather=true&timezone=auto`;
-    console.log('URL clima:', url);
-    const wRes = await fetch(url);
+    const wRes = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&current_weather=true&timezone=auto`);
     const wData = await wRes.json();
-    console.log('Clima completo:', JSON.stringify(wData));
-    res.json({ raw: wData, city: name });
+    if (wData.error) return res.status(500).json({ error: wData.reason });
+    const cur = wData.current_weather;
+    const temp = Math.round(cur.temperature);
+    const wc = cur.weathercode;
+    let desc, emoji;
+    if (wc === 0) { desc = 'Despejado'; emoji = '☀️'; }
+    else if (wc <= 3) { desc = 'Parcialmente nublado'; emoji = '⛅'; }
+    else if (wc <= 48) { desc = 'Nublado'; emoji = '☁️'; }
+    else if (wc <= 67) { desc = 'Lluvia'; emoji = '🌧️'; }
+    else if (wc <= 77) { desc = 'Nieve'; emoji = '🌨️'; }
+    else { desc = 'Tormenta'; emoji = '⛈️'; }
+    res.json({ temp, desc, emoji, humidity: 0, wind: Math.round(cur.windspeed), city: name });
   } catch (err) {
-    console.log('Error:', err.message);
     res.status(500).json({ error: err.message });
   }
 });
