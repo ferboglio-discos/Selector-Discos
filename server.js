@@ -8,14 +8,17 @@ app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public')));
 
 app.get('/api/clima', async (req, res) => {
-  const city = req.query.city || 'Rosario del Tala';
+  const city = req.query.city || 'Buenos Aires';
+  console.log('Buscando clima para:', city);
   try {
     const geoRes = await fetch(`https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(city)}&count=1&language=es&format=json`);
     const geoData = await geoRes.json();
+    console.log('Geo respuesta:', JSON.stringify(geoData));
     if (!geoData.results?.length) return res.status(404).json({ error: 'Ciudad no encontrada' });
     const { latitude, longitude, name } = geoData.results[0];
     const wRes = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&current=temperature_2m,weather_code,wind_speed_10m,relative_humidity_2m&timezone=auto`);
     const wData = await wRes.json();
+    console.log('Clima respuesta:', JSON.stringify(wData.current));
     const cur = wData.current;
     const temp = Math.round(cur.temperature_2m);
     const wc = cur.weather_code;
@@ -28,6 +31,7 @@ app.get('/api/clima', async (req, res) => {
     else { desc = 'Tormenta'; emoji = '⛈️'; }
     res.json({ temp, desc, emoji, humidity: cur.relative_humidity_2m, wind: Math.round(cur.wind_speed_10m), city: name });
   } catch (err) {
+    console.log('Error clima:', err.message);
     res.status(500).json({ error: err.message });
   }
 });
