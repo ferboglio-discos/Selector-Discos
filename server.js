@@ -29,7 +29,7 @@ app.get('/api/clima', async (req, res) => {
     else if (wc <= 67) { desc = 'Lluvia'; emoji = '🌧️'; }
     else if (wc <= 77) { desc = 'Nieve'; emoji = '🌨️'; }
     else { desc = 'Tormenta'; emoji = '⛈️'; }
-    res.json({ temp, desc, emoji, humidity: cur.relative_humidity_2m, wind: Math.round(cur.wind_speed_10m), city: name });
+    res.json({ temp, desc, emoji, humidity: 0, wind: Math.round(cur.windspeed), city: name });
   } catch (err) {
     console.log('Error clima:', err.message);
     res.status(500).json({ error: err.message });
