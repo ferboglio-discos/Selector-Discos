@@ -19,9 +19,9 @@ app.get('/api/clima', async (req, res) => {
     const wRes = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&current_weather=true&hourly=temperature_2m,relativehumidity_2m,windspeed_10m&timezone=auto&forecast_days=1`);
     const wData = await wRes.json();
     console.log('Clima respuesta:', JSON.stringify(wData.current));
-    const cur = wData.current;
-    const temp = Math.round(cur.temperature_2m);
-    const wc = cur.weather_code;
+    const cur = wData.current_weather;
+    const temp = Math.round(cur.temperature);
+    const wc = cur.weathercode;
     let desc, emoji;
     if (wc === 0) { desc = 'Despejado'; emoji = '☀️'; }
     else if (wc <= 3) { desc = 'Parcialmente nublado'; emoji = '⛅'; }
