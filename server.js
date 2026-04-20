@@ -16,7 +16,7 @@ app.get('/api/clima', async (req, res) => {
     console.log('Geo respuesta:', JSON.stringify(geoData));
     if (!geoData.results?.length) return res.status(404).json({ error: 'Ciudad no encontrada' });
     const { latitude, longitude, name } = geoData.results[0];
-    const wRes = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&current=temperature_2m,weather_code,wind_speed_10m,relative_humidity_2m&timezone=auto`);
+    const wRes = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&current_weather=true&hourly=temperature_2m,relativehumidity_2m,windspeed_10m&timezone=auto&forecast_days=1`);
     const wData = await wRes.json();
     console.log('Clima respuesta:', JSON.stringify(wData.current));
     const cur = wData.current;
