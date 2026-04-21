@@ -425,8 +425,10 @@ function recomendar() {
     if (data.error) throw new Error(data.error);
     const bloques = parseRecomendaciones(data.resultado);
     const colors = ['#7f77dd','#1d9e75','#d85a30'];
+    window._recInfo = [];
     resultDiv.innerHTML = bloques.map((bloque, i) => {
       const info = extraerAlbumArtista(bloque);
+      window._recInfo[i] = info;
       const html = bloque
         .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
         .replace(/\n\n/g, '</p><p>')
@@ -440,12 +442,12 @@ function recomendar() {
           '</div>'+
         '</div>'+
         '<div id="spotify-container-'+i+'">'+
-          (info ? '<button id="spotify-btn-'+i+'" class="spotify-search-btn" onclick="buscarEnSpotify(\''+info.album.replace(/'/g,"\\'")+'\',\''+info.artist.replace(/'/g,"\\'")+'\','+i+')">🎵 Buscar en Spotify</button>' : '')+
+          (info ? '<button id="spotify-btn-'+i+'" class="spotify-search-btn" onclick="buscarConInfo('+i+')">🎵 Buscar en Spotify</button>' : '')+
         '</div>'+
       '</div>';
     }).join('');
   })
-  .catch(e => {
+    .catch(e => {
     resultDiv.innerHTML = '<div class="rec-card" style="color:var(--red)">Error: '+e.message+'</div>';
   })
   .finally(() => {
