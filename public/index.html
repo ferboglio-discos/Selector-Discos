@@ -48,14 +48,9 @@
     .mood-btn { padding: 10px 8px; border: 0.5px solid var(--border); border-radius: var(--radius); background: var(--bg2); color: var(--text); font-size: 13px; cursor: pointer; text-align: center; line-height: 1.4; transition: all 0.15s; }
     .mood-btn.selected { background: var(--purple-bg); border-color: #7f77dd; color: var(--purple); }
     .mood-icon { font-size: 18px; display: block; margin-bottom: 2px; }
-    .clima-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
-    .clima-btn { padding: 10px 6px; border: 0.5px solid var(--border); border-radius: var(--radius); background: var(--bg2); color: var(--text); font-size: 12px; cursor: pointer; text-align: center; line-height: 1.4; transition: all 0.15s; }
-    .clima-btn.selected { background: var(--teal-bg); border-color: #1d9e75; color: var(--teal); }
-    .clima-icon { font-size: 20px; display: block; margin-bottom: 3px; }
-    .temp-row { display: flex; align-items: center; gap: 12px; margin-top: 12px; }
-    .temp-row label { margin: 0; white-space: nowrap; }
-    .temp-display { font-size: 20px; font-weight: 500; min-width: 55px; }
-    input[type="range"] { flex: 1; accent-color: #2c2c2a; }
+    .genre-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+    .genre-btn { padding: 8px 6px; border: 0.5px solid var(--border); border-radius: var(--radius); background: var(--bg2); color: var(--text); font-size: 12px; cursor: pointer; text-align: center; line-height: 1.3; transition: all 0.15s; }
+    .genre-btn.selected { background: var(--amber-bg); border-color: #ba7517; color: var(--amber); }
     .weather-auto { display: flex; align-items: center; gap: 10px; padding: 10px 0; }
     .weather-temp-big { font-size: 28px; font-weight: 500; }
     .weather-info { flex: 1; }
@@ -64,9 +59,6 @@
     .city-row { display: flex; gap: 8px; margin-top: 10px; align-items: flex-end; }
     .city-row input { flex: 1; }
     .city-row button { padding: 8px 14px; background: var(--bg2); border: 0.5px solid var(--border); border-radius: var(--radius); font-size: 13px; cursor: pointer; color: var(--text); white-space: nowrap; }
-    .genre-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
-    .genre-btn { padding: 8px 6px; border: 0.5px solid var(--border); border-radius: var(--radius); background: var(--bg2); color: var(--text); font-size: 12px; cursor: pointer; text-align: center; line-height: 1.3; transition: all 0.15s; }
-    .genre-btn.selected { background: var(--amber-bg); border-color: #ba7517; color: var(--amber); }
     .rec-btn { width: 100%; padding: 14px; background: #2c2c2a; color: #f1efe8; border: none; border-radius: var(--radius); font-size: 15px; font-weight: 500; cursor: pointer; margin-top: 4px; transition: background 0.15s; }
     .rec-btn:hover { background: #444441; }
     .rec-btn:disabled { opacity: 0.5; cursor: default; }
@@ -109,19 +101,16 @@
     .pager button:disabled { opacity: 0.4; cursor: default; }
     .pager span { font-size: 12px; color: var(--text2); }
     .rec-card { background: var(--bg); border: 0.5px solid var(--border); border-radius: var(--radius-lg); padding: 1.25rem; margin-top: 16px; }
-    .rec-card-header { display: flex; gap: 14px; align-items: flex-start; margin-bottom: 12px; }
-    .rec-cover { width: 72px; height: 72px; border-radius: var(--radius); object-fit: cover; flex-shrink: 0; background: var(--bg2); border: 0.5px solid var(--border); }
     .rec-cover-placeholder { width: 72px; height: 72px; border-radius: var(--radius); background: var(--bg2); border: 0.5px solid var(--border); display: flex; align-items: center; justify-content: center; font-size: 28px; flex-shrink: 0; }
-    .rec-info { flex: 1; min-width: 0; }
-    .rec-num { font-size: 11px; color: var(--text3); margin-bottom: 3px; }
-    .rec-album { font-size: 16px; font-weight: 500; margin-bottom: 2px; }
-    .rec-artist { font-size: 13px; color: var(--text2); margin-bottom: 8px; }
-    .rec-badges { display: flex; gap: 6px; flex-wrap: wrap; }
-    .rec-body { font-size: 13px; color: var(--text2); line-height: 1.7; padding-top: 12px; border-top: 0.5px solid var(--border); margin-bottom: 12px; }
-    .spotify-btn { display: flex; align-items: center; gap: 8px; padding: 10px 16px; background: #1db954; color: white; border: none; border-radius: var(--radius); font-size: 14px; font-weight: 500; cursor: pointer; text-decoration: none; transition: background 0.15s; width: 100%; justify-content: center; }
-    .spotify-btn:hover { background: #1aa34a; }
-    .spotify-btn:disabled { opacity: 0.5; cursor: default; background: #1db954; }
-    .spotify-btn svg { width: 18px; height: 18px; flex-shrink: 0; }
+    .rec-cover { width: 72px; height: 72px; border-radius: var(--radius); object-fit: cover; flex-shrink: 0; }
+    .spotify-box { background: #f0faf4; border: 0.5px solid #1db954; border-radius: var(--radius); padding: 12px; margin-top: 8px; }
+    .spotify-box-title { font-size: 12px; color: #1aa34a; font-weight: 500; margin-bottom: 6px; }
+    .spotify-box-album { font-size: 13px; font-weight: 500; margin-bottom: 2px; }
+    .spotify-box-artist { font-size: 12px; color: #666; margin-bottom: 10px; }
+    .spotify-link { display: block; font-size: 13px; color: #1db954; font-weight: 500; text-decoration: none; padding: 8px 12px; background: #1db954; color: white; border-radius: var(--radius); text-align: center; }
+    .spotify-link:hover { background: #1aa34a; }
+    .spotify-search-btn { width: 100%; padding: 10px; background: #1db954; color: white; border: none; border-radius: var(--radius); font-size: 14px; font-weight: 500; cursor: pointer; margin-top: 8px; }
+    .spotify-search-btn:disabled { opacity: 0.6; cursor: default; }
     .spotify-not-found { font-size: 12px; color: var(--text3); text-align: center; padding: 8px 0; }
   </style>
 </head>
@@ -165,7 +154,7 @@
         <div class="empty-state" style="padding:1rem">Obteniendo clima... <span class="spinner" style="margin:0"></span></div>
       </div>
       <div class="city-row">
-        <input type="text" id="city-input" placeholder="Cambiar ciudad..." value="Buenos Aires"/>
+        <input type="text" id="city-input" placeholder="Ciudad..." value="Buenos Aires"/>
         <button onclick="fetchClima()">Actualizar</button>
       </div>
     </div>
@@ -313,35 +302,30 @@ function updateContexto() {
   document.getElementById('contexto-display').innerHTML = '<div class="context-chips">'+chips+'</div>';
 }
 
-async function buscarEnSpotify(album, artist, containerId) {
-  const btn = document.getElementById('spotify-btn-'+containerId);
-  if (btn) { btn.disabled = true; btn.innerHTML = '<span class="spinner" style="border-top-color:white"></span>Buscando...'; }
+async function fetchClima() {
+  const city = document.getElementById('city-input').value.trim() || 'Buenos Aires';
+  document.getElementById('clima-auto').innerHTML = '<div class="empty-state" style="padding:1rem">Obteniendo clima... <span class="spinner" style="margin:0"></span></div>';
   try {
-    const res = await fetch('/api/spotify/buscar?album='+encodeURIComponent(album)+'&artist='+encodeURIComponent(artist));
+    const res = await fetch('/api/clima?city='+encodeURIComponent(city));
     const data = await res.json();
-    const container = document.getElementById('spotify-container-'+containerId);
-    if (!container) return;
-    if (data.found) {
-      container.innerHTML =
-        '<div style="background:#f0faf4;border:0.5px solid #1db954;border-radius:8px;padding:12px;margin-top:4px">'+
-          '<div style="font-size:12px;color:#1aa34a;font-weight:500;margin-bottom:6px">✓ Encontrado en Spotify</div>'+
-          '<div style="font-size:13px;font-weight:500;margin-bottom:2px">'+data.name+'</div>'+
-          '<div style="font-size:12px;color:#666;margin-bottom:10px">'+data.artist+'</div>'+
-          '<div style="font-size:11px;color:#666;margin-bottom:6px">Tocá el link para abrir en Spotify:</div>'+
-          '<a href="'+data.url+'" style="font-size:12px;color:#1db954;word-break:break-all;display:block;">'+data.url+'</a>'+
-        '</div>';
-      if (data.image) {
-        const coverEl = document.getElementById('rec-cover-'+containerId);
-        if (coverEl) coverEl.innerHTML = '<img src="'+data.image+'" class="rec-cover" alt="cover"/>';
-      }
-    } else {
-      container.innerHTML = '<div class="spotify-not-found">No encontrado en Spotify</div>';
-    }
+    if (data.error) throw new Error(data.error);
+    state.weather = data;
+    document.getElementById('clima-auto').innerHTML =
+      '<div class="weather-auto">'+
+        '<span style="font-size:36px">'+data.emoji+'</span>'+
+        '<div class="weather-info">'+
+          '<div class="weather-temp-big">'+data.temp+'°C</div>'+
+          '<div class="weather-desc">'+data.desc+'</div>'+
+          '<div class="weather-city">'+data.city+' · Viento '+data.wind+' km/h</div>'+
+        '</div>'+
+      '</div>';
+    updateContexto();
   } catch(e) {
-    const container = document.getElementById('spotify-container-'+containerId);
-    if (container) container.innerHTML = '<div class="spotify-not-found">Error al buscar en Spotify</div>';
+    document.getElementById('clima-auto').innerHTML = '<div class="empty-state" style="padding:0.5rem;color:var(--red)">No se pudo obtener el clima.</div>';
   }
-}function renderGeneros() {
+}
+
+function renderGeneros() {
   const generos = [...new Set(state.library.map(d => d.genre).filter(Boolean))].sort();
   const grid = document.getElementById('genre-grid');
   if (!generos.length) {
@@ -355,28 +339,30 @@ async function buscarEnSpotify(album, artist, containerId) {
 
 async function buscarEnSpotify(album, artist, containerId) {
   const btn = document.getElementById('spotify-btn-'+containerId);
-  if (btn) { btn.disabled = true; btn.innerHTML = '<span class="spinner" style="border-top-color:white"></span>Buscando...'; }
+  if (btn) { btn.disabled = true; btn.textContent = 'Buscando...'; }
   try {
     const res = await fetch('/api/spotify/buscar?album='+encodeURIComponent(album)+'&artist='+encodeURIComponent(artist));
     const data = await res.json();
     const container = document.getElementById('spotify-container-'+containerId);
-    if (!container) 
-      if (data.found) {
-      container.innerHTML = 
-        '<a href="'+data.url+'" class="spotify-btn">'+
-          '<svg viewBox="0 0 24 24" fill="white"><path d="M12 0C5.4 0 0 5.4 0 12s5.4 12 12 12 12-5.4 12-12S18.66 0 12 0zm5.521 17.34c-.24.359-.66.48-1.021.24-2.82-1.74-6.36-2.101-10.561-1.141-.418.122-.779-.179-.899-.539-.12-.421.18-.78.54-.9 4.56-1.021 8.52-.6 11.64 1.32.42.18.479.659.301 1.02zm1.44-3.3c-.301.42-.841.6-1.262.3-3.239-1.98-8.159-2.58-11.939-1.38-.479.12-1.02-.12-1.14-.6-.12-.48.12-1.021.6-1.141C9.6 9.9 15 10.561 18.72 12.84c.361.181.54.78.241 1.2zm.12-3.36C15.24 8.4 8.82 8.16 5.16 9.301c-.6.179-1.2-.181-1.38-.721-.18-.601.18-1.2.72-1.381 4.26-1.26 11.28-1.02 15.721 1.621.539.3.719 1.02.419 1.56-.299.421-1.02.599-1.559.3z"/></svg>'+
-          'Abrir en Spotify'+
-        '</a>';
+    if (!container) return;
+    if (data.found) {
       if (data.image) {
         const coverEl = document.getElementById('rec-cover-'+containerId);
-        if (coverEl) { coverEl.innerHTML = '<img src="'+data.image+'" class="rec-cover" alt="cover"/>'; }
+        if (coverEl) coverEl.innerHTML = '<img src="'+data.image+'" class="rec-cover" alt="cover"/>';
       }
+      container.innerHTML =
+        '<div class="spotify-box">'+
+          '<div class="spotify-box-title">✓ Encontrado en Spotify</div>'+
+          '<div class="spotify-box-album">'+data.name+'</div>'+
+          '<div class="spotify-box-artist">'+data.artist+'</div>'+
+          '<a href="'+data.url+'" target="_blank" class="spotify-link">Abrir en Spotify</a>'+
+        '</div>';
     } else {
       container.innerHTML = '<div class="spotify-not-found">No encontrado en Spotify</div>';
     }
   } catch(e) {
     const container = document.getElementById('spotify-container-'+containerId);
-    if (container) container.innerHTML = '<div class="spotify-not-found">Error al buscar en Spotify</div>';
+    if (container) container.innerHTML = '<div class="spotify-not-found">Error al buscar</div>';
   }
 }
 
@@ -414,7 +400,7 @@ function recomendar() {
   if (state.genero) {
     libFiltrada = state.library.filter(d => (d.genre||'').toLowerCase() === state.genero.toLowerCase());
     if (!libFiltrada.length) {
-      resultDiv.innerHTML = '<div class="rec-card" style="color:var(--red)">No hay discos del género "'+state.genero+'" en tu biblioteca.</div>';
+      resultDiv.innerHTML = '<div class="rec-card" style="color:var(--red)">No hay discos del género "'+state.genero+'".</div>';
       btn.disabled = false; btn.innerHTML = 'Recomendar discos'; return;
     }
   }
@@ -446,17 +432,15 @@ function recomendar() {
         .replace(/\n\n/g, '</p><p>')
         .replace(/\n/g, '<br/>');
       return '<div class="rec-card" style="border-left:4px solid '+colors[i]+'">'+
-        '<div class="rec-card-header">'+
+        '<div style="display:flex;gap:14px;align-items:flex-start;margin-bottom:12px">'+
           '<div id="rec-cover-'+i+'" class="rec-cover-placeholder">⚫</div>'+
-          '<div class="rec-info">'+
-            '<div class="rec-num">Recomendación '+(i+1)+' de 3</div>'+
+          '<div style="flex:1;min-width:0">'+
+            '<div style="font-size:11px;color:var(--text3);margin-bottom:3px">Recomendación '+(i+1)+' de 3</div>'+
             '<div style="font-size:14px;line-height:1.6"><p>'+html+'</p></div>'+
           '</div>'+
         '</div>'+
         '<div id="spotify-container-'+i+'">'+
-          (info ? '<button id="spotify-btn-'+i+'" class="spotify-btn" onclick="buscarEnSpotify(\''+info.album.replace(/'/g,"\\'")+'\',\''+info.artist.replace(/'/g,"\\'")+'\','+i+')">'+
-            '<svg viewBox="0 0 24 24" fill="white"><path d="M12 0C5.4 0 0 5.4 0 12s5.4 12 12 12 12-5.4 12-12S18.66 0 12 0zm5.521 17.34c-.24.359-.66.48-1.021.24-2.82-1.74-6.36-2.101-10.561-1.141-.418.122-.779-.179-.899-.539-.12-.421.18-.78.54-.9 4.56-1.021 8.52-.6 11.64 1.32.42.18.479.659.301 1.02zm1.44-3.3c-.301.42-.841.6-1.262.3-3.239-1.98-8.159-2.58-11.939-1.38-.479.12-1.02-.12-1.14-.6-.12-.48.12-1.021.6-1.141C9.6 9.9 15 10.561 18.72 12.84c.361.181.54.78.241 1.2zm.12-3.36C15.24 8.4 8.82 8.16 5.16 9.301c-.6.179-1.2-.181-1.38-.721-.18-.601.18-1.2.72-1.381 4.26-1.26 11.28-1.02 15.721 1.621.539.3.719 1.02.419 1.56-.299.421-1.02.599-1.559.3z"/></svg>'+
-            'Buscar en Spotify</button>' : '')+
+          (info ? '<button id="spotify-btn-'+i+'" class="spotify-search-btn" onclick="buscarEnSpotify(\''+info.album.replace(/'/g,"\\'")+'\',\''+info.artist.replace(/'/g,"\\'")+'\','+i+')">🎵 Buscar en Spotify</button>' : '')+
         '</div>'+
       '</div>';
     }).join('');
@@ -545,13 +529,7 @@ zone.addEventListener('drop', e => {
   const file = e.dataTransfer.files[0];
   if (file) { const dt = new DataTransfer(); dt.items.add(file); document.getElementById('xlsx-input').files = dt.files; importarExcel(document.getElementById('xlsx-input')); }
 });
-function abrirSpotify(e, uri, url) {
-  e.preventDefault();
-  window.location = uri;
-  setTimeout(function() {
-    window.open(url, '_blank');
-  }, 1500);
-}
+
 renderLibrary();
 renderGeneros();
 updateContexto();
