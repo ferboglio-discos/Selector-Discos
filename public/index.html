@@ -539,7 +539,13 @@ zone.addEventListener('drop', e => {
   const file = e.dataTransfer.files[0];
   if (file) { const dt = new DataTransfer(); dt.items.add(file); document.getElementById('xlsx-input').files = dt.files; importarExcel(document.getElementById('xlsx-input')); }
 });
-
+function abrirSpotify(e, uri, url) {
+  e.preventDefault();
+  window.location = uri;
+  setTimeout(function() {
+    window.open(url, '_blank');
+  }, 1500);
+}
 renderLibrary();
 renderGeneros();
 updateContexto();
