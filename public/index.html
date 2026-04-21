@@ -455,7 +455,38 @@ function recomendar() {
   });
 }
 
-function renderLibrary() {
+async function buscarConInfo(i) {
+  const info = window._recInfo[i];
+  if (!info) return;
+  const btn = document.getElementById('spotify-btn-'+i);
+  if (btn) { btn.disabled = true; btn.textContent = 'Buscando...'; }
+  try {
+    const res = await fetch('/api/spotify/buscar?album='+encodeURIComponent(info.album)+'&artist='+encodeURIComponent(info.artist));
+    const data = await res.json();
+    const container = document.getElementById('spotify-container-'+i);
+    if (!container) return;
+    if (data.found) {
+      if (data.image) {
+        const coverEl = document.getElementById('rec-cover-'+i);
+        if (coverEl) coverEl.innerHTML = '<img src="'+data.image+'" class="rec-cover" alt="cover"/>';
+      }
+      container.innerHTML =
+        '<div class="spotify-box">'+
+          '<div class="spotify-box-title">✓ Encontrado en Spotify</div>'+
+          '<div class="spotify-box-album">'+data.name+'</div>'+
+          '<div class="spotify-box-artist">'+data.artist+'</div>'+
+          '<a href="'+data.url+'" target="_blank" class="spotify-link">Abrir en Spotify</a>'+
+        '</div>';
+    } else {
+      container.innerHTML = '<div class="spotify-not-found">No encontrado en Spotify</div>';
+    }
+  } catch(e) {
+    const container = document.getElementById('spotify-container-'+i);
+    if (container) container.innerHTML = '<div class="spotify-not-found">Error al buscar</div>';
+  
+   }
+  
+    function renderLibrary() {
   const filter = (document.getElementById('lib-filter')?.value || '').toLowerCase();
   const filtered = state.library.filter(d =>
     !filter || d.album.toLowerCase().includes(filter) ||
