@@ -322,14 +322,17 @@ async function buscarEnSpotify(album, artist, containerId) {
     const container = document.getElementById('spotify-container-'+containerId);
     if (!container) return;
     if (data.found) {
-      container.innerHTML = 
-        '<a href="'+data.url+'" class="spotify-btn">'+
-          '<svg viewBox="0 0 24 24" fill="white"><path d="M12 0C5.4 0 0 5.4 0 12s5.4 12 12 12 12-5.4 12-12S18.66 0 12 0zm5.521 17.34c-.24.359-.66.48-1.021.24-2.82-1.74-6.36-2.101-10.561-1.141-.418.122-.779-.179-.899-.539-.12-.421.18-.78.54-.9 4.56-1.021 8.52-.6 11.64 1.32.42.18.479.659.301 1.02zm1.44-3.3c-.301.42-.841.6-1.262.3-3.239-1.98-8.159-2.58-11.939-1.38-.479.12-1.02-.12-1.14-.6-.12-.48.12-1.021.6-1.141C9.6 9.9 15 10.561 18.72 12.84c.361.181.54.78.241 1.2zm.12-3.36C15.24 8.4 8.82 8.16 5.16 9.301c-.6.179-1.2-.181-1.38-.721-.18-.601.18-1.2.72-1.381 4.26-1.26 11.28-1.02 15.721 1.621.539.3.719 1.02.419 1.56-.299.421-1.02.599-1.559.3z"/></svg>'+
-          'Abrir en Spotify'+
-        '</a>';
+      container.innerHTML =
+        '<div style="background:#f0faf4;border:0.5px solid #1db954;border-radius:8px;padding:12px;margin-top:4px">'+
+          '<div style="font-size:12px;color:#1aa34a;font-weight:500;margin-bottom:6px">✓ Encontrado en Spotify</div>'+
+          '<div style="font-size:13px;font-weight:500;margin-bottom:2px">'+data.name+'</div>'+
+          '<div style="font-size:12px;color:#666;margin-bottom:10px">'+data.artist+'</div>'+
+          '<div style="font-size:11px;color:#666;margin-bottom:6px">Tocá el link para abrir en Spotify:</div>'+
+          '<a href="'+data.url+'" style="font-size:12px;color:#1db954;word-break:break-all;display:block;">'+data.url+'</a>'+
+        '</div>';
       if (data.image) {
         const coverEl = document.getElementById('rec-cover-'+containerId);
-        if (coverEl) { coverEl.innerHTML = '<img src="'+data.image+'" class="rec-cover" alt="cover"/>'; }
+        if (coverEl) coverEl.innerHTML = '<img src="'+data.image+'" class="rec-cover" alt="cover"/>';
       }
     } else {
       container.innerHTML = '<div class="spotify-not-found">No encontrado en Spotify</div>';
@@ -338,8 +341,7 @@ async function buscarEnSpotify(album, artist, containerId) {
     const container = document.getElementById('spotify-container-'+containerId);
     if (container) container.innerHTML = '<div class="spotify-not-found">Error al buscar en Spotify</div>';
   }
-}
-function renderGeneros() {
+}function renderGeneros() {
   const generos = [...new Set(state.library.map(d => d.genre).filter(Boolean))].sort();
   const grid = document.getElementById('genre-grid');
   if (!generos.length) {
