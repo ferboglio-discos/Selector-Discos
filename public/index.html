@@ -105,9 +105,9 @@
     .rec-cover { width: 72px; height: 72px; border-radius: var(--radius); object-fit: cover; flex-shrink: 0; }
     .spotify-box { background: #f0faf4; border: 0.5px solid #1db954; border-radius: var(--radius); padding: 12px; margin-top: 8px; }
     .spotify-box-title { font-size: 12px; color: #1aa34a; font-weight: 500; margin-bottom: 6px; }
-    .spotify-box-album { font-size: 13px; font-weight: 500; margin-bottom: 2px; }
+    .spotify-box-album { font-size: 13px; font-weight: 500; margin-bottom: 2px; color: #1a1a1a; }
     .spotify-box-artist { font-size: 12px; color: #666; margin-bottom: 10px; }
-    .spotify-link { display: block; font-size: 13px; color: #1db954; font-weight: 500; text-decoration: none; padding: 8px 12px; background: #1db954; color: white; border-radius: var(--radius); text-align: center; }
+    .spotify-link { display: block; font-size: 13px; font-weight: 500; text-decoration: none; padding: 8px 12px; background: #1db954; color: white; border-radius: var(--radius); text-align: center; }
     .spotify-link:hover { background: #1aa34a; }
     .spotify-search-btn { width: 100%; padding: 10px; background: #1db954; color: white; border: none; border-radius: var(--radius); font-size: 14px; font-weight: 500; cursor: pointer; margin-top: 8px; }
     .spotify-search-btn:disabled { opacity: 0.6; cursor: default; }
@@ -337,35 +337,6 @@ function renderGeneros() {
   ).join('');
 }
 
-async function buscarEnSpotify(album, artist, containerId) {
-  const btn = document.getElementById('spotify-btn-'+containerId);
-  if (btn) { btn.disabled = true; btn.textContent = 'Buscando...'; }
-  try {
-    const res = await fetch('/api/spotify/buscar?album='+encodeURIComponent(album)+'&artist='+encodeURIComponent(artist));
-    const data = await res.json();
-    const container = document.getElementById('spotify-container-'+containerId);
-    if (!container) return;
-    if (data.found) {
-      if (data.image) {
-        const coverEl = document.getElementById('rec-cover-'+containerId);
-        if (coverEl) coverEl.innerHTML = '<img src="'+data.image+'" class="rec-cover" alt="cover"/>';
-      }
-      container.innerHTML =
-        '<div class="spotify-box">'+
-          '<div class="spotify-box-title">✓ Encontrado en Spotify</div>'+
-          '<div class="spotify-box-album">'+data.name+'</div>'+
-          '<div class="spotify-box-artist">'+data.artist+'</div>'+
-          '<a href="'+data.url+'" target="_blank" class="spotify-link">Abrir en Spotify</a>'+
-        '</div>';
-    } else {
-      container.innerHTML = '<div class="spotify-not-found">No encontrado en Spotify</div>';
-    }
-  } catch(e) {
-    const container = document.getElementById('spotify-container-'+containerId);
-    if (container) container.innerHTML = '<div class="spotify-not-found">Error al buscar</div>';
-  }
-}
-
 function parseRecomendaciones(texto) {
   const bloques = texto.split(/\n(?=\d+\.\s|\*\*\d+)/);
   return bloques.filter(b => b.trim().length > 20).slice(0, 3);
@@ -381,6 +352,37 @@ function extraerAlbumArtista(bloque) {
     return { album: match2[1].trim(), artist: '' };
   }
   return null;
+}
+
+async function buscarConInfo(i) {
+  const info = window._recInfo[i];
+  if (!info) return;
+  const btn = document.getElementById('spotify-btn-'+i);
+  if (btn) { btn.disabled = true; btn.textContent = 'Buscando...'; }
+  try {
+    const res = await fetch('/api/spotify/buscar?album='+encodeURIComponent(info.album)+'&artist='+encodeURIComponent(info.artist));
+    const data = await res.json();
+    const container = document.getElementById('spotify-container-'+i);
+    if (!container) return;
+    if (data.found) {
+      if (data.image) {
+        const coverEl = document.getElementById('rec-cover-'+i);
+        if (coverEl) coverEl.innerHTML = '<img src="'+data.image+'" class="rec-cover" alt="cover"/>';
+      }
+      container.innerHTML =
+        '<div class="spotify-box">'+
+          '<div class="spotify-box-title">✓ Encontrado en Spotify</div>'+
+          '<div class="spotify-box-album">'+data.name+'</div>'+
+          '<div class="spotify-box-artist">'+data.artist+'</div>'+
+          '<a href="'+data.url+'" target="_blank" class="spotify-link">Abrir en Spotify</a>'+
+        '</div>';
+    } else {
+      container.innerHTML = '<div class="spotify-not-found">No encontrado en Spotify</div>';
+    }
+  } catch(e) {
+    const container = document.getElementById('spotify-container-'+i);
+    if (container) container.innerHTML = '<div class="spotify-not-found">Error al buscar</div>';
+  }
 }
 
 function recomendar() {
@@ -447,7 +449,7 @@ function recomendar() {
       '</div>';
     }).join('');
   })
-    .catch(e => {
+  .catch(e => {
     resultDiv.innerHTML = '<div class="rec-card" style="color:var(--red)">Error: '+e.message+'</div>';
   })
   .finally(() => {
@@ -455,38 +457,7 @@ function recomendar() {
   });
 }
 
-async function buscarConInfo(i) {
-  const info = window._recInfo[i];
-  if (!info) return;
-  const btn = document.getElementById('spotify-btn-'+i);
-  if (btn) { btn.disabled = true; btn.textContent = 'Buscando...'; }
-  try {
-    const res = await fetch('/api/spotify/buscar?album='+encodeURIComponent(info.album)+'&artist='+encodeURIComponent(info.artist));
-    const data = await res.json();
-    const container = document.getElementById('spotify-container-'+i);
-    if (!container) return;
-    if (data.found) {
-      if (data.image) {
-        const coverEl = document.getElementById('rec-cover-'+i);
-        if (coverEl) coverEl.innerHTML = '<img src="'+data.image+'" class="rec-cover" alt="cover"/>';
-      }
-      container.innerHTML =
-        '<div class="spotify-box">'+
-          '<div class="spotify-box-title">✓ Encontrado en Spotify</div>'+
-          '<div class="spotify-box-album">'+data.name+'</div>'+
-          '<div class="spotify-box-artist">'+data.artist+'</div>'+
-          '<a href="'+data.url+'" target="_blank" class="spotify-link">Abrir en Spotify</a>'+
-        '</div>';
-    } else {
-      container.innerHTML = '<div class="spotify-not-found">No encontrado en Spotify</div>';
-    }
-  } catch(e) {
-    const container = document.getElementById('spotify-container-'+i);
-    if (container) container.innerHTML = '<div class="spotify-not-found">Error al buscar</div>';
-  
-   }
-  
-    function renderLibrary() {
+function renderLibrary() {
   const filter = (document.getElementById('lib-filter')?.value || '').toLowerCase();
   const filtered = state.library.filter(d =>
     !filter || d.album.toLowerCase().includes(filter) ||
