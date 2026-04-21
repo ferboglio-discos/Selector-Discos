@@ -24,8 +24,14 @@ async function getSpotifyToken() {
   return spotifyToken;
 }
 
+let climaCache = {};
+
 app.get('/api/clima', async (req, res) => {
   const city = req.query.city || 'Buenos Aires';
+  const ahora = Date.now();
+  if (climaCache[city] && (ahora - climaCache[city].timestamp) < 30 * 60 * 1000) {
+    return res.json(climaCache[city].data);
+  }
   try {
     const geoRes = await fetch(`https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(city)}&count=1&language=es&format=json`);
     const geoData = await geoRes.json();
@@ -44,12 +50,14 @@ app.get('/api/clima', async (req, res) => {
     else if (wc <= 67) { desc = 'Lluvia'; emoji = '🌧️'; }
     else if (wc <= 77) { desc = 'Nieve'; emoji = '🌨️'; }
     else { desc = 'Tormenta'; emoji = '⛈️'; }
-    res.json({ temp, desc, emoji, humidity: 0, wind: Math.round(cur.windspeed), city: name });
+    const resultado = { temp, desc, emoji, humidity: 0, wind: Math.round(cur.windspeed), city: name };
+    climaCache[city] = { data: resultado, timestamp: ahora };
+    res.json(resultado);
   } catch (err) {
+    if (climaCache[city]) return res.json({ ...climaCache[city].data, cached: true });
     res.status(500).json({ error: err.message });
   }
 });
-
 app.get('/api/spotify/buscar', async (req, res) => {
   const { album, artist } = req.query;
   if (!album || !artist) return res.status(400).json({ error: 'Faltan parámetros' });
