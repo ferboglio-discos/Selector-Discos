@@ -355,7 +355,8 @@ async function buscarEnSpotify(album, artist, containerId) {
     const res = await fetch('/api/spotify/buscar?album='+encodeURIComponent(album)+'&artist='+encodeURIComponent(artist));
     const data = await res.json();
     const container = document.getElementById('spotify-container-'+containerId);
-    if (!container) return;if (data.found) {
+    if (!container) return;
+    if (data.found) {
       const spotifyUri = data.uri;
       const spotifyUrl = data.url;
       container.innerHTML = '<a href="'+spotifyUri+'" class="spotify-btn" onclick="abrirSpotify(event,\''+spotifyUri+'\',\''+spotifyUrl+'\')">'+
