@@ -110,6 +110,20 @@ app.post('/api/recomendar', async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 });
+let historial = [];
+
+app.post('/api/historial/agregar', (req, res) => {
+  const { discos } = req.body;
+  if (!discos || !Array.isArray(discos)) return res.status(400).json({ error: 'Faltan discos' });
+  const fecha = new Date().toLocaleDateString('es-AR');
+  historial.unshift({ fecha, discos, timestamp: Date.now() });
+  if (historial.length > 20) historial = historial.slice(0, 20);
+  res.json({ ok: true });
+});
+
+app.get('/api/historial', (req, res) => {
+  res.json({ historial });
+});
 
 app.get('*', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
