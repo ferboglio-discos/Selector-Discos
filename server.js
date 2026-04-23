@@ -33,24 +33,24 @@ app.get('/api/clima', async (req, res) => {
     return res.json(climaCache[city].data);
   }
   try {
-    const geoRes = await fetch(`https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(city)}&count=1&language=es&format=json`);
-    const geoData = await geoRes.json();
-    if (!geoData.results?.length) return res.status(404).json({ error: 'Ciudad no encontrada' });
-    const { latitude, longitude, name } = geoData.results[0];
-    const wRes = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&current_weather=true&timezone=auto`);
+    const url = `https://wttr.in/${encodeURIComponent(city)}?format=j1`;
+    const wRes = await fetch(url);
     const wData = await wRes.json();
-    if (wData.error) return res.status(500).json({ error: wData.reason });
-    const cur = wData.current_weather;
-    const temp = Math.round(cur.temperature);
-    const wc = cur.weathercode;
-    let desc, emoji;
-    if (wc === 0) { desc = 'Despejado'; emoji = '☀️'; }
-    else if (wc <= 3) { desc = 'Parcialmente nublado'; emoji = '⛅'; }
-    else if (wc <= 48) { desc = 'Nublado'; emoji = '☁️'; }
-    else if (wc <= 67) { desc = 'Lluvia'; emoji = '🌧️'; }
-    else if (wc <= 77) { desc = 'Nieve'; emoji = '🌨️'; }
-    else { desc = 'Tormenta'; emoji = '⛈️'; }
-    const resultado = { temp, desc, emoji, humidity: 0, wind: Math.round(cur.windspeed), city: name };
+    const cur = wData.current_condition[0];
+    const temp = Math.round(parseFloat(cur.temp_C));
+    const wind = Math.round(parseFloat(cur.windspeedKmph));
+    const humidity = parseInt(cur.humidity);
+    const desc = cur.lang_es?.[0]?.value || cur.weatherDesc?.[0]?.value || 'Despejado';
+    const code = parseInt(cur.weatherCode);
+    let emoji;
+    if (code === 113) emoji = '☀️';
+    else if ([116,119].includes(code)) emoji = '⛅';
+    else if ([122,143,248,260].includes(code)) emoji = '☁️';
+    else if ([176,180,182,185,263,266,281,284,293,296,299,302,305,308,311,314,317,320,323,326].includes(code)) emoji = '🌧️';
+    else if ([227,230,329,332,335,338,350,368,371,374,377].includes(code)) emoji = '🌨️';
+    else if ([200,386,389,392,395].includes(code)) emoji = '⛈️';
+    else emoji = '🌡️';
+    const resultado = { temp, desc, emoji, humidity, wind, city };
     climaCache[city] = { data: resultado, timestamp: ahora };
     res.json(resultado);
   } catch (err) {
@@ -58,6 +58,7 @@ app.get('/api/clima', async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 });
+
 app.get('/api/spotify/buscar', async (req, res) => {
   const { album, artist } = req.query;
   if (!album || !artist) return res.status(400).json({ error: 'Faltan parámetros' });
