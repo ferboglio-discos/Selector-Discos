@@ -465,25 +465,31 @@ function recomendar() {
         hData.historial.slice(0, 5).map(h => h.fecha+': '+h.discos.join(', ')).join('\n')
       : 'Sin historial previo.';
 
-    const prompt = 'Sos un sommelier musical experto y estricto.\n\n'+
-      'BIBLIOTECA DISPONIBLE (SOLO podés recomendar discos de esta lista, identificados por su número):\n\n'+
-      libraryText+'\n\n'+
-      'REGLA ABSOLUTA: Solo podés recomendar discos que aparezcan en la lista de arriba con su número. NUNCA inventes ni agregues discos que no estén en la lista. Si no encontrás opciones adecuadas, elegí las mejores disponibles dentro de la lista.\n\n'+
-      histReciente+'\n\n'+
-      'CONTEXTO ACTUAL:\n'+
-      '- Momento: '+tod.name+' ('+timeStr+'), '+getDayType()+'\n'+
-      '- Época: '+s.name+' (hemisferio sur, Buenos Aires)\n'+
-      '- '+weatherText+'\n'+
-      '- Estado de ánimo: '+state.mood+'\n'+
-      '- Ocasión: '+(document.getElementById('ocasion').value||'Sin especificar')+'\n'+
-      '- '+generoTexto+'\n'+
-      (nota?'- Nota: '+nota+'\n':'')+
-      '\nRecomendá exactamente 3 discos de la biblioteca. Para cada uno usá este formato:\n\n'+
-      '**Número. "Nombre del álbum" — Artista (Año)**\n'+
-      '[género] [formato]\n\n'+
-      'Razón: explicación de 2-3 oraciones de por qué encaja con este contexto exacto.\n\n'+
-      'Cómo escucharlo: sugerencia concreta.\n\n---';
+    const hoy = new Date();
+const dia = hoy.getDate();
+const mes = hoy.toLocaleString('es-AR', { month: 'long' });
+const anio = hoy.getFullYear();
 
+const prompt = 'Sos un sommelier musical experto y estricto con profundo conocimiento de la historia de la música.\n\n'+
+  'FECHA DE HOY: '+dia+' de '+mes+' de '+anio+'\n\n'+
+  'TAREA 1 — EFEMÉRIDES: Antes de recomendar, pensá si hoy es una fecha especial en la historia de la música: aniversario de lanzamiento de algún álbum de la biblioteca, nacimiento o fallecimiento de algún músico relacionado, o cualquier hito musical relevante para esta fecha. Si encontrás algo relevante mencionalo brevemente al inicio de tu respuesta.\n\n'+
+  'BIBLIOTECA DISPONIBLE (SOLO podés recomendar discos de esta lista):\n\n'+
+  libraryText+'\n\n'+
+  'REGLA ABSOLUTA: Solo podés recomendar discos que aparezcan numerados en la lista de arriba. NUNCA inventes ni agregues discos que no estén en la lista.\n\n'+
+  histReciente+'\n\n'+
+  'CONTEXTO ACTUAL:\n'+
+  '- Momento: '+tod.name+' ('+timeStr+'), '+getDayType()+'\n'+
+  '- Época: '+s.name+' (hemisferio sur, Buenos Aires)\n'+
+  '- '+weatherText+'\n'+
+  '- Estado de ánimo: '+state.mood+'\n'+
+  '- Ocasión: '+(document.getElementById('ocasion').value||'Sin especificar')+'\n'+
+  '- '+generoTexto+'\n'+
+  (nota?'- Nota: '+nota+'\n':'')+
+  '\nRecomendá exactamente 3 discos de la biblioteca. Si alguno está relacionado con una efeméride de hoy, priorizalo. Para cada disco usá este formato:\n\n'+
+  '**Número. "Nombre del álbum" — Artista (Año)**\n'+
+  '[género] [formato]\n\n'+
+  'Razón: explicación de 2-3 oraciones de por qué encaja con este contexto, mencionando la efeméride si aplica.\n\n'+
+  'Cómo escucharlo: sugerencia concreta.\n\n---';
     return fetch('/api/recomendar', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
