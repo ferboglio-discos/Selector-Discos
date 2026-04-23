@@ -112,6 +112,10 @@
     .spotify-search-btn { width: 100%; padding: 10px; background: #1db954; color: white; border: none; border-radius: var(--radius); font-size: 14px; font-weight: 500; cursor: pointer; margin-top: 8px; }
     .spotify-search-btn:disabled { opacity: 0.6; cursor: default; }
     .spotify-not-found { font-size: 12px; color: var(--text3); text-align: center; padding: 8px 0; }
+    .hist-row { display: flex; align-items: flex-start; gap: 10px; padding: 10px 0; border-bottom: 0.5px solid var(--border); font-size: 13px; }
+    .hist-row:last-child { border-bottom: none; }
+    .hist-date { font-size: 11px; color: var(--text3); white-space: nowrap; margin-top: 2px; min-width: 80px; }
+    .hist-discos { flex: 1; color: var(--text2); line-height: 1.6; }
   </style>
 </head>
 <body>
@@ -133,6 +137,7 @@
   <div class="tabs">
     <button class="tab active" onclick="showTab('recomendar')">Recomendar</button>
     <button class="tab" onclick="showTab('biblioteca')">Biblioteca</button>
+    <button class="tab" onclick="showTab('historial')">Historial</button>
   </div>
 
   <div class="section active" id="sec-recomendar">
@@ -236,6 +241,14 @@
       <div class="pager" id="pager"></div>
     </div>
   </div>
+
+  <div class="section" id="sec-historial">
+    <div class="card">
+      <div class="card-title">Últimas recomendaciones <span style="font-weight:400;color:var(--text3);font-size:11px;text-transform:none;letter-spacing:0">(últimas 20 sesiones)</span></div>
+      <div id="historial-list"><div class="empty-state">Todavía no hay historial.<br/>Las próximas recomendaciones aparecerán acá.</div></div>
+    </div>
+    <button class="clear-btn" style="width:100%;padding:10px;margin-top:4px;" onclick="limpiarHistorial()">Borrar historial</button>
+  </div>
 </div>
 
 <script>
@@ -253,6 +266,7 @@ function showTab(tab) {
   document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
   document.querySelector('[onclick="showTab(\''+tab+'\')"]').classList.add('active');
   document.getElementById('sec-' + tab).classList.add('active');
+  if (tab === 'historial') cargarHistorial();
 }
 
 function selectMood(btn, mood) {
@@ -337,6 +351,34 @@ function renderGeneros() {
   ).join('');
 }
 
+async function cargarHistorial() {
+  try {
+    const res = await fetch('/api/historial');
+    const data = await res.json();
+    const el = document.getElementById('historial-list');
+    if (!data.historial || !data.historial.length) {
+      el.innerHTML = '<div class="empty-state">Todavía no hay historial.</div>';
+      return;
+    }
+    el.innerHTML = data.historial.map(h =>
+      '<div class="hist-row">'+
+        '<div class="hist-date">'+h.fecha+'</div>'+
+        '<div class="hist-discos">'+h.discos.join('<br/>')+'</div>'+
+      '</div>'
+    ).join('');
+  } catch(e) {
+    document.getElementById('historial-list').innerHTML = '<div class="empty-state">Error al cargar historial.</div>';
+  }
+}
+
+async function limpiarHistorial() {
+  if (!confirm('¿Borrar todo el historial?')) return;
+  try {
+    await fetch('/api/historial/limpiar', { method: 'POST' });
+    document.getElementById('historial-list').innerHTML = '<div class="empty-state">Historial borrado.</div>';
+  } catch(e) {}
+}
+
 function parseRecomendaciones(texto) {
   const bloques = texto.split(/\n(?=\d+\.\s|\*\*\d+)/);
   return bloques.filter(b => b.trim().length > 20).slice(0, 3);
@@ -415,12 +457,38 @@ function recomendar() {
   const nota = document.getElementById('nota-extra').value.trim();
   const generoTexto = state.genero ? 'Género filtrado: '+state.genero : 'Toda la biblioteca';
 
-  const prompt = 'Sos un sommelier musical experto. El usuario tiene esta biblioteca'+(state.genero?' (género: '+state.genero+')':'')+': \n\n'+libraryText+'\n\nContexto:\n- Momento: '+tod.name+' ('+timeStr+'), '+getDayType()+'\n- Época: '+s.name+' (hemisferio sur)\n- '+weatherText+'\n- Estado de ánimo: '+state.mood+'\n- Ocasión: '+(document.getElementById('ocasion').value||'Sin especificar')+'\n- '+generoTexto+'\n'+(nota?'- Nota: '+nota:'')+'\n\nRecomendá exactamente 3 discos. Para cada uno usá este formato:\n\n**Número. "Nombre del álbum" — Artista (Año)**\n[género] [formato]\n\nRazón: explicación de 2-3 oraciones de por qué encaja con este contexto.\n\nCómo escucharlo: sugerencia concreta.\n\n---';
+  fetch('/api/historial')
+  .then(r => r.json())
+  .then(hData => {
+    const histReciente = hData.historial && hData.historial.length
+      ? 'HISTORIAL DE RECOMENDACIONES RECIENTES (evitá repetir estos discos salvo que sea muy justificado):\n' +
+        hData.historial.slice(0, 5).map(h => h.fecha+': '+h.discos.join(', ')).join('\n')
+      : 'Sin historial previo.';
 
-  fetch('/api/recomendar', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ prompt })
+    const prompt = 'Sos un sommelier musical experto y estricto.\n\n'+
+      'BIBLIOTECA DISPONIBLE (SOLO podés recomendar discos de esta lista, identificados por su número):\n\n'+
+      libraryText+'\n\n'+
+      'REGLA ABSOLUTA: Solo podés recomendar discos que aparezcan en la lista de arriba con su número. NUNCA inventes ni agregues discos que no estén en la lista. Si no encontrás opciones adecuadas, elegí las mejores disponibles dentro de la lista.\n\n'+
+      histReciente+'\n\n'+
+      'CONTEXTO ACTUAL:\n'+
+      '- Momento: '+tod.name+' ('+timeStr+'), '+getDayType()+'\n'+
+      '- Época: '+s.name+' (hemisferio sur, Buenos Aires)\n'+
+      '- '+weatherText+'\n'+
+      '- Estado de ánimo: '+state.mood+'\n'+
+      '- Ocasión: '+(document.getElementById('ocasion').value||'Sin especificar')+'\n'+
+      '- '+generoTexto+'\n'+
+      (nota?'- Nota: '+nota+'\n':'')+
+      '\nRecomendá exactamente 3 discos de la biblioteca. Para cada uno usá este formato:\n\n'+
+      '**Número. "Nombre del álbum" — Artista (Año)**\n'+
+      '[género] [formato]\n\n'+
+      'Razón: explicación de 2-3 oraciones de por qué encaja con este contexto exacto.\n\n'+
+      'Cómo escucharlo: sugerencia concreta.\n\n---';
+
+    return fetch('/api/recomendar', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ prompt })
+    });
   })
   .then(r => r.json())
   .then(data => {
@@ -428,9 +496,12 @@ function recomendar() {
     const bloques = parseRecomendaciones(data.resultado);
     const colors = ['#7f77dd','#1d9e75','#d85a30'];
     window._recInfo = [];
+    const discosRecomendados = [];
+
     resultDiv.innerHTML = bloques.map((bloque, i) => {
       const info = extraerAlbumArtista(bloque);
       window._recInfo[i] = info;
+      if (info) discosRecomendados.push(info.album + (info.artist ? ' — ' + info.artist : ''));
       const html = bloque
         .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
         .replace(/\n\n/g, '</p><p>')
@@ -448,6 +519,14 @@ function recomendar() {
         '</div>'+
       '</div>';
     }).join('');
+
+    if (discosRecomendados.length) {
+      fetch('/api/historial/agregar', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ discos: discosRecomendados })
+      }).catch(() => {});
+    }
   })
   .catch(e => {
     resultDiv.innerHTML = '<div class="rec-card" style="color:var(--red)">Error: '+e.message+'</div>';
