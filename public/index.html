@@ -257,7 +257,45 @@
       <div class="pager" id="pager"></div>
     </div>
   </div>
-
+  
+<div class="section" id="sec-preferencias">
+  <div class="card">
+    <div class="card-title">Géneros favoritos <span style="font-weight:400;color:var(--text3);font-size:11px;text-transform:none;letter-spacing:0">(seleccioná uno o más)</span></div>
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;" id="pref-generos-grid">
+      <button class="pref-btn" onclick="togglePref('generos','Rock')">Rock</button>
+      <button class="pref-btn" onclick="togglePref('generos','Rock progresivo')">Rock progresivo</button>
+      <button class="pref-btn" onclick="togglePref('generos','Jazz')">Jazz</button>
+      <button class="pref-btn" onclick="togglePref('generos','Pop')">Pop</button>
+      <button class="pref-btn" onclick="togglePref('generos','Blues')">Blues</button>
+      <button class="pref-btn" onclick="togglePref('generos','Folk')">Folk</button>
+      <button class="pref-btn" onclick="togglePref('generos','Clásica')">Clásica</button>
+      <button class="pref-btn" onclick="togglePref('generos','Electrónica')">Electrónica</button>
+      <button class="pref-btn" onclick="togglePref('generos','Tango')">Tango</button>
+      <button class="pref-btn" onclick="togglePref('generos','Folklore')">Folklore</button>
+      <button class="pref-btn" onclick="togglePref('generos','Soul')">Soul</button>
+      <button class="pref-btn" onclick="togglePref('generos','Funk')">Funk</button>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-title">Décadas preferidas <span style="font-weight:400;color:var(--text3);font-size:11px;text-transform:none;letter-spacing:0">(seleccioná una o más)</span></div>
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;" id="pref-decadas-grid">
+      <button class="pref-btn" onclick="togglePref('decadas','1950s')">50s</button>
+      <button class="pref-btn" onclick="togglePref('decadas','1960s')">60s</button>
+      <button class="pref-btn" onclick="togglePref('decadas','1970s')">70s</button>
+      <button class="pref-btn" onclick="togglePref('decadas','1980s')">80s</button>
+      <button class="pref-btn" onclick="togglePref('decadas','1990s')">90s</button>
+      <button class="pref-btn" onclick="togglePref('decadas','2000s')">2000s</button>
+      <button class="pref-btn" onclick="togglePref('decadas','2010s')">2010s</button>
+      <button class="pref-btn" onclick="togglePref('decadas','2020s')">2020s</button>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-title">Resumen de preferencias</div>
+    <div id="pref-resumen" style="font-size:13px;color:var(--text2);line-height:1.8;">Sin preferencias configuradas.</div>
+  </div>
+  <button class="rec-btn" onclick="guardarPreferencias()">Guardar preferencias</button>
+</div>
+  
   <div class="section" id="sec-historial">
     <div class="card">
       <div class="card-title">Últimas recomendaciones <span style="font-weight:400;color:var(--text3);font-size:11px;text-transform:none;letter-spacing:0">(últimas 20 sesiones)</span></div>
