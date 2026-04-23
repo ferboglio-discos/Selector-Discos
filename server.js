@@ -125,6 +125,11 @@ app.get('/api/historial', (req, res) => {
   res.json({ historial });
 });
 
+app.post('/api/historial/limpiar', (req, res) => {
+  historial = [];
+  res.json({ ok: true });
+});
+
 app.get('*', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
