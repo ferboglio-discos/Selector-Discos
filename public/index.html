@@ -288,7 +288,19 @@ function selectMood(btn, mood) {
   document.querySelectorAll('.mood-btn').forEach(b => b.classList.remove('selected'));
   btn.classList.add('selected'); state.mood = mood; updateContexto();
 }
-
+function selectFuente(btn, fuente) {
+  document.querySelectorAll('.fuente-btn').forEach(b => {
+    b.style.background = 'var(--bg2)';
+    b.style.borderColor = 'var(--border)';
+    b.style.color = 'var(--text)';
+  });
+  btn.style.background = 'var(--purple-bg)';
+  btn.style.borderColor = '#7f77dd';
+  btn.style.color = 'var(--purple)';
+  state.fuente = fuente;
+}
+state.fuente = 'biblioteca';
+  
 function selectGenero(btn, genero) {
   if (state.genero === genero) {
     btn.classList.remove('selected'); state.genero = null;
