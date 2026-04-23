@@ -607,7 +607,48 @@ const prompt = 'Sos un sommelier musical experto y estricto con profundo conocim
     btn.disabled = false; btn.innerHTML = 'Recomendar discos';
   });
 }
+let preferencias = JSON.parse(localStorage.getItem('preferencias') || '{"generos":[],"decadas":[]}');
 
+function togglePref(tipo, valor) {
+  const idx = preferencias[tipo].indexOf(valor);
+  if (idx >= 0) {
+    preferencias[tipo].splice(idx, 1);
+  } else {
+    preferencias[tipo].push(valor);
+  }
+  renderPreferencias();
+}
+
+function renderPreferencias() {
+  document.querySelectorAll('.pref-btn').forEach(btn => {
+    const onclick = btn.getAttribute('onclick');
+    const match = onclick.match(/togglePref\('(\w+)','(.+?)'\)/);
+    if (match) {
+      const tipo = match[1], valor = match[2];
+      if (preferencias[tipo] && preferencias[tipo].includes(valor)) {
+        btn.style.background = 'var(--purple-bg)';
+        btn.style.borderColor = '#7f77dd';
+        btn.style.color = 'var(--purple)';
+      } else {
+        btn.style.background = 'var(--bg2)';
+        btn.style.borderColor = 'var(--border)';
+        btn.style.color = 'var(--text)';
+      }
+    }
+  });
+  const resumen = document.getElementById('pref-resumen');
+  if (resumen) {
+    const g = preferencias.generos.length ? '🎸 Géneros: '+preferencias.generos.join(', ') : '';
+    const d = preferencias.decadas.length ? '📅 Décadas: '+preferencias.decadas.join(', ') : '';
+    resumen.innerHTML = [g,d].filter(Boolean).join('<br/>') || 'Sin preferencias configuradas.';
+  }
+}
+
+function guardarPreferencias() {
+  try { localStorage.setItem('preferencias', JSON.stringify(preferencias)); } catch(e) {}
+  alert('Preferencias guardadas correctamente.');
+}
+  
 function renderLibrary() {
   const filter = (document.getElementById('lib-filter')?.value || '').toLowerCase();
   const filtered = state.library.filter(d =>
