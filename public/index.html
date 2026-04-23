@@ -163,7 +163,22 @@
         <button onclick="fetchClima()">Actualizar</button>
       </div>
     </div>
-
+    
+<div class="card">
+  <div class="card-title">Fuente de recomendación</div>
+  <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;">
+    <button class="fuente-btn selected" onclick="selectFuente(this,'biblioteca')" id="fuente-biblioteca" style="padding:10px 6px;border:0.5px solid var(--border);border-radius:var(--radius);background:var(--purple-bg);border-color:#7f77dd;color:var(--purple);font-size:12px;cursor:pointer;text-align:center;line-height:1.4;">
+      <span style="font-size:18px;display:block;margin-bottom:3px">📀</span>Mi biblioteca
+    </button>
+    <button class="fuente-btn" onclick="selectFuente(this,'spotify')" id="fuente-spotify" style="padding:10px 6px;border:0.5px solid var(--border);border-radius:var(--radius);background:var(--bg2);color:var(--text);font-size:12px;cursor:pointer;text-align:center;line-height:1.4;">
+      <span style="font-size:18px;display:block;margin-bottom:3px">🎵</span>Spotify
+    </button>
+    <button class="fuente-btn" onclick="selectFuente(this,'ambos')" id="fuente-ambos" style="padding:10px 6px;border:0.5px solid var(--border);border-radius:var(--radius);background:var(--bg2);color:var(--text);font-size:12px;cursor:pointer;text-align:center;line-height:1.4;">
+      <span style="font-size:18px;display:block;margin-bottom:3px">🔀</span>Ambos
+    </button>
+  </div>
+</div>
+    
     <div class="card">
       <div class="card-title">Género musical <span style="font-weight:400;color:var(--text3);font-size:11px;text-transform:none;letter-spacing:0">(opcional)</span></div>
       <div class="genre-grid" id="genre-grid">
