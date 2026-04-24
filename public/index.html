@@ -533,16 +533,15 @@ function recomendar() {
   const mes = hoy.toLocaleString('es-AR', { month: 'long' });
   const anio = hoy.getFullYear();
 
-  fetch('/api/historial')
+ fetch('/api/historial')
   .then(r => r.json())
   .then(hData => {
     const histReciente = hData.historial && hData.historial.length
-  '⚠️ HISTORIAL — REGLA ESTRICTA: Los siguientes discos YA fueron recomendados recientemente. ESTÁ PROHIBIDO recomendarlos de nuevo salvo que sea absolutamente el único disco adecuado para el contexto. Buscá siempre discos diferentes:\n' + hData.historial.slice(0,8).map(h => '- '+h.discos.join(', ')).join('\n')     
-  : 'Sin historial previo.';
-
+      ? '⚠️ HISTORIAL — REGLA ESTRICTA: Los siguientes discos YA fueron recomendados recientemente. ESTÁ PROHIBIDO recomendarlos de nuevo salvo que sea absolutamente el único disco adecuado para el contexto. Buscá siempre discos diferentes:\n' + hData.historial.slice(0,8).map(h => '- '+h.discos.join(', ')).join('\n')
+      : 'Sin historial previo.';
     const prompt = 'Sos un sommelier musical experto y estricto con profundo conocimiento de la historia de la música.\n\n'+
   'FECHA DE HOY: '+dia+' de '+mes+' de '+anio+'\n\n'+
-  'EFEMÉRIDES: Si hoy es una fecha notable en la historia general del rock o la música (nacimiento o muerte de un músico importante, un hito cultural, un movimiento musical) escribí un párrafo breve comenzando con "📅 EFEMÉRIDE:" y terminá con "---". IMPORTANTE: NO menciones fechas exactas de lanzamiento de álbumes porque podés equivocarte. Solo mencioná hechos históricos generales que conozcas con certeza. Si no hay nada relevante omití esta sección completamente.\n\n'+  
+  'EFEMÉRIDES: Si hoy es una fecha notable en la historia general del rock o la música (nacimiento o muerte de un músico importante, un hito cultural, un movimiento musical) escribí un párrafo breve comenzando con "📅 EFEMÉRIDE:" y terminá con "---". IMPORTANTE: NO menciones fechas exactas de lanzamiento de álbumes porque podés equivocarte. Solo mencioná hechos históricos generales que conozcas con certeza. Si no hay nada relevante omití esta sección completamente.\n\n'+
   'BIBLIOTECA DISPONIBLE (SOLO podés recomendar discos de esta lista):\n\n'+libraryText+'\n\n'+
   'REGLA ABSOLUTA: Solo podés recomendar discos numerados en la lista. NUNCA inventes discos que no estén.\n\n'+
   histReciente+'\n\n'+
@@ -553,14 +552,15 @@ function recomendar() {
   '\nLuego de la efeméride (si la hay), recomendá exactamente 3 discos de la biblioteca. Cada recomendación DEBE comenzar con el número en negrita:\n\n'+
   '**1. "Nombre del álbum" — Artista (Año)**\n[género] [formato]\n\nRazón: 2-3 oraciones.\n\nCómo escucharlo: sugerencia concreta.\n\n---\n\n'+
   '**2. ...**\n\n---\n\n**3. ...**\n\n---';
-    
+
     return fetch('/api/recomendar', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ prompt })
     });
   })
-  .then(r => r.json())
+   
+   .then(r => r.json())
   .then(data => {
     if (data.error) throw new Error(data.error);
     renderResultados(data.resultado, resultDiv);
