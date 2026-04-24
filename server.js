@@ -131,6 +131,42 @@ app.post('/api/historial/limpiar', (req, res) => {
   res.json({ ok: true });
 });
 
+app.post('/api/spotify/recomendar', async (req, res) => {
+  const { generos, decadas, mood, ocasion, efemeride } = req.body;
+  try {
+    const token = await getSpotifyToken();
+    const resultados = [];
+    const generosQuery = generos && generos.length ? generos.slice(0,2).join(' ') : 'rock';
+    const decadaQuery = decadas && decadas.length ? decadas[Math.floor(Math.random()*decadas.length)] : '1970s';
+    const queries = [
+      generosQuery + ' ' + decadaQuery,
+      efemeride ? efemeride.substring(0, 50) : generosQuery + ' classic',
+      generosQuery + ' ' + (mood || 'relaxing')
+    ];
+    for (const q of queries) {
+      const r = await fetch('https://api.spotify.com/v1/search?q='+encodeURIComponent(q)+'&type=album&limit=5&market=AR', {
+        headers: { 'Authorization': 'Bearer ' + token }
+      });
+      const d = await r.json();
+      if (d.albums && d.albums.items.length) {
+        const item = d.albums.items[Math.floor(Math.random()*Math.min(3,d.albums.items.length))];
+        resultados.push({
+          found: true,
+          uri: item.uri,
+          url: item.external_urls.spotify,
+          name: item.name,
+          artist: item.artists[0]?.name,
+          image: item.images[1]?.url || item.images[0]?.url,
+          query: q
+        });
+      }
+    }
+    res.json({ resultados });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 app.get('*', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
