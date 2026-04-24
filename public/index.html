@@ -647,7 +647,7 @@ async function recomendarAmbos(tod, s, weatherText, nota, ocasion, btn, resultDi
 
     const hData = await fetch('/api/historial').then(r => r.json());
     const histReciente = hData.historial && hData.historial.length
-      ? 'HISTORIAL RECIENTE:\n' + hData.historial.slice(0,5).map(h => h.fecha+': '+h.discos.join(', ')).join('\n')+
+      ? '⚠️ HISTORIAL — REGLA ESTRICTA: Los siguientes discos YA fueron recomendados recientemente. ESTÁ PROHIBIDO recomendarlos de nuevo salvo que sea absolutamente el único disco adecuado para el contexto. Buscá siempre discos diferentes:\n' + hData.historial.slice(0,8).map(h => '- '+h.discos.join(', ')).join('\n')
       : '';
 
     const prompt = 'Sos un sommelier musical experto.\n\n'+
