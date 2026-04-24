@@ -537,8 +537,8 @@ function recomendar() {
   .then(r => r.json())
   .then(hData => {
     const histReciente = hData.historial && hData.historial.length
-      ? 'HISTORIAL RECIENTE (evitá repetir):\n' + hData.historial.slice(0,5).map(h => h.fecha+': '+h.discos.join(', ')).join('\n')
-      : 'Sin historial previo.';
+  '⚠️ HISTORIAL — REGLA ESTRICTA: Los siguientes discos YA fueron recomendados recientemente. ESTÁ PROHIBIDO recomendarlos de nuevo salvo que sea absolutamente el único disco adecuado para el contexto. Buscá siempre discos diferentes:\n' + hData.historial.slice(0,8).map(h => '- '+h.discos.join(', ')).join('\n')     
+  : 'Sin historial previo.';
 
     const prompt = 'Sos un sommelier musical experto y estricto con profundo conocimiento de la historia de la música.\n\n'+
   'FECHA DE HOY: '+dia+' de '+mes+' de '+anio+'\n\n'+
