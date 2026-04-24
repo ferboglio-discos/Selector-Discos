@@ -495,18 +495,32 @@ async function buscarConInfo(i) {
 }
 
 function recomendar() {
-  if (!state.library.length) { alert('Tu biblioteca está vacía.'); showTab('biblioteca'); return; }
+  if (!state.library.length && state.fuente === 'biblioteca') { alert('Tu biblioteca está vacía.'); showTab('biblioteca'); return; }
   if (!state.mood) { alert('Seleccioná un estado de ánimo.'); return; }
 
   const btn = document.getElementById('btn-rec');
   const resultDiv = document.getElementById('resultado');
   btn.disabled = true;
-  btn.innerHTML = '<span class="spinner"></span>Analizando tu biblioteca...';
+  btn.innerHTML = '<span class="spinner"></span>Analizando...';
   resultDiv.innerHTML = '';
 
   const s = getSeason(), tod = getTimeOfDay(), w = state.weather;
   const timeStr = new Date().toLocaleTimeString('es-AR', {hour:'2-digit', minute:'2-digit'});
+  const weatherText = w ? 'Clima: '+w.desc+', '+w.temp+'°C' : 'Clima no disponible';
+  const nota = document.getElementById('nota-extra').value.trim();
+  const ocasion = document.getElementById('ocasion').value || 'Sin especificar';
 
+  if (state.fuente === 'spotify') {
+    recomendarSpotify(tod, s, weatherText, nota, ocasion, btn, resultDiv);
+    return;
+  }
+
+  if (state.fuente === 'ambos') {
+    recomendarAmbos(tod, s, weatherText, nota, ocasion, btn, resultDiv);
+    return;
+  }
+
+  // Fuente: biblioteca (comportamiento actual)
   let libFiltrada = state.library;
   if (state.genero) {
     libFiltrada = state.library.filter(d => (d.genre||'').toLowerCase() === state.genero.toLowerCase());
@@ -520,43 +534,32 @@ function recomendar() {
     (i+1)+'. "'+d.album+'" de '+d.artist+(d.year?' ('+d.year+')':'')+(d.genre?', '+d.genre:'')+' ['+(d.type==='vinyl'?'Vinilo':'CD')+']'
   ).join('\n');
 
-  const weatherText = w ? 'Clima: '+w.desc+', '+w.temp+'°C' : 'Clima no disponible';
-  const nota = document.getElementById('nota-extra').value.trim();
   const generoTexto = state.genero ? 'Género filtrado: '+state.genero : 'Toda la biblioteca';
+  const hoy = new Date();
+  const dia = hoy.getDate();
+  const mes = hoy.toLocaleString('es-AR', { month: 'long' });
+  const anio = hoy.getFullYear();
 
   fetch('/api/historial')
   .then(r => r.json())
   .then(hData => {
     const histReciente = hData.historial && hData.historial.length
-      ? 'HISTORIAL DE RECOMENDACIONES RECIENTES (evitá repetir estos discos salvo que sea muy justificado):\n' +
-        hData.historial.slice(0, 5).map(h => h.fecha+': '+h.discos.join(', ')).join('\n')
+      ? 'HISTORIAL RECIENTE (evitá repetir):\n' + hData.historial.slice(0,5).map(h => h.fecha+': '+h.discos.join(', ')).join('\n')
       : 'Sin historial previo.';
 
-    const hoy = new Date();
-const dia = hoy.getDate();
-const mes = hoy.toLocaleString('es-AR', { month: 'long' });
-const anio = hoy.getFullYear();
+    const prompt = 'Sos un sommelier musical experto y estricto con profundo conocimiento de la historia de la música.\n\n'+
+      'FECHA DE HOY: '+dia+' de '+mes+' de '+anio+'\n\n'+
+      'TAREA 1 — EFEMÉRIDES: Pensá si hoy es una fecha especial en la historia de la música. Si encontrás algo relevante mencionalo brevemente al inicio.\n\n'+
+      'BIBLIOTECA DISPONIBLE (SOLO podés recomendar discos de esta lista):\n\n'+libraryText+'\n\n'+
+      'REGLA ABSOLUTA: Solo podés recomendar discos numerados en la lista. NUNCA inventes discos que no estén.\n\n'+
+      histReciente+'\n\n'+
+      'CONTEXTO:\n- Momento: '+tod.name+' ('+timeStr+'), '+getDayType()+'\n'+
+      '- Época: '+s.name+' (hemisferio sur)\n- '+weatherText+'\n'+
+      '- Estado de ánimo: '+state.mood+'\n- Ocasión: '+ocasion+'\n- '+generoTexto+'\n'+
+      (nota?'- Nota: '+nota+'\n':'')+
+      '\nRecomendá exactamente 3 discos. Para cada uno:\n\n'+
+      '**Número. "Nombre del álbum" — Artista (Año)**\n[género] [formato]\n\nRazón: 2-3 oraciones.\n\nCómo escucharlo: sugerencia concreta.\n\n---';
 
-const prompt = 'Sos un sommelier musical experto y estricto con profundo conocimiento de la historia de la música.\n\n'+
-  'FECHA DE HOY: '+dia+' de '+mes+' de '+anio+'\n\n'+
-  'TAREA 1 — EFEMÉRIDES: Antes de recomendar, pensá si hoy es una fecha especial en la historia de la música: aniversario de lanzamiento de algún álbum de la biblioteca, nacimiento o fallecimiento de algún músico relacionado, o cualquier hito musical relevante para esta fecha. Si encontrás algo relevante mencionalo brevemente al inicio de tu respuesta.\n\n'+
-  'BIBLIOTECA DISPONIBLE (SOLO podés recomendar discos de esta lista):\n\n'+
-  libraryText+'\n\n'+
-  'REGLA ABSOLUTA: Solo podés recomendar discos que aparezcan numerados en la lista de arriba. NUNCA inventes ni agregues discos que no estén en la lista.\n\n'+
-  histReciente+'\n\n'+
-  'CONTEXTO ACTUAL:\n'+
-  '- Momento: '+tod.name+' ('+timeStr+'), '+getDayType()+'\n'+
-  '- Época: '+s.name+' (hemisferio sur, Buenos Aires)\n'+
-  '- '+weatherText+'\n'+
-  '- Estado de ánimo: '+state.mood+'\n'+
-  '- Ocasión: '+(document.getElementById('ocasion').value||'Sin especificar')+'\n'+
-  '- '+generoTexto+'\n'+
-  (nota?'- Nota: '+nota+'\n':'')+
-  '\nRecomendá exactamente 3 discos de la biblioteca. Si alguno está relacionado con una efeméride de hoy, priorizalo. Para cada disco usá este formato:\n\n'+
-  '**Número. "Nombre del álbum" — Artista (Año)**\n'+
-  '[género] [formato]\n\n'+
-  'Razón: explicación de 2-3 oraciones de por qué encaja con este contexto, mencionando la efeméride si aplica.\n\n'+
-  'Cómo escucharlo: sugerencia concreta.\n\n---';
     return fetch('/api/recomendar', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -566,40 +569,7 @@ const prompt = 'Sos un sommelier musical experto y estricto con profundo conocim
   .then(r => r.json())
   .then(data => {
     if (data.error) throw new Error(data.error);
-    const bloques = parseRecomendaciones(data.resultado);
-    const colors = ['#7f77dd','#1d9e75','#d85a30'];
-    window._recInfo = [];
-    const discosRecomendados = [];
-
-    resultDiv.innerHTML = bloques.map((bloque, i) => {
-      const info = extraerAlbumArtista(bloque);
-      window._recInfo[i] = info;
-      if (info) discosRecomendados.push(info.album + (info.artist ? ' — ' + info.artist : ''));
-      const html = bloque
-        .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
-        .replace(/\n\n/g, '</p><p>')
-        .replace(/\n/g, '<br/>');
-      return '<div class="rec-card" style="border-left:4px solid '+colors[i]+'">'+
-        '<div style="display:flex;gap:14px;align-items:flex-start;margin-bottom:12px">'+
-          '<div id="rec-cover-'+i+'" class="rec-cover-placeholder">⚫</div>'+
-          '<div style="flex:1;min-width:0">'+
-            '<div style="font-size:11px;color:var(--text3);margin-bottom:3px">Recomendación '+(i+1)+' de 3</div>'+
-            '<div style="font-size:14px;line-height:1.6"><p>'+html+'</p></div>'+
-          '</div>'+
-        '</div>'+
-        '<div id="spotify-container-'+i+'">'+
-          (info ? '<button id="spotify-btn-'+i+'" class="spotify-search-btn" onclick="buscarConInfo('+i+')">🎵 Buscar en Spotify</button>' : '')+
-        '</div>'+
-      '</div>';
-    }).join('');
-
-    if (discosRecomendados.length) {
-      fetch('/api/historial/agregar', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ discos: discosRecomendados })
-      }).catch(() => {});
-    }
+    renderResultados(data.resultado, resultDiv);
   })
   .catch(e => {
     resultDiv.innerHTML = '<div class="rec-card" style="color:var(--red)">Error: '+e.message+'</div>';
@@ -608,8 +578,178 @@ const prompt = 'Sos un sommelier musical experto y estricto con profundo conocim
     btn.disabled = false; btn.innerHTML = 'Recomendar discos';
   });
 }
-let preferencias = JSON.parse(localStorage.getItem('preferencias') || '{"generos":[],"decadas":[]}');
 
+async function recomendarSpotify(tod, s, weatherText, nota, ocasion, btn, resultDiv) {
+  try {
+    const pref = JSON.parse(localStorage.getItem('preferencias') || '{"generos":[],"decadas":[]}');
+    if (!pref.generos.length && !pref.decadas.length) {
+      resultDiv.innerHTML = '<div class="rec-card" style="color:var(--amber)">⚠️ Configurá tus preferencias de géneros y décadas antes de buscar en Spotify.</div>';
+      btn.disabled = false; btn.innerHTML = 'Recomendar discos';
+      return;
+    }
+    const spotRes = await fetch('/api/spotify/recomendar', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ generos: pref.generos, decadas: pref.decadas, mood: state.mood, ocasion, clima: weatherText })
+    });
+    const spotData = await spotRes.json();
+    if (spotData.error) throw new Error(spotData.error);
+    if (!spotData.resultados.length) throw new Error('Sin resultados en Spotify');
+
+    const hoy = new Date();
+    const listaSpotify = spotData.resultados.map((d,i) => (i+1)+'. "'+d.album+'" de '+d.artist+(d.year?' ('+d.year+')':'')).join('\n');
+
+    const prompt = 'Sos un sommelier musical experto.\n\n'+
+      'FECHA DE HOY: '+hoy.getDate()+' de '+hoy.toLocaleString('es-AR',{month:'long'})+' de '+hoy.getFullYear()+'\n\n'+
+      'TAREA: Elegí los 3 álbumes más apropiados de esta lista de Spotify para el contexto actual. Solo podés elegir de esta lista:\n\n'+
+      listaSpotify+'\n\n'+
+      'CONTEXTO:\n- Momento: '+tod.name+', '+getDayType()+'\n- Época: '+s.name+'\n- '+weatherText+'\n'+
+      '- Estado de ánimo: '+state.mood+'\n- Ocasión: '+ocasion+'\n'+
+      (nota?'- Nota: '+nota+'\n':'')+
+      '\nPara cada disco elegido usá este formato:\n\n'+
+      '**Número. "Nombre del álbum" — Artista (Año)**\n\nRazón: 2-3 oraciones.\n\nCómo escucharlo: sugerencia.\n\n---';
+
+    const recRes = await fetch('/api/recomendar', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ prompt })
+    });
+    const recData = await recRes.json();
+    if (recData.error) throw new Error(recData.error);
+    renderResultadosSpotify(recData.resultado, spotData.resultados, resultDiv);
+  } catch(e) {
+    resultDiv.innerHTML = '<div class="rec-card" style="color:var(--red)">Error: '+e.message+'</div>';
+  } finally {
+    btn.disabled = false; btn.innerHTML = 'Recomendar discos';
+  }
+}
+
+async function recomendarAmbos(tod, s, weatherText, nota, ocasion, btn, resultDiv) {
+  try {
+    const pref = JSON.parse(localStorage.getItem('preferencias') || '{"generos":[],"decadas":[]}');
+    const hoy = new Date();
+    const dia = hoy.getDate();
+    const mes = hoy.toLocaleString('es-AR', { month: 'long' });
+    const anio = hoy.getFullYear();
+
+    let libFiltrada = state.library;
+    if (state.genero) libFiltrada = state.library.filter(d => (d.genre||'').toLowerCase() === state.genero.toLowerCase());
+    const libraryText = libFiltrada.map((d,i) => (i+1)+'. "'+d.album+'" de '+d.artist+(d.year?' ('+d.year+')':'')+(d.genre?', '+d.genre:'')+' ['+(d.type==='vinyl'?'Vinilo':'CD')+']').join('\n');
+
+    let spotifyExtra = '';
+    if (pref.generos.length || pref.decadas.length) {
+      const spotRes = await fetch('/api/spotify/recomendar', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ generos: pref.generos, decadas: pref.decadas, mood: state.mood, ocasion, clima: weatherText })
+      });
+      const spotData = await spotRes.json();
+      if (spotData.resultados && spotData.resultados.length) {
+        spotifyExtra = '\n\nADEMÁS podés recomendar hasta 1 disco de esta lista de Spotify (indicalo claramente como "Sugerencia Spotify"):\n'+
+          spotData.resultados.slice(0,8).map((d,i)=>(i+1)+'. "'+d.album+'" de '+d.artist+(d.year?' ('+d.year+')':'')).join('\n');
+        window._spotifyResultados = spotData.resultados;
+      }
+    }
+
+    const hData = await fetch('/api/historial').then(r => r.json());
+    const histReciente = hData.historial && hData.historial.length
+      ? 'HISTORIAL RECIENTE:\n' + hData.historial.slice(0,5).map(h => h.fecha+': '+h.discos.join(', ')).join('\n')
+      : '';
+
+    const prompt = 'Sos un sommelier musical experto.\n\n'+
+      'FECHA DE HOY: '+dia+' de '+mes+' de '+anio+'\n\n'+
+      'EFEMÉRIDES: Si hoy es fecha especial en la historia musical mencionalo.\n\n'+
+      'BIBLIOTECA (podés recomendar de acá):\n\n'+libraryText+'\n\n'+
+      'REGLA: Solo recomendá discos de la biblioteca con su número exacto.'+spotifyExtra+'\n\n'+
+      (histReciente?histReciente+'\n\n':'')+
+      'CONTEXTO:\n- Momento: '+tod.name+', '+getDayType()+'\n- Época: '+s.name+'\n- '+weatherText+'\n'+
+      '- Estado de ánimo: '+state.mood+'\n- Ocasión: '+ocasion+'\n'+
+      (nota?'- Nota: '+nota+'\n':'')+
+      '\nRecomendá 2 discos de la biblioteca y opcionalmente 1 de Spotify. Formato:\n\n'+
+      '**Número. "Nombre del álbum" — Artista (Año)**\n[fuente: Mi biblioteca / Spotify]\n\nRazón: 2-3 oraciones.\n\nCómo escucharlo: sugerencia.\n\n---';
+
+    const recRes = await fetch('/api/recomendar', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ prompt })
+    });
+    const recData = await recRes.json();
+    if (recData.error) throw new Error(recData.error);
+    renderResultados(recData.resultado, resultDiv, true);
+  } catch(e) {
+    resultDiv.innerHTML = '<div class="rec-card" style="color:var(--red)">Error: '+e.message+'</div>';
+  } finally {
+    btn.disabled = false; btn.innerHTML = 'Recomendar discos';
+  }
+}
+
+function renderResultados(texto, resultDiv, includeSpotify) {
+  const bloques = parseRecomendaciones(texto);
+  const colors = ['#7f77dd','#1d9e75','#d85a30'];
+  window._recInfo = [];
+  const discosRecomendados = [];
+
+  resultDiv.innerHTML = bloques.map((bloque, i) => {
+    const info = extraerAlbumArtista(bloque);
+    window._recInfo[i] = info;
+    if (info) discosRecomendados.push(info.album+(info.artist?' — '+info.artist:''));
+    const html = bloque
+      .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+      .replace(/\n\n/g, '</p><p>')
+      .replace(/\n/g, '<br/>');
+    return '<div class="rec-card" style="border-left:4px solid '+colors[i]+'">'+
+      '<div style="display:flex;gap:14px;align-items:flex-start;margin-bottom:12px">'+
+        '<div id="rec-cover-'+i+'" class="rec-cover-placeholder">⚫</div>'+
+        '<div style="flex:1;min-width:0">'+
+          '<div style="font-size:11px;color:var(--text3);margin-bottom:3px">Recomendación '+(i+1)+' de '+bloques.length+'</div>'+
+          '<div style="font-size:14px;line-height:1.6"><p>'+html+'</p></div>'+
+        '</div>'+
+      '</div>'+
+      '<div id="spotify-container-'+i+'">'+
+        (info ? '<button id="spotify-btn-'+i+'" class="spotify-search-btn" onclick="buscarConInfo('+i+')">🎵 Buscar en Spotify</button>' : '')+
+      '</div>'+
+    '</div>';
+  }).join('');
+
+  if (discosRecomendados.length) {
+    fetch('/api/historial/agregar', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ discos: discosRecomendados })
+    }).catch(()=>{});
+  }
+}
+
+function renderResultadosSpotify(texto, spotifyResultados, resultDiv) {
+  const bloques = parseRecomendaciones(texto);
+  const colors = ['#7f77dd','#1d9e75','#d85a30'];
+  window._recInfo = [];
+
+  resultDiv.innerHTML = bloques.map((bloque, i) => {
+    const info = extraerAlbumArtista(bloque);
+    window._recInfo[i] = info;
+    const spotMatch = info ? spotifyResultados.find(s =>
+      s.album.toLowerCase().includes((info.album||'').toLowerCase().substring(0,10)) ||
+      (info.album||'').toLowerCase().includes(s.album.toLowerCase().substring(0,10))
+    ) : null;
+    const html = bloque
+      .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+      .replace(/\n\n/g, '</p><p>')
+      .replace(/\n/g, '<br/>');
+    return '<div class="rec-card" style="border-left:4px solid '+colors[i]+'">'+
+      '<div style="display:flex;gap:14px;align-items:flex-start;margin-bottom:12px">'+
+        '<div id="rec-cover-'+i+'" class="rec-cover-placeholder">'+(spotMatch&&spotMatch.image?'<img src="'+spotMatch.image+'" class="rec-cover" alt="cover"/>':'🎵')+'</div>'+
+        '<div style="flex:1;min-width:0">'+
+          '<div style="font-size:11px;color:var(--text3);margin-bottom:3px">Recomendación '+(i+1)+' de '+bloques.length+' · Spotify</div>'+
+          '<div style="font-size:14px;line-height:1.6"><p>'+html+'</p></div>'+
+        '</div>'+
+      '</div>'+
+      (spotMatch ? '<div class="spotify-box"><div class="spotify-box-title">✓ Disponible en Spotify</div><div class="spotify-box-album">'+spotMatch.album+'</div><div class="spotify-box-artist">'+spotMatch.artist+'</div><a href="'+spotMatch.url+'" target="_blank" class="spotify-link">Abrir en Spotify</a></div>' :
+        (info ? '<div id="spotify-container-'+i+'"><button id="spotify-btn-'+i+'" class="spotify-search-btn" onclick="buscarConInfo('+i+')">🎵 Buscar en Spotify</button></div>' : ''))+
+    '</div>';
+  }).join('');
+}
+  
 function togglePref(tipo, valor) {
   const idx = preferencias[tipo].indexOf(valor);
   if (idx >= 0) {
