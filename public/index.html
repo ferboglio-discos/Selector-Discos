@@ -550,18 +550,19 @@ function recomendar() {
       : 'Sin historial previo.';
 
     const prompt = 'Sos un sommelier musical experto y estricto con profundo conocimiento de la historia de la música.\n\n'+
-      'FECHA DE HOY: '+dia+' de '+mes+' de '+anio+'\n\n'+
-      'TAREA 1 — EFEMÉRIDES: Pensá si hoy es una fecha especial en la historia de la música. Si encontrás algo relevante mencionalo brevemente al inicio.\n\n'+
-      'BIBLIOTECA DISPONIBLE (SOLO podés recomendar discos de esta lista):\n\n'+libraryText+'\n\n'+
-      'REGLA ABSOLUTA: Solo podés recomendar discos numerados en la lista. NUNCA inventes discos que no estén.\n\n'+
-      histReciente+'\n\n'+
-      'CONTEXTO:\n- Momento: '+tod.name+' ('+timeStr+'), '+getDayType()+'\n'+
-      '- Época: '+s.name+' (hemisferio sur)\n- '+weatherText+'\n'+
-      '- Estado de ánimo: '+state.mood+'\n- Ocasión: '+ocasion+'\n- '+generoTexto+'\n'+
-      (nota?'- Nota: '+nota+'\n':'')+
-      '\nRecomendá exactamente 3 discos. Para cada uno:\n\n'+
-      '**Número. "Nombre del álbum" — Artista (Año)**\n[género] [formato]\n\nRazón: 2-3 oraciones.\n\nCómo escucharlo: sugerencia concreta.\n\n---';
-
+  'FECHA DE HOY: '+dia+' de '+mes+' de '+anio+'\n\n'+
+  'EFEMÉRIDES: Si hoy es fecha especial en la historia musical escribí un párrafo breve comenzando con "📅 EFEMÉRIDE:" y terminá con "---". Si no hay nada relevante omití esta sección completamente.\n\n'+
+  'BIBLIOTECA DISPONIBLE (SOLO podés recomendar discos de esta lista):\n\n'+libraryText+'\n\n'+
+  'REGLA ABSOLUTA: Solo podés recomendar discos numerados en la lista. NUNCA inventes discos que no estén.\n\n'+
+  histReciente+'\n\n'+
+  'CONTEXTO:\n- Momento: '+tod.name+' ('+timeStr+'), '+getDayType()+'\n'+
+  '- Época: '+s.name+' (hemisferio sur)\n- '+weatherText+'\n'+
+  '- Estado de ánimo: '+state.mood+'\n- Ocasión: '+ocasion+'\n- '+generoTexto+'\n'+
+  (nota?'- Nota: '+nota+'\n':'')+
+  '\nLuego de la efeméride (si la hay), recomendá exactamente 3 discos de la biblioteca. Cada recomendación DEBE comenzar con el número en negrita:\n\n'+
+  '**1. "Nombre del álbum" — Artista (Año)**\n[género] [formato]\n\nRazón: 2-3 oraciones.\n\nCómo escucharlo: sugerencia concreta.\n\n---\n\n'+
+  '**2. ...**\n\n---\n\n**3. ...**\n\n---';
+    
     return fetch('/api/recomendar', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
