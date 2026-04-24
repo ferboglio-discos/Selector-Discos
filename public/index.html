@@ -735,10 +735,13 @@ function renderResultadosSpotify(texto, spotifyResultados, resultDiv) {
   resultDiv.innerHTML = bloques.map((bloque, i) => {
     const info = extraerAlbumArtista(bloque);
     window._recInfo[i] = info;
-    const spotMatch = info ? spotifyResultados.find(s =>
-      s.album.toLowerCase().includes((info.album||'').toLowerCase().substring(0,10)) ||
-      (info.album||'').toLowerCase().includes(s.album.toLowerCase().substring(0,10))
-    ) : null;
+   const spotMatch = info && spotifyResultados ? spotifyResultados.find(s =>
+  s && s.album && (
+    s.album.toLowerCase().includes((info.album||'').toLowerCase().substring(0,10)) ||
+    (info.album||'').toLowerCase().includes(s.album.toLowerCase().substring(0,10))
+  )
+) : null;
+    
     const html = bloque
       .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
       .replace(/\n\n/g, '</p><p>')
