@@ -704,9 +704,8 @@ if (efemeride) {
     '<div style="font-size:13px;color:var(--text);line-height:1.7;">'+efemeride+'</div>'+
   '</div>';
 }
-  
-  resultDiv.innerHTML = bloques.map((bloque, i) => {
-    const info = extraerAlbumArtista(bloque);
+  resultDiv.innerHTML = headerHtml + bloques.map((bloque, i) => {
+      const info = extraerAlbumArtista(bloque);
     window._recInfo[i] = info;
     if (info) discosRecomendados.push(info.album+(info.artist?' — '+info.artist:''));
     const html = bloque
