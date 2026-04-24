@@ -805,6 +805,22 @@ function guardarPreferencias() {
   alert('Preferencias guardadas correctamente.');
 }
   
+let preferencias = JSON.parse(localStorage.getItem('preferencias') || '{"generos":[],"decadas":[]}');
+
+function extraerAlbumArtista(bloque) {
+  const yearMatch = bloque.match(/\((\d{4})\)/);
+  const year = yearMatch ? yearMatch[1] : '';
+  const match = bloque.match(/\*\*(.+?)\*\*[^—\-]*[—\-]\s*(.+?)[\n\*]/);
+  if (match) return { album: match[1].trim(), artist: match[2].trim(), year };
+  const match2 = bloque.match(/\*\*(.+?)\*\*/);
+  if (match2) {
+    const parts = match2[1].split(/[—\-]/);
+    if (parts.length >= 2) return { album: parts[0].trim(), artist: parts[1].trim(), year };
+    return { album: match2[1].trim(), artist: '', year };
+  }
+  return null;
+}
+  
 function renderLibrary() {
   const filter = (document.getElementById('lib-filter')?.value || '').toLowerCase();
   const filtered = state.library.filter(d =>
