@@ -678,8 +678,9 @@ async function recomendarAmbos(tod, s, weatherText, nota, ocasion, btn, resultDi
 }
   
 function extraerEfemeride(texto) {
-  const match = texto.match(/📅 EFEMÉRIDE:([\s\S]+?)---/);
-  return match ? match[1].trim() : null;
+  const match = texto.match(/📅 EFEMÉRIDE:([\s\S]*?)(?=---|\*\*\d+\.|\*\*")/);
+  if (match && match[1].trim().length > 5) return match[1].trim();
+  return null;
 }
   
 function renderResultados(texto, resultDiv, includeSpotify) {
