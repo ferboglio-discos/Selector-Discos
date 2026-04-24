@@ -678,8 +678,16 @@ async function recomendarAmbos(tod, s, weatherText, nota, ocasion, btn, resultDi
 }
   
 function extraerEfemeride(texto) {
-  const match = texto.match(/📅 EFEMÉRIDE:([\s\S]*?)(?=---|\*\*\d+\.|\*\*")/);
-  if (match && match[1].trim().length > 5) return match[1].trim();
+  // Intenta varios patrones
+  const patrones = [
+    /📅 EFEMÉRIDE:([\s\S]*?)(?=---|\*\*\d+\.|\*\*")/,
+    /📅 EFEMÉRIDE:([\s\S]*?)(?=\n\n\*\*)/,
+    /📅 EFEMÉRIDE:([\s\S]+)/,
+  ];
+  for (const p of patrones) {
+    const match = texto.match(p);
+    if (match && match[1].trim().length > 5) return match[1].trim();
+  }
   return null;
 }
   
