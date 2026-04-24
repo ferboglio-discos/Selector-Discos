@@ -685,7 +685,12 @@ async function recomendarAmbos(tod, s, weatherText, nota, ocasion, btn, resultDi
     btn.disabled = false; btn.innerHTML = 'Recomendar discos';
   }
 }
-
+  
+function extraerEfemeride(texto) {
+  const match = texto.match(/📅 EFEMÉRIDE:([\s\S]+?)---/);
+  return match ? match[1].trim() : null;
+}
+  
 function renderResultados(texto, resultDiv, includeSpotify) {
   const bloques = parseRecomendaciones(texto);
   const colors = ['#7f77dd','#1d9e75','#d85a30'];
