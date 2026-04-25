@@ -151,15 +151,14 @@ app.post('/api/spotify/recomendar', async (req, res) => {
       if (d.albums && d.albums.items.length) {
         const item = d.albums.items[Math.floor(Math.random()*Math.min(3,d.albums.items.length))];
         resultados.push({
-          found: true,
-          uri: item.uri,
-          url: item.external_urls.spotify,
-          name: item.name,
-          artist: item.artists[0]?.name,
-          image: item.images[1]?.url || item.images[0]?.url,
-          query: q
-        });
-      }
+  id: item.id,
+  album: item.name,
+  artist: item.artists[0]?.name || '',
+  year: item.release_date?.substring(0,4) || '',
+  url: item.external_urls.spotify,
+  uri: item.uri,
+  image: item.images[1]?.url || item.images[0]?.url || ''
+});
     }
     res.json({ resultados });
   } catch (err) {
