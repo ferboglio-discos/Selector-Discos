@@ -526,8 +526,9 @@ function recomendar() {
   const mes = hoy.toLocaleString('es-AR', { month: 'long' });
   const anio = hoy.getFullYear();
 
- fetch('/api/historial')
-  .then(r => r.json())
+const histLocal = JSON.parse(localStorage.getItem('historial_recomendaciones') || '[]');
+const hData = { historial: histLocal };
+Promise.resolve(hData)
   .then(hData => {
     const histReciente = hData.historial && hData.historial.length
       ? '⚠️ HISTORIAL — REGLA ESTRICTA: Los siguientes discos YA fueron recomendados recientemente. ESTÁ PROHIBIDO recomendarlos de nuevo salvo que sea absolutamente el único disco adecuado para el contexto. Buscá siempre discos diferentes:\n' + hData.historial.slice(0,8).map(h => '- '+h.discos.join(', ')).join('\n')
