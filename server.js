@@ -111,14 +111,29 @@ app.post('/api/recomendar', async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 });
-let historial = [];
+const fs = require('fs');
+const HISTORIAL_FILE = '/tmp/historial.json';
+
+function leerHistorial() {
+  try {
+    if (fs.existsSync(HISTORIAL_FILE)) return JSON.parse(fs.readFileSync(HISTORIAL_FILE, 'utf8'));
+  } catch(e) {}
+  return [];
+}
+
+function guardarHistorial(h) {
+  try { fs.writeFileSync(HISTORIAL_FILE, JSON.stringify(h)); } catch(e) {}
+}
+
+let historial = leerHistorial();
 
 app.post('/api/historial/agregar', (req, res) => {
   const { discos } = req.body;
   if (!discos || !Array.isArray(discos)) return res.status(400).json({ error: 'Faltan discos' });
   const fecha = new Date().toLocaleDateString('es-AR');
   historial.unshift({ fecha, discos, timestamp: Date.now() });
-  if (historial.length > 20) historial = historial.slice(0, 20);
+  if (historial.length > 30) historial = historial.slice(0, 30);
+  guardarHistorial(historial);
   res.json({ ok: true });
 });
 
@@ -128,6 +143,7 @@ app.get('/api/historial', (req, res) => {
 
 app.post('/api/historial/limpiar', (req, res) => {
   historial = [];
+  guardarHistorial(historial);
   res.json({ ok: true });
 });
 
