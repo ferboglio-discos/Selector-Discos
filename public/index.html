@@ -726,12 +726,13 @@ if (efemeride) {
   }).join('');
 
   if (discosRecomendados.length) {
-    fetch('/api/historial/agregar', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ discos: discosRecomendados })
-    }).catch(()=>{});
-  }
+  try {
+    const hist = JSON.parse(localStorage.getItem('historial_recomendaciones') || '[]');
+    const fecha = new Date().toLocaleDateString('es-AR');
+    hist.unshift({ fecha, discos: discosRecomendados });
+    if (hist.length > 30) hist.splice(30);
+    localStorage.setItem('historial_recomendaciones', JSON.stringify(hist));
+  } catch(e) {}
 }
 
 function renderResultadosSpotify(texto, spotifyResultados, resultDiv) {
