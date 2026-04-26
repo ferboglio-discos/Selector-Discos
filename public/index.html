@@ -743,18 +743,19 @@ function renderResultadosSpotify(texto, spotifyResultados, resultDiv) {
   resultDiv.innerHTML = bloques.map((bloque, i) => {
     const info = extraerAlbumArtista(bloque);
     window._recInfo[i] = info;
-   const spotMatch = info && spotifyResultados ? spotifyResultados.find(s =>
-  s && s.album && (
-    s.album.toLowerCase().includes((info.album||'').toLowerCase().substring(0,10)) ||
-    (info.album||'').toLowerCase().includes(s.album.toLowerCase().substring(0,10))
-  )
-) : null;
-    
+    const spotMatch = info && spotifyResultados ? spotifyResultados.find(s =>
+      s && s.album && (
+        s.album.toLowerCase().includes((info.album||'').toLowerCase().substring(0,10)) ||
+        (info.album||'').toLowerCase().includes(s.album.toLowerCase().substring(0,10))
+      )
+    ) : null;
     const html = bloque
       .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
       .replace(/\n\n/g, '</p><p>')
       .replace(/\n/g, '<br/>');
-    return '<div class="rec-card" style="border-left:4px solid '+colors[i]+'">'+
+    const albumNombre = spotMatch ? spotMatch.album : (info ? info.album : '');
+    const artistaNombre = spotMatch ? spotMatch.artist : (info ? info.artist : '');
+    return '<div class="rec-card" style="border-left:4px solid '+colors[i]+'" id="rec-card-'+i+'">'+
       '<div style="display:flex;gap:14px;align-items:flex-start;margin-bottom:12px">'+
         '<div id="rec-cover-'+i+'" class="rec-cover-placeholder">'+(spotMatch&&spotMatch.image?'<img src="'+spotMatch.image+'" class="rec-cover" alt="cover"/>':'🎵')+'</div>'+
         '<div style="flex:1;min-width:0">'+
@@ -762,8 +763,22 @@ function renderResultadosSpotify(texto, spotifyResultados, resultDiv) {
           '<div style="font-size:14px;line-height:1.6"><p>'+html+'</p></div>'+
         '</div>'+
       '</div>'+
-      (spotMatch ? '<div class="spotify-box"><div class="spotify-box-title">✓ Disponible en Spotify</div><div class="spotify-box-album">'+spotMatch.album+'</div><div class="spotify-box-artist">'+spotMatch.artist+'</div><a href="'+spotMatch.url+'" target="_blank" class="spotify-link">Abrir en Spotify</a></div>' :
-        (info ? '<div id="spotify-container-'+i+'"><button id="spotify-btn-'+i+'" class="spotify-search-btn" onclick="buscarConInfo('+i+')">🎵 Buscar en Spotify</button></div>' : ''))+
+      (spotMatch ?
+        '<div class="spotify-box">'+
+          '<div class="spotify-box-title">✓ Disponible en Spotify</div>'+
+          '<div class="spotify-box-album">'+spotMatch.album+'</div>'+
+          '<div class="spotify-box-artist">'+spotMatch.artist+'</div>'+
+          '<a href="'+spotMatch.url+'" target="_blank" class="spotify-link">Abrir en Spotify</a>'+
+        '</div>' :
+        (info ? '<div id="spotify-container-'+i+'"><button id="spotify-btn-'+i+'" class="spotify-search-btn" onclick="buscarConInfo('+i+')">🎵 Buscar en Spotify</button></div>' : '')
+      )+
+      '<div id="valoracion-'+i+'" style="display:flex;gap:8px;margin-top:10px;align-items:center;">'+
+        '<span style="font-size:12px;color:var(--text2);">¿Te gustó?</span>'+
+        '<button onclick="valorar('+i+',\''+albumNombre.replace(/'/g,"\\'")+'\',\''+artistaNombre.replace(/'/g,"\\'")+'\',\'👍\')" '+
+          'style="padding:6px 14px;border:0.5px solid var(--border);border-radius:var(--radius);background:var(--bg2);font-size:16px;cursor:pointer;">👍</button>'+
+        '<button onclick="valorar('+i+',\''+albumNombre.replace(/'/g,"\\'")+'\',\''+artistaNombre.replace(/'/g,"\\'")+'\',\'👎\')" '+
+          'style="padding:6px 14px;border:0.5px solid var(--border);border-radius:var(--radius);background:var(--bg2);font-size:16px;cursor:pointer;">👎</button>'+
+      '</div>'+
     '</div>';
   }).join('');
 }
