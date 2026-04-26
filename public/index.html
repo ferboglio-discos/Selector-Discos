@@ -818,7 +818,63 @@ function guardarPreferencias() {
   try { localStorage.setItem('preferencias', JSON.stringify(preferencias)); } catch(e) {}
   alert('Preferencias guardadas correctamente.');
 }
+async function sorprendeme() {
+  if (!state.library.length) { alert('Tu biblioteca está vacía.'); return; }
+  const btn = document.getElementById('btn-sorpresa');
+  const resultDiv = document.getElementById('resultado');
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner"></span>Buscando una joya olvidada...';
+  resultDiv.innerHTML = '';
 
+  const hist = JSON.parse(localStorage.getItem('historial_recomendaciones') || '[]');
+  const recomendados = new Set(hist.flatMap(h => h.discos.map(d => d.toLowerCase())));
+
+  const noRecomendados = state.library.filter(d =>
+    !recomendados.has((d.album+' — '+d.artist).toLowerCase())
+  );
+
+  const pool = noRecomendados.length >= 5 ? noRecomendados : state.library;
+  const shuffled = [...pool].sort(() => Math.random() - 0.5);
+  const candidatos = shuffled.slice(0, 20);
+
+  const lista = candidatos.map((d,i) =>
+    (i+1)+'. "'+d.album+'" de '+d.artist+(d.year?' ('+d.year+')':'')+(d.genre?', '+d.genre:'')+' ['+(d.type==='vinyl'?'Vinilo':'CD')+']'
+  ).join('\n');
+
+  const hoy = new Date();
+  const s = getSeason(), tod = getTimeOfDay(), w = state.weather;
+  const weatherText = w ? 'Clima: '+w.desc+', '+w.temp+'°C' : 'Clima no disponible';
+
+  const prompt =
+    'Sos un sommelier musical experto.\n\n'+
+    'FECHA DE HOY: '+hoy.getDate()+' de '+hoy.toLocaleString('es-AR',{month:'long'})+' de '+hoy.getFullYear()+'\n\n'+
+    'MODO SORPRESA: El usuario quiere redescubrir un disco olvidado de su biblioteca. '+
+    'Elegí UN SOLO disco de esta lista que sea especial, subestimado o que merezca más atención. '+
+    'Priorizá discos menos conocidos o que podrían sorprender.\n\n'+
+    'CANDIDATOS:\n\n'+lista+'\n\n'+
+    'CONTEXTO:\n- Momento: '+tod.name+', '+getDayType()+'\n- Época: '+s.name+'\n- '+weatherText+'\n\n'+
+    'Respondé con UN solo disco en este formato:\n\n'+
+    '**1. "Nombre del álbum" — Artista (Año)**\n[género] [formato]\n\n'+
+    'Por qué es una joya olvidada: 2-3 oraciones explicando qué hace especial a este disco y por qué merece ser redescubierto hoy.\n\n'+
+    'Cómo escucharlo: sugerencia concreta.\n\n---';
+
+  try {
+    const res = await fetch('/api/recomendar', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ prompt })
+    });
+    const data = await res.json();
+    if (data.error) throw new Error(data.error);
+    renderResultados(data.resultado, resultDiv);
+  } catch(e) {
+    resultDiv.innerHTML = '<div class="rec-card" style="color:var(--red)">Error: '+e.message+'</div>';
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = '🎲 Sorprendeme';
+  }
+}
+  
 function renderLibrary() {
   const filter = (document.getElementById('lib-filter')?.value || '').toLowerCase();
   const filtered = state.library.filter(d =>
