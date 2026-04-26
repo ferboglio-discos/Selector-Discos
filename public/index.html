@@ -593,16 +593,22 @@ async function recomendarSpotify(tod, s, weatherText, nota, ocasion, btn, result
     const hoy = new Date();
     const listaSpotify = spotData.resultados.map((d,i) => (i+1)+'. "'+d.album+'" de '+d.artist+(d.year?' ('+d.year+')':'')).join('\n');
 
-    const prompt = 'Sos un sommelier musical experto.\n\n'+
-      'FECHA DE HOY: '+hoy.getDate()+' de '+hoy.toLocaleString('es-AR',{month:'long'})+' de '+hoy.getFullYear()+'\n\n'+
-      'TAREA: Elegí los 3 álbumes más apropiados de esta lista de Spotify para el contexto actual. Solo podés elegir de esta lista:\n\n'+
-      listaSpotify+'\n\n'+
-      'CONTEXTO:\n- Momento: '+tod.name+', '+getDayType()+'\n- Época: '+s.name+'\n- '+weatherText+'\n'+
-      '- Estado de ánimo: '+state.mood+'\n- Ocasión: '+ocasion+'\n'+
-      (nota?'- Nota: '+nota+'\n':'')+
-      '\nPara cada disco elegido usá este formato:\n\n'+
-      '**Número. "Nombre del álbum" — Artista (Año)**\n\nRazón: 2-3 oraciones.\n\nCómo escucharlo: sugerencia.\n\n---';
+    const valRes = await fetch('/api/valoraciones');
+const valData = await valRes.json();
+const positivos = valData.valoraciones.filter(v => v.valor === '👍').map(v => v.album+' — '+v.artist).join(', ');
+const negativos = valData.valoraciones.filter(v => v.valor === '👎').map(v => v.album+' — '+v.artist).join(', ');
 
+const prompt = 'Sos un sommelier musical experto.\n\n'+
+  'FECHA DE HOY: '+hoy.getDate()+' de '+hoy.toLocaleString('es-AR',{month:'long'})+' de '+hoy.getFullYear()+'\n\n'+
+  'TAREA: Elegí los 3 álbumes más apropiados de esta lista de Spotify para el contexto actual. Solo podés elegir de esta lista:\n\n'+
+  listaSpotify+'\n\n'+
+  (positivos ? 'DISCOS QUE LE GUSTARON AL USUARIO (priorizá estilos similares): '+positivos+'\n\n' : '')+
+  (negativos ? 'DISCOS QUE NO LE GUSTARON (evitá estilos similares): '+negativos+'\n\n' : '')+
+  'CONTEXTO:\n- Momento: '+tod.name+', '+getDayType()+'\n- Época: '+s.name+'\n- '+weatherText+'\n'+
+  '- Estado de ánimo: '+state.mood+'\n- Ocasión: '+ocasion+'\n'+
+  (nota?'- Nota: '+nota+'\n':'')+
+  '\nPara cada disco elegido usá este formato:\n\n'+
+  '**Número. "Nombre del álbum" — Artista (Año)**\n\nRazón: 2-3 oraciones.\n\nCómo escucharlo: sugerencia.\n\n---';
     const recRes = await fetch('/api/recomendar', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
