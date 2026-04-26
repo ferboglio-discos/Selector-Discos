@@ -525,9 +525,8 @@ function recomendar() {
   const dia = hoy.getDate();
   const mes = hoy.toLocaleString('es-AR', { month: 'long' });
   const anio = hoy.getFullYear();
-
-const histLocal = JSON.parse(localStorage.getItem('historial_recomendaciones') || '[]');
-const hData = { historial: histLocal };
+  const histLocal = JSON.parse(localStorage.getItem('historial_recomendaciones') || '[]');
+  const hData = { historial: histLocal };
 Promise.resolve(hData)
   .then(hData => {
     const histReciente = hData.historial && hData.historial.length
