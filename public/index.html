@@ -418,26 +418,21 @@ function renderGeneros() {
   ).join('');
 }
 
-async function cargarHistorial() {
-  try {
-    const res = await fetch('/api/historial');
-    const data = await res.json();
-    const el = document.getElementById('historial-list');
-    if (!data.historial || !data.historial.length) {
-      el.innerHTML = '<div class="empty-state">Todavía no hay historial.</div>';
-      return;
-    }
-    el.innerHTML = data.historial.map(h =>
-      '<div class="hist-row">'+
-        '<div class="hist-date">'+h.fecha+'</div>'+
-        '<div class="hist-discos">'+h.discos.join('<br/>')+'</div>'+
-      '</div>'
-    ).join('');
-  } catch(e) {
-    document.getElementById('historial-list').innerHTML = '<div class="empty-state">Error al cargar historial.</div>';
+function cargarHistorial() {
+  const hist = JSON.parse(localStorage.getItem('historial_recomendaciones') || '[]');
+  const el = document.getElementById('historial-list');
+  if (!hist.length) {
+    el.innerHTML = '<div class="empty-state">Todavía no hay historial.</div>';
+    return;
   }
+  el.innerHTML = hist.map(h =>
+    '<div class="hist-row">'+
+      '<div class="hist-date">'+h.fecha+'</div>'+
+      '<div class="hist-discos">'+h.discos.join('<br/>')+'</div>'+
+    '</div>'
+  ).join('');
 }
-
+  
 async function limpiarHistorial() {
   if (!confirm('¿Borrar todo el historial?')) return;
   try {
