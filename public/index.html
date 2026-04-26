@@ -435,12 +435,10 @@ function cargarHistorial() {
   
 async function limpiarHistorial() {
   if (!confirm('¿Borrar todo el historial?')) return;
-  try {
-    await fetch('/api/historial/limpiar', { method: 'POST' });
-    document.getElementById('historial-list').innerHTML = '<div class="empty-state">Historial borrado.</div>';
-  } catch(e) {}
+  localStorage.removeItem('historial_recomendaciones');
+  document.getElementById('historial-list').innerHTML = '<div class="empty-state">Historial borrado.</div>';
 }
-
+  
 function parseRecomendaciones(texto) {
   window._textoCompleto = texto;
   // Eliminar la sección de efeméride
