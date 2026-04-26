@@ -526,10 +526,9 @@ function recomendar() {
   const mes = hoy.toLocaleString('es-AR', { month: 'long' });
   const anio = hoy.getFullYear();
   const histLocal = JSON.parse(localStorage.getItem('historial_recomendaciones') || '[]');
-  const hData = { historial: histLocal };
-Promise.resolve(hData)
-  .then(hData => {
-    const histReciente = hData.historial && hData.historial.length
+  const histReciente = histLocal && histLocal.length
+  ? '⚠️ HISTORIAL — REGLA ESTRICTA: Los siguientes discos YA fueron recomendados recientemente. ESTÁ PROHIBIDO recomendarlos de nuevo salvo que sea absolutamente el único disco adecuado para el contexto. Buscá siempre discos diferentes:\n' + histLocal.slice(0,8).map(h => '- '+h.discos.join(', ')).join('\n')
+  : 'Sin historial previo.';    const histReciente = hData.historial && hData.historial.length
       ? '⚠️ HISTORIAL — REGLA ESTRICTA: Los siguientes discos YA fueron recomendados recientemente. ESTÁ PROHIBIDO recomendarlos de nuevo salvo que sea absolutamente el único disco adecuado para el contexto. Buscá siempre discos diferentes:\n' + hData.historial.slice(0,8).map(h => '- '+h.discos.join(', ')).join('\n')
       : 'Sin historial previo.';
     const prompt = 'Sos un sommelier musical experto y estricto con profundo conocimiento de la historia de la música.\n\n'+
