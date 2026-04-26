@@ -33,8 +33,8 @@
     .logo svg { width: 22px; height: 22px; }
     .header h1 { font-size: 18px; font-weight: 500; }
     .header p { font-size: 13px; color: var(--text2); }
-    .tabs { display: flex; gap: 4px; margin-bottom: 1.5rem; background: var(--bg2); border-radius: var(--radius); padding: 4px; }
-    .tab { flex: 1; padding: 8px; font-size: 13px; font-weight: 500; border: none; background: transparent; color: var(--text2); cursor: pointer; border-radius: 6px; transition: all 0.15s; }
+    .tabs { display: flex; gap: 4px; margin-bottom: 1.5rem; background: var(--bg2); border-radius: var(--radius); padding: 4px; flex-wrap: wrap; }
+    .tab { flex: 1; padding: 8px; font-size: 12px; font-weight: 500; border: none; background: transparent; color: var(--text2); cursor: pointer; border-radius: 6px; transition: all 0.15s; white-space: nowrap; }
     .tab.active { background: var(--bg); color: var(--text); border: 0.5px solid var(--border); }
     .section { display: none; }
     .section.active { display: block; }
@@ -139,7 +139,7 @@
     <button class="tab active" onclick="showTab('recomendar')">Recomendar</button>
     <button class="tab" onclick="showTab('biblioteca')">Biblioteca</button>
     <button class="tab" onclick="showTab('historial')">Historial</button>
-<button class="tab" onclick="showTab('preferencias')">Preferencias</button>
+    <button class="tab" onclick="showTab('preferencias')">Preferencias</button>
   </div>
 
   <div class="section active" id="sec-recomendar">
@@ -165,22 +165,22 @@
         <button onclick="fetchClima()">Actualizar</button>
       </div>
     </div>
-    
-<div class="card">
-  <div class="card-title">Fuente de recomendación</div>
-  <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;">
-    <button class="fuente-btn selected" onclick="selectFuente(this,'biblioteca')" id="fuente-biblioteca" style="padding:10px 6px;border:0.5px solid var(--border);border-radius:var(--radius);background:var(--purple-bg);border-color:#7f77dd;color:var(--purple);font-size:12px;cursor:pointer;text-align:center;line-height:1.4;">
-      <span style="font-size:18px;display:block;margin-bottom:3px">📀</span>Mi biblioteca
-    </button>
-    <button class="fuente-btn" onclick="selectFuente(this,'spotify')" id="fuente-spotify" style="padding:10px 6px;border:0.5px solid var(--border);border-radius:var(--radius);background:var(--bg2);color:var(--text);font-size:12px;cursor:pointer;text-align:center;line-height:1.4;">
-      <span style="font-size:18px;display:block;margin-bottom:3px">🎵</span>Spotify
-    </button>
-    <button class="fuente-btn" onclick="selectFuente(this,'ambos')" id="fuente-ambos" style="padding:10px 6px;border:0.5px solid var(--border);border-radius:var(--radius);background:var(--bg2);color:var(--text);font-size:12px;cursor:pointer;text-align:center;line-height:1.4;">
-      <span style="font-size:18px;display:block;margin-bottom:3px">🔀</span>Ambos
-    </button>
-  </div>
-</div>
-    
+
+    <div class="card">
+      <div class="card-title">Fuente de recomendación</div>
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;">
+        <button class="fuente-btn" onclick="selectFuente(this,'biblioteca')" id="fuente-biblioteca" style="padding:10px 6px;border:0.5px solid #7f77dd;border-radius:var(--radius);background:var(--purple-bg);color:var(--purple);font-size:12px;cursor:pointer;text-align:center;line-height:1.4;">
+          <span style="font-size:18px;display:block;margin-bottom:3px">📀</span>Mi biblioteca
+        </button>
+        <button class="fuente-btn" onclick="selectFuente(this,'spotify')" id="fuente-spotify" style="padding:10px 6px;border:0.5px solid var(--border);border-radius:var(--radius);background:var(--bg2);color:var(--text);font-size:12px;cursor:pointer;text-align:center;line-height:1.4;">
+          <span style="font-size:18px;display:block;margin-bottom:3px">🎵</span>Spotify
+        </button>
+        <button class="fuente-btn" onclick="selectFuente(this,'ambos')" id="fuente-ambos" style="padding:10px 6px;border:0.5px solid var(--border);border-radius:var(--radius);background:var(--bg2);color:var(--text);font-size:12px;cursor:pointer;text-align:center;line-height:1.4;">
+          <span style="font-size:18px;display:block;margin-bottom:3px">🔀</span>Ambos
+        </button>
+      </div>
+    </div>
+
     <div class="card">
       <div class="card-title">Género musical <span style="font-weight:400;color:var(--text3);font-size:11px;text-transform:none;letter-spacing:0">(opcional)</span></div>
       <div class="genre-grid" id="genre-grid">
@@ -258,61 +258,61 @@
       <div class="pager" id="pager"></div>
     </div>
   </div>
-  
-<div class="section" id="sec-preferencias">
-  <div class="card">
-    <div class="card-title">Géneros favoritos <span style="font-weight:400;color:var(--text3);font-size:11px;text-transform:none;letter-spacing:0">(seleccioná uno o más)</span></div>
-    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;" id="pref-generos-grid">
-      <button class="pref-btn" onclick="togglePref('generos','Rock')">Rock</button>
-      <button class="pref-btn" onclick="togglePref('generos','Rock progresivo')">Rock progresivo</button>
-      <button class="pref-btn" onclick="togglePref('generos','Jazz')">Jazz</button>
-      <button class="pref-btn" onclick="togglePref('generos','Pop')">Pop</button>
-      <button class="pref-btn" onclick="togglePref('generos','Blues')">Blues</button>
-      <button class="pref-btn" onclick="togglePref('generos','Folk')">Folk</button>
-      <button class="pref-btn" onclick="togglePref('generos','Clásica')">Clásica</button>
-      <button class="pref-btn" onclick="togglePref('generos','Electrónica')">Electrónica</button>
-      <button class="pref-btn" onclick="togglePref('generos','Tango')">Tango</button>
-      <button class="pref-btn" onclick="togglePref('generos','Folklore')">Folklore</button>
-      <button class="pref-btn" onclick="togglePref('generos','Soul')">Soul</button>
-      <button class="pref-btn" onclick="togglePref('generos','Funk')">Funk</button>
-    </div>
-  </div>
-  <div class="card">
-    <div class="card-title">Décadas preferidas <span style="font-weight:400;color:var(--text3);font-size:11px;text-transform:none;letter-spacing:0">(seleccioná una o más)</span></div>
-    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;" id="pref-decadas-grid">
-      <button class="pref-btn" onclick="togglePref('decadas','1950s')">50s</button>
-      <button class="pref-btn" onclick="togglePref('decadas','1960s')">60s</button>
-      <button class="pref-btn" onclick="togglePref('decadas','1970s')">70s</button>
-      <button class="pref-btn" onclick="togglePref('decadas','1980s')">80s</button>
-      <button class="pref-btn" onclick="togglePref('decadas','1990s')">90s</button>
-      <button class="pref-btn" onclick="togglePref('decadas','2000s')">2000s</button>
-      <button class="pref-btn" onclick="togglePref('decadas','2010s')">2010s</button>
-      <button class="pref-btn" onclick="togglePref('decadas','2020s')">2020s</button>
-    </div>
-  </div>
-  <div class="card">
-    <div class="card-title">Resumen de preferencias</div>
-    <div id="pref-resumen" style="font-size:13px;color:var(--text2);line-height:1.8;">Sin preferencias configuradas.</div>
-  </div>
-  <button class="rec-btn" onclick="guardarPreferencias()">Guardar preferencias</button>
-</div>
-  
+
   <div class="section" id="sec-historial">
     <div class="card">
-      <div class="card-title">Últimas recomendaciones <span style="font-weight:400;color:var(--text3);font-size:11px;text-transform:none;letter-spacing:0">(últimas 20 sesiones)</span></div>
-      <div id="historial-list"><div class="empty-state">Todavía no hay historial.<br/>Las próximas recomendaciones aparecerán acá.</div></div>
+      <div class="card-title">Últimas recomendaciones <span style="font-weight:400;color:var(--text3);font-size:11px;text-transform:none;letter-spacing:0">(últimas 30 sesiones)</span></div>
+      <div id="historial-list"><div class="empty-state">Todavía no hay historial.</div></div>
     </div>
     <button class="clear-btn" style="width:100%;padding:10px;margin-top:4px;" onclick="limpiarHistorial()">Borrar historial</button>
   </div>
-</div>
 
+  <div class="section" id="sec-preferencias">
+    <div class="card">
+      <div class="card-title">Géneros favoritos <span style="font-weight:400;color:var(--text3);font-size:11px;text-transform:none;letter-spacing:0">(para búsqueda en Spotify)</span></div>
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;">
+        <button class="pref-btn" onclick="togglePref('generos','Rock')">Rock</button>
+        <button class="pref-btn" onclick="togglePref('generos','Rock progresivo')">Rock progresivo</button>
+        <button class="pref-btn" onclick="togglePref('generos','Jazz')">Jazz</button>
+        <button class="pref-btn" onclick="togglePref('generos','Pop')">Pop</button>
+        <button class="pref-btn" onclick="togglePref('generos','Blues')">Blues</button>
+        <button class="pref-btn" onclick="togglePref('generos','Folk')">Folk</button>
+        <button class="pref-btn" onclick="togglePref('generos','Clásica')">Clásica</button>
+        <button class="pref-btn" onclick="togglePref('generos','Electrónica')">Electrónica</button>
+        <button class="pref-btn" onclick="togglePref('generos','Tango')">Tango</button>
+        <button class="pref-btn" onclick="togglePref('generos','Folklore')">Folklore</button>
+        <button class="pref-btn" onclick="togglePref('generos','Soul')">Soul</button>
+        <button class="pref-btn" onclick="togglePref('generos','Funk')">Funk</button>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">Décadas preferidas</div>
+      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;">
+        <button class="pref-btn" onclick="togglePref('decadas','1950s')">50s</button>
+        <button class="pref-btn" onclick="togglePref('decadas','1960s')">60s</button>
+        <button class="pref-btn" onclick="togglePref('decadas','1970s')">70s</button>
+        <button class="pref-btn" onclick="togglePref('decadas','1980s')">80s</button>
+        <button class="pref-btn" onclick="togglePref('decadas','1990s')">90s</button>
+        <button class="pref-btn" onclick="togglePref('decadas','2000s')">2000s</button>
+        <button class="pref-btn" onclick="togglePref('decadas','2010s')">2010s</button>
+        <button class="pref-btn" onclick="togglePref('decadas','2020s')">2020s</button>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">Resumen de preferencias</div>
+      <div id="pref-resumen" style="font-size:13px;color:var(--text2);line-height:1.8;">Sin preferencias configuradas.</div>
+    </div>
+    <button class="rec-btn" onclick="guardarPreferencias()">Guardar preferencias</button>
+  </div>
+</div>
 <script>
 const PAGE_SIZE = 15;
 let currentPage = 0;
 let state = {
   library: JSON.parse(localStorage.getItem('vinyl_library') || '[]'),
-  mood: null, genero: null, weather: null
+  mood: null, genero: null, weather: null, fuente: 'biblioteca'
 };
+let preferencias = JSON.parse(localStorage.getItem('preferencias') || '{"generos":[],"decadas":[]}');
 
 function saveLibrary() { try { localStorage.setItem('vinyl_library', JSON.stringify(state.library)); } catch(e){} }
 
@@ -328,6 +328,7 @@ function selectMood(btn, mood) {
   document.querySelectorAll('.mood-btn').forEach(b => b.classList.remove('selected'));
   btn.classList.add('selected'); state.mood = mood; updateContexto();
 }
+
 function selectFuente(btn, fuente) {
   document.querySelectorAll('.fuente-btn').forEach(b => {
     b.style.background = 'var(--bg2)';
@@ -339,8 +340,7 @@ function selectFuente(btn, fuente) {
   btn.style.color = 'var(--purple)';
   state.fuente = fuente;
 }
-state.fuente = 'biblioteca';
-  
+
 function selectGenero(btn, genero) {
   if (state.genero === genero) {
     btn.classList.remove('selected'); state.genero = null;
@@ -421,10 +421,7 @@ function renderGeneros() {
 function cargarHistorial() {
   const hist = JSON.parse(localStorage.getItem('historial_recomendaciones') || '[]');
   const el = document.getElementById('historial-list');
-  if (!hist.length) {
-    el.innerHTML = '<div class="empty-state">Todavía no hay historial.</div>';
-    return;
-  }
+  if (!hist.length) { el.innerHTML = '<div class="empty-state">Todavía no hay historial.</div>'; return; }
   el.innerHTML = hist.map(h =>
     '<div class="hist-row">'+
       '<div class="hist-date">'+h.fecha+'</div>'+
@@ -432,23 +429,63 @@ function cargarHistorial() {
     '</div>'
   ).join('');
 }
-  
-async function limpiarHistorial() {
+
+function limpiarHistorial() {
   if (!confirm('¿Borrar todo el historial?')) return;
   localStorage.removeItem('historial_recomendaciones');
   document.getElementById('historial-list').innerHTML = '<div class="empty-state">Historial borrado.</div>';
 }
-  
+
+function guardarHistorialLocal(discos) {
+  try {
+    const hist = JSON.parse(localStorage.getItem('historial_recomendaciones') || '[]');
+    const fecha = new Date().toLocaleDateString('es-AR');
+    hist.unshift({ fecha, discos });
+    if (hist.length > 30) hist.splice(30);
+    localStorage.setItem('historial_recomendaciones', JSON.stringify(hist));
+  } catch(e) {}
+}
+
+function getHistorialTexto() {
+  const hist = JSON.parse(localStorage.getItem('historial_recomendaciones') || '[]');
+  if (!hist.length) return 'Sin historial previo.';
+  return '⚠️ HISTORIAL — REGLA ESTRICTA: Los siguientes discos YA fueron recomendados recientemente. ESTÁ PROHIBIDO recomendarlos de nuevo salvo que sea absolutamente el único disco adecuado. Buscá siempre discos diferentes:\n' +
+    hist.slice(0,8).map(h => '- '+h.discos.join(', ')).join('\n');
+}
+
 function parseRecomendaciones(texto) {
-  window._textoCompleto = texto;
-  // Eliminar la sección de efeméride
   const sinEfemeride = texto.replace(/📅 EFEMÉRIDE:[\s\S]*?---/g, '').trim();
-  // Dividir por los separadores --- o por líneas que empiezan con número en negrita
   const bloques = sinEfemeride.split(/\n---\n|\n---$/).map(b => b.trim()).filter(b => b.length > 30);
-  // Filtrar solo los que tienen formato de recomendación
   return bloques.filter(b => b.match(/\*\*\d+\./) || b.match(/\*\*[^*]{3,}/)).slice(0, 3);
 }
-  
+
+function extraerEfemeride(texto) {
+  const patrones = [
+    /📅 EFEMÉRIDE:([\s\S]*?)(?=---|\*\*\d+\.|\*\*")/,
+    /📅 EFEMÉRIDE:([\s\S]*?)(?=\n\n\*\*)/,
+    /📅 EFEMÉRIDE:([\s\S]+)/,
+  ];
+  for (const p of patrones) {
+    const match = texto.match(p);
+    if (match && match[1].trim().length > 5) return match[1].trim();
+  }
+  return null;
+}
+
+function extraerAlbumArtista(bloque) {
+  const yearMatch = bloque.match(/\((\d{4})\)/);
+  const year = yearMatch ? yearMatch[1] : '';
+  const match = bloque.match(/\*\*(.+?)\*\*[^—\-]*[—\-]\s*(.+?)[\n\*]/);
+  if (match) return { album: match[1].trim(), artist: match[2].trim(), year };
+  const match2 = bloque.match(/\*\*(.+?)\*\*/);
+  if (match2) {
+    const parts = match2[1].split(/[—\-]/);
+    if (parts.length >= 2) return { album: parts[0].trim(), artist: parts[1].trim(), year };
+    return { album: match2[1].trim(), artist: '', year };
+  }
+  return null;
+}
+
 async function buscarConInfo(i) {
   const info = window._recInfo[i];
   if (!info) return;
@@ -480,230 +517,36 @@ async function buscarConInfo(i) {
   }
 }
 
-function recomendar() {
-  if (!state.library.length && state.fuente === 'biblioteca') { alert('Tu biblioteca está vacía.'); showTab('biblioteca'); return; }
-  if (!state.mood) { alert('Seleccioná un estado de ánimo.'); return; }
-
-  const btn = document.getElementById('btn-rec');
-  const resultDiv = document.getElementById('resultado');
-  btn.disabled = true;
-  btn.innerHTML = '<span class="spinner"></span>Analizando...';
-  resultDiv.innerHTML = '';
-
-  const s = getSeason(), tod = getTimeOfDay(), w = state.weather;
-  const timeStr = new Date().toLocaleTimeString('es-AR', {hour:'2-digit', minute:'2-digit'});
-  const weatherText = w ? 'Clima: '+w.desc+', '+w.temp+'°C' : 'Clima no disponible';
-  const nota = document.getElementById('nota-extra').value.trim();
-  const ocasion = document.getElementById('ocasion').value || 'Sin especificar';
-
-  if (state.fuente === 'spotify') {
-    recomendarSpotify(tod, s, weatherText, nota, ocasion, btn, resultDiv);
-    return;
-  }
-
-  if (state.fuente === 'ambos') {
-    recomendarAmbos(tod, s, weatherText, nota, ocasion, btn, resultDiv);
-    return;
-  }
-
-  // Fuente: biblioteca (comportamiento actual)
-  let libFiltrada = state.library;
-  if (state.genero) {
-    libFiltrada = state.library.filter(d => (d.genre||'').toLowerCase() === state.genero.toLowerCase());
-    if (!libFiltrada.length) {
-      resultDiv.innerHTML = '<div class="rec-card" style="color:var(--red)">No hay discos del género "'+state.genero+'".</div>';
-      btn.disabled = false; btn.innerHTML = 'Recomendar discos'; return;
-    }
-  }
-
-  const libraryText = libFiltrada.map((d,i) =>
-    (i+1)+'. "'+d.album+'" de '+d.artist+(d.year?' ('+d.year+')':'')+(d.genre?', '+d.genre:'')+' ['+(d.type==='vinyl'?'Vinilo':'CD')+']'
-  ).join('\n');
-
-  const generoTexto = state.genero ? 'Género filtrado: '+state.genero : 'Toda la biblioteca';
-  const hoy = new Date();
-  const dia = hoy.getDate();
-  const mes = hoy.toLocaleString('es-AR', { month: 'long' });
-  const anio = hoy.getFullYear();
-  const histLocal = JSON.parse(localStorage.getItem('historial_recomendaciones') || '[]');
-  const histReciente = histLocal && histLocal.length
-  ? '⚠️ HISTORIAL — REGLA ESTRICTA: Los siguientes discos YA fueron recomendados recientemente. ESTÁ PROHIBIDO recomendarlos de nuevo salvo que sea absolutamente el único disco adecuado para el contexto. Buscá siempre discos diferentes:\n' + histLocal.slice(0,8).map(h => '- '+h.discos.join(', ')).join('\n')
-  : 'Sin historial previo.';    const histReciente = hData.historial && hData.historial.length
-      ? '⚠️ HISTORIAL — REGLA ESTRICTA: Los siguientes discos YA fueron recomendados recientemente. ESTÁ PROHIBIDO recomendarlos de nuevo salvo que sea absolutamente el único disco adecuado para el contexto. Buscá siempre discos diferentes:\n' + hData.historial.slice(0,8).map(h => '- '+h.discos.join(', ')).join('\n')
-      : 'Sin historial previo.';
-    const prompt = 'Sos un sommelier musical experto y estricto con profundo conocimiento de la historia de la música.\n\n'+
-  'FECHA DE HOY: '+dia+' de '+mes+' de '+anio+'\n\n'+
-  'EFEMÉRIDES: Si hoy es una fecha notable en la historia general del rock o la música (nacimiento o muerte de un músico importante, un hito cultural, un movimiento musical) escribí un párrafo breve comenzando con "📅 EFEMÉRIDE:" y terminá con "---". IMPORTANTE: NO menciones fechas exactas de lanzamiento de álbumes porque podés equivocarte. Solo mencioná hechos históricos generales que conozcas con certeza. Si no hay nada relevante omití esta sección completamente.\n\n'+
-  'BIBLIOTECA DISPONIBLE (SOLO podés recomendar discos de esta lista):\n\n'+libraryText+'\n\n'+
-  'REGLA ABSOLUTA: Solo podés recomendar discos numerados en la lista. NUNCA inventes discos que no estén.\n\n'+
-  histReciente+'\n\n'+
-  'CONTEXTO:\n- Momento: '+tod.name+' ('+timeStr+'), '+getDayType()+'\n'+
-  '- Época: '+s.name+' (hemisferio sur)\n- '+weatherText+'\n'+
-  '- Estado de ánimo: '+state.mood+'\n- Ocasión: '+ocasion+'\n- '+generoTexto+'\n'+
-  (nota?'- Nota: '+nota+'\n':'')+
-  '\nLuego de la efeméride (si la hay), recomendá exactamente 3 discos de la biblioteca. Cada recomendación DEBE comenzar con el número en negrita:\n\n'+
-  '**1. "Nombre del álbum" — Artista (Año)**\n[género] [formato]\n\nRazón: 2-3 oraciones.\n\nCómo escucharlo: sugerencia concreta.\n\n---\n\n'+
-  '**2. ...**\n\n---\n\n**3. ...**\n\n---';
-
-    return fetch('/api/recomendar', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ prompt })
-    });
-  })
-   
-   .then(r => r.json())
-  .then(data => {
-    if (data.error) throw new Error(data.error);
-    renderResultados(data.resultado, resultDiv);
-  })
-  .catch(e => {
-    resultDiv.innerHTML = '<div class="rec-card" style="color:var(--red)">Error: '+e.message+'</div>';
-  })
-  .finally(() => {
-    btn.disabled = false; btn.innerHTML = 'Recomendar discos';
-  });
-}
-
-async function recomendarSpotify(tod, s, weatherText, nota, ocasion, btn, resultDiv) {
+async function valorar(i, album, artist, valor) {
   try {
-    const pref = JSON.parse(localStorage.getItem('preferencias') || '{"generos":[],"decadas":[]}');
-    if (!pref.generos.length && !pref.decadas.length) {
-      resultDiv.innerHTML = '<div class="rec-card" style="color:var(--amber)">⚠️ Configurá tus preferencias de géneros y décadas antes de buscar en Spotify.</div>';
-      btn.disabled = false; btn.innerHTML = 'Recomendar discos';
-      return;
-    }
-    const spotRes = await fetch('/api/spotify/recomendar', {
+    await fetch('/api/valoraciones/agregar', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ generos: pref.generos, decadas: pref.decadas, mood: state.mood, ocasion, clima: weatherText })
+      body: JSON.stringify({ album, artist, valor })
     });
-    const spotData = await spotRes.json();
-    if (spotData.error) throw new Error(spotData.error);
-    if (!spotData.resultados.length) throw new Error('Sin resultados en Spotify');
-
-    const hoy = new Date();
-    const listaSpotify = spotData.resultados.map((d,i) => (i+1)+'. "'+d.album+'" de '+d.artist+(d.year?' ('+d.year+')':'')).join('\n');
-
-    const valRes = await fetch('/api/valoraciones');
-const valData = await valRes.json();
-const positivos = valData.valoraciones.filter(v => v.valor === '👍').map(v => v.album+' — '+v.artist).join(', ');
-const negativos = valData.valoraciones.filter(v => v.valor === '👎').map(v => v.album+' — '+v.artist).join(', ');
-
-const prompt = 'Sos un sommelier musical experto.\n\n'+
-  'FECHA DE HOY: '+hoy.getDate()+' de '+hoy.toLocaleString('es-AR',{month:'long'})+' de '+hoy.getFullYear()+'\n\n'+
-  'TAREA: Elegí los 3 álbumes más apropiados de esta lista de Spotify para el contexto actual. Solo podés elegir de esta lista:\n\n'+
-  listaSpotify+'\n\n'+
-  (positivos ? 'DISCOS QUE LE GUSTARON AL USUARIO (priorizá estilos similares): '+positivos+'\n\n' : '')+
-  (negativos ? 'DISCOS QUE NO LE GUSTARON (evitá estilos similares): '+negativos+'\n\n' : '')+
-  'CONTEXTO:\n- Momento: '+tod.name+', '+getDayType()+'\n- Época: '+s.name+'\n- '+weatherText+'\n'+
-  '- Estado de ánimo: '+state.mood+'\n- Ocasión: '+ocasion+'\n'+
-  (nota?'- Nota: '+nota+'\n':'')+
-  '\nPara cada disco elegido usá este formato:\n\n'+
-  '**Número. "Nombre del álbum" — Artista (Año)**\n\nRazón: 2-3 oraciones.\n\nCómo escucharlo: sugerencia.\n\n---';
-    const recRes = await fetch('/api/recomendar', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ prompt })
-    });
-    const recData = await recRes.json();
-    if (recData.error) throw new Error(recData.error);
-    renderResultadosSpotify(recData.resultado, spotData.resultados, resultDiv);
+    const div = document.getElementById('valoracion-'+i);
+    if (div) div.innerHTML = '<span style="font-size:13px;color:var(--green);">✓ Valoración guardada '+valor+'</span>';
   } catch(e) {
-    resultDiv.innerHTML = '<div class="rec-card" style="color:var(--red)">Error: '+e.message+'</div>';
-  } finally {
-    btn.disabled = false; btn.innerHTML = 'Recomendar discos';
+    const div = document.getElementById('valoracion-'+i);
+    if (div) div.innerHTML = '<span style="font-size:12px;color:var(--red);">Error al guardar</span>';
   }
 }
 
-async function recomendarAmbos(tod, s, weatherText, nota, ocasion, btn, resultDiv) {
-  try {
-    const pref = JSON.parse(localStorage.getItem('preferencias') || '{"generos":[],"decadas":[]}');
-    const hoy = new Date();
-    const dia = hoy.getDate();
-    const mes = hoy.toLocaleString('es-AR', { month: 'long' });
-    const anio = hoy.getFullYear();
-
-    let libFiltrada = state.library;
-    if (state.genero) libFiltrada = state.library.filter(d => (d.genre||'').toLowerCase() === state.genero.toLowerCase());
-    const libraryText = libFiltrada.map((d,i) => (i+1)+'. "'+d.album+'" de '+d.artist+(d.year?' ('+d.year+')':'')+(d.genre?', '+d.genre:'')+' ['+(d.type==='vinyl'?'Vinilo':'CD')+']').join('\n');
-
-    let spotifyExtra = '';
-    if (pref.generos.length || pref.decadas.length) {
-      const spotRes = await fetch('/api/spotify/recomendar', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ generos: pref.generos, decadas: pref.decadas, mood: state.mood, ocasion, clima: weatherText })
-      });
-      const spotData = await spotRes.json();
-      if (spotData.resultados && spotData.resultados.length) {
-        spotifyExtra = '\n\nADEMÁS podés recomendar hasta 1 disco de esta lista de Spotify (indicalo claramente como "Sugerencia Spotify"):\n'+
-          spotData.resultados.slice(0,8).map((d,i)=>(i+1)+'. "'+d.album+'" de '+d.artist+(d.year?' ('+d.year+')':'')).join('\n');
-        window._spotifyResultados = spotData.resultados;
-      }
-    }
-
-    const hData = await fetch('/api/historial').then(r => r.json());
-    const histReciente = hData.historial && hData.historial.length
-      ? '⚠️ HISTORIAL — REGLA ESTRICTA: Los siguientes discos YA fueron recomendados recientemente. ESTÁ PROHIBIDO recomendarlos de nuevo salvo que sea absolutamente el único disco adecuado para el contexto. Buscá siempre discos diferentes:\n' + hData.historial.slice(0,8).map(h => '- '+h.discos.join(', ')).join('\n')
-      : '';
-
-    const prompt = 'Sos un sommelier musical experto.\n\n'+
-      'FECHA DE HOY: '+dia+' de '+mes+' de '+anio+'\n\n'+
-      'EFEMÉRIDES: Si hoy es fecha especial en la historia musical mencionalo.\n\n'+
-      'BIBLIOTECA (podés recomendar de acá):\n\n'+libraryText+'\n\n'+
-      'REGLA: Solo recomendá discos de la biblioteca con su número exacto.'+spotifyExtra+'\n\n'+
-      (histReciente?histReciente+'\n\n':'')+
-      'CONTEXTO:\n- Momento: '+tod.name+', '+getDayType()+'\n- Época: '+s.name+'\n- '+weatherText+'\n'+
-      '- Estado de ánimo: '+state.mood+'\n- Ocasión: '+ocasion+'\n'+
-      (nota?'- Nota: '+nota+'\n':'')+
-      '\nRecomendá 2 discos de la biblioteca y opcionalmente 1 de Spotify. Formato:\n\n'+
-      '**Número. "Nombre del álbum" — Artista (Año)**\n[fuente: Mi biblioteca / Spotify]\n\nRazón: 2-3 oraciones.\n\nCómo escucharlo: sugerencia.\n\n---';
-
-    const recRes = await fetch('/api/recomendar', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ prompt })
-    });
-    const recData = await recRes.json();
-    if (recData.error) throw new Error(recData.error);
-    renderResultados(recData.resultado, resultDiv, true);
-  } catch(e) {
-    resultDiv.innerHTML = '<div class="rec-card" style="color:var(--red)">Error: '+e.message+'</div>';
-  } finally {
-    btn.disabled = false; btn.innerHTML = 'Recomendar discos';
-  }
-}
-  
-function extraerEfemeride(texto) {
-  // Intenta varios patrones
-  const patrones = [
-    /📅 EFEMÉRIDE:([\s\S]*?)(?=---|\*\*\d+\.|\*\*")/,
-    /📅 EFEMÉRIDE:([\s\S]*?)(?=\n\n\*\*)/,
-    /📅 EFEMÉRIDE:([\s\S]+)/,
-  ];
-  for (const p of patrones) {
-    const match = texto.match(p);
-    if (match && match[1].trim().length > 5) return match[1].trim();
-  }
-  return null;
-}
-  
-function renderResultados(texto, resultDiv, includeSpotify) {
+function renderResultados(texto, resultDiv) {
   const bloques = parseRecomendaciones(texto);
   const colors = ['#7f77dd','#1d9e75','#d85a30'];
   window._recInfo = [];
   const discosRecomendados = [];
-const efemeride = extraerEfemeride(texto);
-let headerHtml = '';
-if (efemeride) {
-  headerHtml = '<div style="background:var(--amber-bg);border:0.5px solid #ba7517;border-radius:var(--radius-lg);padding:1rem 1.25rem;margin-bottom:12px;">'+
-    '<div style="font-size:11px;font-weight:500;color:var(--amber);margin-bottom:6px;text-transform:uppercase;letter-spacing:0.05em">📅 Efeméride del día</div>'+
-    '<div style="font-size:13px;color:var(--amber);line-height:1.7;">'+efemeride+'</div>'+
-  '</div>';
-}
+  const efemeride = extraerEfemeride(texto);
+  let headerHtml = '';
+  if (efemeride) {
+    headerHtml = '<div style="background:var(--amber-bg);border:0.5px solid #ba7517;border-radius:var(--radius-lg);padding:1rem 1.25rem;margin-bottom:12px;">'+
+      '<div style="font-size:11px;font-weight:500;color:var(--amber);margin-bottom:6px;text-transform:uppercase;letter-spacing:0.05em">📅 Efeméride del día</div>'+
+      '<div style="font-size:13px;color:var(--amber);line-height:1.7;">'+efemeride+'</div>'+
+    '</div>';
+  }
   resultDiv.innerHTML = headerHtml + bloques.map((bloque, i) => {
-      const info = extraerAlbumArtista(bloque);
+    const info = extraerAlbumArtista(bloque);
     window._recInfo[i] = info;
     if (info) discosRecomendados.push(info.album+(info.artist?' — '+info.artist:''));
     const html = bloque
@@ -723,22 +566,13 @@ if (efemeride) {
       '</div>'+
     '</div>';
   }).join('');
-
-  if (discosRecomendados.length) {
-  try {
-    const hist = JSON.parse(localStorage.getItem('historial_recomendaciones') || '[]');
-    const fecha = new Date().toLocaleDateString('es-AR');
-    hist.unshift({ fecha, discos: discosRecomendados });
-    if (hist.length > 30) hist.splice(30);
-    localStorage.setItem('historial_recomendaciones', JSON.stringify(hist));
-  } catch(e) {}
+  if (discosRecomendados.length) guardarHistorialLocal(discosRecomendados);
 }
 
 function renderResultadosSpotify(texto, spotifyResultados, resultDiv) {
   const bloques = parseRecomendaciones(texto);
   const colors = ['#7f77dd','#1d9e75','#d85a30'];
   window._recInfo = [];
-
   resultDiv.innerHTML = bloques.map((bloque, i) => {
     const info = extraerAlbumArtista(bloque);
     window._recInfo[i] = info;
@@ -754,7 +588,7 @@ function renderResultadosSpotify(texto, spotifyResultados, resultDiv) {
       .replace(/\n/g, '<br/>');
     const albumNombre = spotMatch ? spotMatch.album : (info ? info.album : '');
     const artistaNombre = spotMatch ? spotMatch.artist : (info ? info.artist : '');
-    return '<div class="rec-card" style="border-left:4px solid '+colors[i]+'" id="rec-card-'+i+'">'+
+    return '<div class="rec-card" style="border-left:4px solid '+colors[i]+'">'+
       '<div style="display:flex;gap:14px;align-items:flex-start;margin-bottom:12px">'+
         '<div id="rec-cover-'+i+'" class="rec-cover-placeholder">'+(spotMatch&&spotMatch.image?'<img src="'+spotMatch.image+'" class="rec-cover" alt="cover"/>':'🎵')+'</div>'+
         '<div style="flex:1;min-width:0">'+
@@ -781,14 +615,176 @@ function renderResultadosSpotify(texto, spotifyResultados, resultDiv) {
     '</div>';
   }).join('');
 }
-  
+
+function recomendar() {
+  if (!state.library.length && state.fuente === 'biblioteca') { alert('Tu biblioteca está vacía.'); showTab('biblioteca'); return; }
+  if (!state.mood) { alert('Seleccioná un estado de ánimo.'); return; }
+  const btn = document.getElementById('btn-rec');
+  const resultDiv = document.getElementById('resultado');
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner"></span>Analizando...';
+  resultDiv.innerHTML = '';
+  const s = getSeason(), tod = getTimeOfDay(), w = state.weather;
+  const timeStr = new Date().toLocaleTimeString('es-AR', {hour:'2-digit', minute:'2-digit'});
+  const weatherText = w ? 'Clima: '+w.desc+', '+w.temp+'°C' : 'Clima no disponible';
+  const nota = document.getElementById('nota-extra').value.trim();
+  const ocasion = document.getElementById('ocasion').value || 'Sin especificar';
+  if (state.fuente === 'spotify') { recomendarSpotify(tod, s, weatherText, nota, ocasion, btn, resultDiv); return; }
+  if (state.fuente === 'ambos') { recomendarAmbos(tod, s, weatherText, nota, ocasion, btn, resultDiv); return; }
+  let libFiltrada = state.library;
+  if (state.genero) {
+    libFiltrada = state.library.filter(d => (d.genre||'').toLowerCase() === state.genero.toLowerCase());
+    if (!libFiltrada.length) {
+      resultDiv.innerHTML = '<div class="rec-card" style="color:var(--red)">No hay discos del género "'+state.genero+'".</div>';
+      btn.disabled = false; btn.innerHTML = 'Recomendar discos'; return;
+    }
+  }
+  const libraryText = libFiltrada.map((d,i) =>
+    (i+1)+'. "'+d.album+'" de '+d.artist+(d.year?' ('+d.year+')':'')+(d.genre?', '+d.genre:'')+' ['+(d.type==='vinyl'?'Vinilo':'CD')+']'
+  ).join('\n');
+  const generoTexto = state.genero ? 'Género filtrado: '+state.genero : 'Toda la biblioteca';
+  const hoy = new Date();
+  const dia = hoy.getDate();
+  const mes = hoy.toLocaleString('es-AR', { month: 'long' });
+  const anio = hoy.getFullYear();
+  const histReciente = getHistorialTexto();
+  const prompt =
+    'Sos un sommelier musical experto y estricto con profundo conocimiento de la historia de la música.\n\n'+
+    'FECHA DE HOY: '+dia+' de '+mes+' de '+anio+'\n\n'+
+    'EFEMÉRIDES: Si hoy es una fecha notable en la historia del rock o la música (nacimiento o muerte de un músico importante, un hito cultural) escribí un párrafo breve comenzando con "📅 EFEMÉRIDE:" y terminá con "---". IMPORTANTE: NO menciones fechas de lanzamiento de álbumes. Solo hechos sobre personas o movimientos que conozcas con certeza. Si no hay nada relevante omití esta sección.\n\n'+
+    'BIBLIOTECA (SOLO podés recomendar de esta lista):\n\n'+libraryText+'\n\n'+
+    'REGLA ABSOLUTA: Solo podés recomendar discos numerados en la lista. NUNCA inventes discos.\n\n'+
+    histReciente+'\n\n'+
+    'CONTEXTO:\n- Momento: '+tod.name+' ('+timeStr+'), '+getDayType()+'\n'+
+    '- Época: '+s.name+' (hemisferio sur)\n- '+weatherText+'\n'+
+    '- Estado de ánimo: '+state.mood+'\n- Ocasión: '+ocasion+'\n- '+generoTexto+'\n'+
+    (nota?'- Nota: '+nota+'\n':'')+
+    '\nRecomendá exactamente 3 discos. Formato:\n\n'+
+    '**1. "Nombre del álbum" — Artista (Año)**\n[género] [formato]\n\nRazón: 2-3 oraciones.\n\nCómo escucharlo: sugerencia.\n\n---\n\n'+
+    '**2. "Nombre del álbum" — Artista (Año)**\n[género] [formato]\n\nRazón: 2-3 oraciones.\n\nCómo escucharlo: sugerencia.\n\n---\n\n'+
+    '**3. "Nombre del álbum" — Artista (Año)**\n[género] [formato]\n\nRazón: 2-3 oraciones.\n\nCómo escucharlo: sugerencia.\n\n---';
+  fetch('/api/recomendar', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ prompt })
+  })
+  .then(r => r.json())
+  .then(data => {
+    if (data.error) throw new Error(data.error);
+    renderResultados(data.resultado, resultDiv);
+  })
+  .catch(e => { resultDiv.innerHTML = '<div class="rec-card" style="color:var(--red)">Error: '+e.message+'</div>'; })
+  .finally(() => { btn.disabled = false; btn.innerHTML = 'Recomendar discos'; });
+}
+
+async function recomendarSpotify(tod, s, weatherText, nota, ocasion, btn, resultDiv) {
+  try {
+    const pref = JSON.parse(localStorage.getItem('preferencias') || '{"generos":[],"decadas":[]}');
+    if (!pref.generos.length && !pref.decadas.length) {
+      resultDiv.innerHTML = '<div class="rec-card" style="color:var(--amber)">⚠️ Configurá tus preferencias antes de buscar en Spotify.</div>';
+      btn.disabled = false; btn.innerHTML = 'Recomendar discos'; return;
+    }
+    const spotRes = await fetch('/api/spotify/recomendar', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ generos: pref.generos, decadas: pref.decadas, mood: state.mood, ocasion, clima: weatherText })
+    });
+    const spotData = await spotRes.json();
+    if (spotData.error) throw new Error(spotData.error);
+    if (!spotData.resultados || !spotData.resultados.length) throw new Error('Sin resultados en Spotify');
+    const hoy = new Date();
+    const listaSpotify = spotData.resultados.map((d,i) => (i+1)+'. "'+d.album+'" de '+d.artist+(d.year?' ('+d.year+')':'')).join('\n');
+    let positivos = '', negativos = '';
+    try {
+      const valRes = await fetch('/api/valoraciones');
+      const valData = await valRes.json();
+      positivos = valData.valoraciones.filter(v => v.valor === '👍').map(v => v.album+' — '+v.artist).join(', ');
+      negativos = valData.valoraciones.filter(v => v.valor === '👎').map(v => v.album+' — '+v.artist).join(', ');
+    } catch(e) {}
+    const prompt =
+      'Sos un sommelier musical experto.\n\n'+
+      'FECHA DE HOY: '+hoy.getDate()+' de '+hoy.toLocaleString('es-AR',{month:'long'})+' de '+hoy.getFullYear()+'\n\n'+
+      'Elegí los 3 álbumes más apropiados de esta lista para el contexto. Solo podés elegir de esta lista:\n\n'+
+      listaSpotify+'\n\n'+
+      (positivos ? 'DISCOS QUE LE GUSTARON (priorizá estilos similares): '+positivos+'\n\n' : '')+
+      (negativos ? 'DISCOS QUE NO LE GUSTARON (evitá estilos similares): '+negativos+'\n\n' : '')+
+      'CONTEXTO:\n- Momento: '+tod.name+', '+getDayType()+'\n- Época: '+s.name+'\n- '+weatherText+'\n'+
+      '- Estado de ánimo: '+state.mood+'\n- Ocasión: '+ocasion+'\n'+
+      (nota?'- Nota: '+nota+'\n':'')+
+      '\nFormato:\n\n**Número. "Nombre del álbum" — Artista (Año)**\n\nRazón: 2-3 oraciones.\n\nCómo escucharlo: sugerencia.\n\n---';
+    const recRes = await fetch('/api/recomendar', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ prompt })
+    });
+    const recData = await recRes.json();
+    if (recData.error) throw new Error(recData.error);
+    renderResultadosSpotify(recData.resultado, spotData.resultados, resultDiv);
+  } catch(e) {
+    resultDiv.innerHTML = '<div class="rec-card" style="color:var(--red)">Error: '+e.message+'</div>';
+  } finally {
+    btn.disabled = false; btn.innerHTML = 'Recomendar discos';
+  }
+}
+
+async function recomendarAmbos(tod, s, weatherText, nota, ocasion, btn, resultDiv) {
+  try {
+    const pref = JSON.parse(localStorage.getItem('preferencias') || '{"generos":[],"decadas":[]}');
+    const hoy = new Date();
+    const dia = hoy.getDate();
+    const mes = hoy.toLocaleString('es-AR', { month: 'long' });
+    const anio = hoy.getFullYear();
+    let libFiltrada = state.library;
+    if (state.genero) libFiltrada = state.library.filter(d => (d.genre||'').toLowerCase() === state.genero.toLowerCase());
+    const libraryText = libFiltrada.map((d,i) => (i+1)+'. "'+d.album+'" de '+d.artist+(d.year?' ('+d.year+')':'')+(d.genre?', '+d.genre:'')+' ['+(d.type==='vinyl'?'Vinilo':'CD')+']').join('\n');
+    let spotifyExtra = '';
+    if (pref.generos.length || pref.decadas.length) {
+      try {
+        const spotRes = await fetch('/api/spotify/recomendar', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ generos: pref.generos, decadas: pref.decadas, mood: state.mood, ocasion, clima: weatherText })
+        });
+        const spotData = await spotRes.json();
+        if (spotData.resultados && spotData.resultados.length) {
+          spotifyExtra = '\n\nADEMÁS podés recomendar hasta 1 disco de esta lista de Spotify (indicalo como "Sugerencia Spotify"):\n'+
+            spotData.resultados.slice(0,8).map((d,i)=>(i+1)+'. "'+d.album+'" de '+d.artist+(d.year?' ('+d.year+')':'')).join('\n');
+          window._spotifyResultados = spotData.resultados;
+        }
+      } catch(e) {}
+    }
+    const histReciente = getHistorialTexto();
+    const prompt =
+      'Sos un sommelier musical experto.\n\n'+
+      'FECHA DE HOY: '+dia+' de '+mes+' de '+anio+'\n\n'+
+      'EFEMÉRIDES: Si hoy es fecha notable en la historia del rock mencionalo con "📅 EFEMÉRIDE:" terminando en "---".\n\n'+
+      'BIBLIOTECA (SOLO podés recomendar de acá):\n\n'+libraryText+'\n\n'+
+      'REGLA: Solo recomendá discos de la biblioteca con su número exacto.'+spotifyExtra+'\n\n'+
+      histReciente+'\n\n'+
+      'CONTEXTO:\n- Momento: '+tod.name+', '+getDayType()+'\n- Época: '+s.name+'\n- '+weatherText+'\n'+
+      '- Estado de ánimo: '+state.mood+'\n- Ocasión: '+ocasion+'\n'+
+      (nota?'- Nota: '+nota+'\n':'')+
+      '\nRecomendá 2 discos de la biblioteca y opcionalmente 1 de Spotify. Formato:\n\n'+
+      '**Número. "Nombre del álbum" — Artista (Año)**\n[fuente: Mi biblioteca / Spotify]\n\nRazón: 2-3 oraciones.\n\nCómo escucharlo: sugerencia.\n\n---';
+    const recRes = await fetch('/api/recomendar', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ prompt })
+    });
+    const recData = await recRes.json();
+    if (recData.error) throw new Error(recData.error);
+    renderResultados(recData.resultado, resultDiv);
+  } catch(e) {
+    resultDiv.innerHTML = '<div class="rec-card" style="color:var(--red)">Error: '+e.message+'</div>';
+  } finally {
+    btn.disabled = false; btn.innerHTML = 'Recomendar discos';
+  }
+}
+
 function togglePref(tipo, valor) {
   const idx = preferencias[tipo].indexOf(valor);
-  if (idx >= 0) {
-    preferencias[tipo].splice(idx, 1);
-  } else {
-    preferencias[tipo].push(valor);
-  }
+  if (idx >= 0) preferencias[tipo].splice(idx, 1);
+  else preferencias[tipo].push(valor);
   renderPreferencias();
 }
 
@@ -821,37 +817,7 @@ function guardarPreferencias() {
   try { localStorage.setItem('preferencias', JSON.stringify(preferencias)); } catch(e) {}
   alert('Preferencias guardadas correctamente.');
 }
-  
-let preferencias = JSON.parse(localStorage.getItem('preferencias') || '{"generos":[],"decadas":[]}');
 
-function extraerAlbumArtista(bloque) {
-  const yearMatch = bloque.match(/\((\d{4})\)/);
-  const year = yearMatch ? yearMatch[1] : '';
-  const match = bloque.match(/\*\*(.+?)\*\*[^—\-]*[—\-]\s*(.+?)[\n\*]/);
-  if (match) return { album: match[1].trim(), artist: match[2].trim(), year };
-  const match2 = bloque.match(/\*\*(.+?)\*\*/);
-  if (match2) {
-    const parts = match2[1].split(/[—\-]/);
-    if (parts.length >= 2) return { album: parts[0].trim(), artist: parts[1].trim(), year };
-    return { album: match2[1].trim(), artist: '', year };
-  }
-  return null;
-}
-async function valorar(i, album, artist, valor) {
-  try {
-    await fetch('/api/valoraciones/agregar', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ album, artist, valor })
-    });
-    const div = document.getElementById('valoracion-'+i);
-    if (div) div.innerHTML = '<span style="font-size:13px;color:var(--green);">✓ Valoración guardada '+valor+'</span>';
-  } catch(e) {
-    const div = document.getElementById('valoracion-'+i);
-    if (div) div.innerHTML = '<span style="font-size:12px;color:var(--red);">Error al guardar</span>';
-  }
-}
-  
 function renderLibrary() {
   const filter = (document.getElementById('lib-filter')?.value || '').toLowerCase();
   const filtered = state.library.filter(d =>
@@ -933,7 +899,7 @@ renderLibrary();
 renderGeneros();
 updateContexto();
 fetchClima();
-renderPreferencias();  
+renderPreferencias();
 </script>
 </body>
 </html>
