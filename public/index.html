@@ -838,6 +838,20 @@ function extraerAlbumArtista(bloque) {
   }
   return null;
 }
+async function valorar(i, album, artist, valor) {
+  try {
+    await fetch('/api/valoraciones/agregar', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ album, artist, valor })
+    });
+    const div = document.getElementById('valoracion-'+i);
+    if (div) div.innerHTML = '<span style="font-size:13px;color:var(--green);">✓ Valoración guardada '+valor+'</span>';
+  } catch(e) {
+    const div = document.getElementById('valoracion-'+i);
+    if (div) div.innerHTML = '<span style="font-size:12px;color:var(--red);">Error al guardar</span>';
+  }
+}
   
 function renderLibrary() {
   const filter = (document.getElementById('lib-filter')?.value || '').toLowerCase();
