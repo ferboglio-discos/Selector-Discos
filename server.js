@@ -182,6 +182,39 @@ app.post('/api/spotify/recomendar', async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 });
+const VALORACIONES_FILE = '/tmp/valoraciones.json';
+
+function leerValoraciones() {
+  try {
+    if (fs.existsSync(VALORACIONES_FILE)) return JSON.parse(fs.readFileSync(VALORACIONES_FILE, 'utf8'));
+  } catch(e) {}
+  return [];
+}
+
+function guardarValoraciones(v) {
+  try { fs.writeFileSync(VALORACIONES_FILE, JSON.stringify(v)); } catch(e) {}
+}
+
+let valoraciones = leerValoraciones();
+
+app.post('/api/valoraciones/agregar', (req, res) => {
+  const { album, artist, valor } = req.body;
+  if (!album || !valor) return res.status(400).json({ error: 'Faltan datos' });
+  const existente = valoraciones.findIndex(v => v.album.toLowerCase() === album.toLowerCase() && v.artist.toLowerCase() === (artist||'').toLowerCase());
+  if (existente >= 0) {
+    valoraciones[existente].valor = valor;
+    valoraciones[existente].fecha = new Date().toLocaleDateString('es-AR');
+  } else {
+    valoraciones.unshift({ album, artist: artist||'', valor, fecha: new Date().toLocaleDateString('es-AR') });
+  }
+  if (valoraciones.length > 100) valoraciones = valoraciones.slice(0, 100);
+  guardarValoraciones(valoraciones);
+  res.json({ ok: true });
+});
+
+app.get('/api/valoraciones', (req, res) => {
+  res.json({ valoraciones });
+});
 
 app.get('*', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
