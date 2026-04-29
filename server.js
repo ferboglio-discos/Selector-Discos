@@ -215,6 +215,42 @@ app.post('/api/valoraciones/agregar', (req, res) => {
 app.get('/api/valoraciones', (req, res) => {
   res.json({ valoraciones });
 });
+app.get('/api/discogs/coleccion', async (req, res) => {
+  const usuario = 'ferboglio';
+  const token = process.env.DISCOGS_TOKEN;
+  try {
+    let pagina = 1;
+    let todosLosDiscos = [];
+    let hayMas = true;
+    while (hayMas) {
+      const r = await fetch(
+        `https://api.discogs.com/users/${usuario}/collection/folders/0/releases?per_page=100&page=${pagina}`,
+        { headers: {
+          'Authorization': 'Discogs token=' + token,
+          'User-Agent': 'SelectorDiscos/1.0'
+        }}
+      );
+      const data = await r.json();
+      if (!data.releases || !data.releases.length) { hayMas = false; break; }
+      data.releases.forEach(item => {
+        const info = item.basic_information;
+        todosLosDiscos.push({
+          album: info.title,
+          artist: info.artists.map(a => a.name).join(', ').replace(/\(\d+\)/g, '').trim(),
+          year: info.year ? info.year.toString() : '',
+          genre: info.genres?.[0] || info.styles?.[0] || 'Otro',
+          type: info.formats?.[0]?.name?.toLowerCase().includes('cd') ? 'cd' : 'vinyl',
+          source: 'discogs'
+        });
+      });
+      if (data.pagination && pagina < data.pagination.pages) pagina++;
+      else hayMas = false;
+    }
+    res.json({ discos: todosLosDiscos, total: todosLosDiscos.length });
+  } catch(err) {
+    res.status(500).json({ error: err.message });
+  }
+});
 
 app.get('*', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
