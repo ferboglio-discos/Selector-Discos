@@ -218,6 +218,12 @@
 
   <div class="section" id="sec-biblioteca">
     <div class="card">
+  <div class="card-title">Sincronizar con Discogs</div>
+  <div style="font-size:13px;color:var(--text2);margin-bottom:12px;">Importa tu colección completa de Discogs. Los discos sincronizados se marcan con 💿 Discogs y no se pierden al vaciar la biblioteca manual.</div>
+  <button class="rec-btn" onclick="sincronizarDiscogs()" id="btn-discogs" style="background:#333">🔄 Sincronizar con Discogs</button>
+  <div id="discogs-result" style="margin-top:10px;font-size:13px;"></div>
+</div>
+    <div class="card">
       <div class="card-title">Importar desde Excel</div>
       <div class="import-zone" id="import-zone">
         <input type="file" id="xlsx-input" accept=".xlsx,.xls" onchange="importarExcel(this)"/>
