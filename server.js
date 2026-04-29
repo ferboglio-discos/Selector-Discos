@@ -215,39 +215,49 @@ app.post('/api/valoraciones/agregar', (req, res) => {
 app.get('/api/valoraciones', (req, res) => {
   res.json({ valoraciones });
 });
+
 app.get('/api/discogs/coleccion', async (req, res) => {
   const usuario = 'ferboglio';
   const token = process.env.DISCOGS_TOKEN;
   try {
     let pagina = 1;
     let todosLosDiscos = [];
-    let hayMas = true;
-    while (hayMas) {
+    let totalPaginas = 1;
+
+    do {
       const r = await fetch(
-        `https://api.discogs.com/users/${usuario}/collection/folders/0/releases?per_page=100&page=${pagina}`,
+        `https://api.discogs.com/users/${usuario}/collection/folders/0/releases?per_page=100&page=${pagina}&sort=added&sort_order=desc`,
         { headers: {
           'Authorization': 'Discogs token=' + token,
           'User-Agent': 'SelectorDiscos/1.0'
         }}
       );
       const data = await r.json();
-      if (!data.releases || !data.releases.length) { hayMas = false; break; }
+      if (data.error) throw new Error(data.error);
+      if (!data.releases || !data.releases.length) break;
+
+      totalPaginas = data.pagination?.pages || 1;
+      console.log('Pagina '+pagina+' de '+totalPaginas+', discos en esta pagina: '+data.releases.length);
+
       data.releases.forEach(item => {
         const info = item.basic_information;
         todosLosDiscos.push({
           album: info.title,
-          artist: info.artists.map(a => a.name).join(', ').replace(/\(\d+\)/g, '').trim(),
+          artist: info.artists.map(a => a.name).join(', ').replace(/\s*\(\d+\)\s*/g, '').trim(),
           year: info.year ? info.year.toString() : '',
           genre: info.genres?.[0] || info.styles?.[0] || 'Otro',
           type: info.formats?.[0]?.name?.toLowerCase().includes('cd') ? 'cd' : 'vinyl',
           source: 'discogs'
         });
       });
-      if (data.pagination && pagina < data.pagination.pages) pagina++;
-      else hayMas = false;
-    }
+
+      pagina++;
+    } while (pagina <= totalPaginas);
+
+    console.log('Total discos traidos: '+todosLosDiscos.length);
     res.json({ discos: todosLosDiscos, total: todosLosDiscos.length });
   } catch(err) {
+    console.log('Error Discogs: '+err.message);
     res.status(500).json({ error: err.message });
   }
 });
