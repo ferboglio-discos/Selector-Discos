@@ -1042,8 +1042,11 @@ function renderLibrary() {
   if (!page.length) { list.innerHTML = '<div class="empty-state">Sin resultados.</div>'; document.getElementById('pager').innerHTML = ''; return; }
   list.innerHTML = page.map(d => {
     const i = state.library.indexOf(d);
-    return '<div class="library-row"><div class="disc-icon">'+(d.type==='vinyl'?'⚫':'💿')+'</div><div class="disc-info"><div class="disc-title">'+d.album+'</div><div class="disc-sub">'+d.artist+(d.year?' · '+d.year:'')+(d.genre?' · '+d.genre:'')+'</div></div><span class="disc-type">'+(d.type==='vinyl'?'Vinilo':'CD')+'</span><button class="del-btn" onclick="eliminarDisco('+i+')">✕</button></div>';
-  }).join('');
+    return '<div class="library-row" onclick="verDetalle('+i+')" style="cursor:pointer;">'+
+  '<div class="disc-icon" style="overflow:hidden;border-radius:50%;">'+
+    (d.imagen ? '<img src="'+d.imagen+'" style="width:36px;height:36px;object-fit:cover;border-radius:50%;" onerror="this.parentElement.innerHTML=\''+(d.type==='vinyl'?'⚫':'💿')+'\'"/>' : (d.type==='vinyl'?'⚫':'💿'))+
+  '</div>
+      }).join('');
   const pager = document.getElementById('pager');
   if (totalPages <= 1) { pager.innerHTML = ''; return; }
   pager.innerHTML = '<button onclick="changePage(-1)" '+(currentPage===0?'disabled':'')+'>← Anterior</button><span>Página '+(currentPage+1)+' de '+totalPages+'</span><button onclick="changePage(1)" '+(currentPage>=totalPages-1?'disabled':'')+'>Siguiente →</button>';
