@@ -1026,6 +1026,49 @@ function mostrarStats() {
     ).join('') : '<div class="empty-state">Sin datos</div>';
 }
   
+function verDetalle(i) {
+  const d = state.library[i];
+  if (!d) return;
+  const precio = d.precio_min ? 'USD '+d.precio_min : 'Sin datos';
+  const rating = d.rating ? '⭐ '+d.rating+'/5' : 'Sin rating';
+  const tracks = d.tracks && d.tracks.length ?
+    d.tracks.map(t => '<div style="display:flex;gap:8px;padding:4px 0;border-bottom:0.5px solid var(--border);font-size:12px;"><span style="color:var(--text3);min-width:24px;">'+t.posicion+'</span><span style="flex:1;">'+t.titulo+'</span><span style="color:var(--text3);">'+t.duracion+'</span></div>').join('') :
+    '<div style="font-size:13px;color:var(--text2)">Sin información de tracks</div>';
+
+  const modal = document.createElement('div');
+  modal.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:1000;display:flex;align-items:flex-end;';
+  modal.innerHTML =
+    '<div style="background:var(--bg);border-radius:16px 16px 0 0;padding:1.5rem;width:100%;max-height:80vh;overflow-y:auto;">'+
+      '<div style="display:flex;gap:14px;align-items:flex-start;margin-bottom:16px;">'+
+        (d.imagen ? '<img src="'+d.imagen+'" style="width:80px;height:80px;object-fit:cover;border-radius:8px;flex-shrink:0;"/>' : '<div style="width:80px;height:80px;background:var(--bg2);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:32px;">'+(d.type==='vinyl'?'⚫':'💿')+'</div>')+
+        '<div style="flex:1;min-width:0;">'+
+          '<div style="font-size:16px;font-weight:500;margin-bottom:4px;">'+d.album+'</div>'+
+          '<div style="font-size:14px;color:var(--text2);margin-bottom:8px;">'+d.artist+'</div>'+
+          '<div style="display:flex;gap:8px;flex-wrap:wrap;">'+
+            '<span class="badge badge-amber">'+d.year+'</span>'+
+            '<span class="badge badge-teal">'+d.genre+'</span>'+
+            (d.type==='vinyl' ? '<span class="badge badge-purple">Vinilo</span>' : '<span class="badge badge-blue">CD</span>')+
+          '</div>'+
+        '</div>'+
+      '</div>'+
+      '<div style="display:flex;gap:12px;margin-bottom:16px;">'+
+        '<div style="flex:1;background:var(--bg2);border-radius:8px;padding:10px;text-align:center;">'+
+          '<div style="font-size:11px;color:var(--text2);margin-bottom:4px;">VALORACIÓN</div>'+
+          '<div style="font-size:16px;font-weight:500;">'+rating+'</div>'+
+        '</div>'+
+        '<div style="flex:1;background:var(--bg2);border-radius:8px;padding:10px;text-align:center;">'+
+          '<div style="font-size:11px;color:var(--text2);margin-bottom:4px;">VALOR MÍNIMO</div>'+
+          '<div style="font-size:16px;font-weight:500;">'+precio+'</div>'+
+        '</div>'+
+      '</div>'+
+      '<div style="font-size:12px;font-weight:500;color:var(--text2);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:8px;">Tracklist</div>'+
+      tracks+
+      '<button onclick="this.parentElement.parentElement.remove()" style="width:100%;margin-top:16px;padding:12px;background:var(--bg2);border:none;border-radius:8px;font-size:14px;cursor:pointer;color:var(--text);">Cerrar</button>'+
+    '</div>';
+  modal.addEventListener('click', e => { if (e.target === modal) modal.remove(); });
+  document.body.appendChild(modal);
+}
+  
 function renderLibrary() {
   const filter = (document.getElementById('lib-filter')?.value || '').toLowerCase();
   const filtered = state.library.filter(d =>
