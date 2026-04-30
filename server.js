@@ -237,7 +237,9 @@ app.get('/api/discogs/coleccion', async (req, res) => {
           'User-Agent': 'SelectorDiscos/1.0'
         }}
       );
-      const data = await r.json();
+      const texto1 = await r.text();
+      if (!texto1 || texto1.trim() === '') throw new Error('Respuesta vacía de colección');
+      const data = JSON.parse(texto1);
       if (data.error) throw new Error(data.error);
       if (!data.releases || !data.releases.length) break;
       totalPaginas = data.pagination?.pages || 1;
@@ -245,17 +247,13 @@ app.get('/api/discogs/coleccion', async (req, res) => {
       for (const item of data.releases) {
         const info = item.basic_information;
         const releaseId = info.id;
-
         let rating = null;
         let precioMin = null;
-        let precioMax = null;
-        let precioMedio = null;
         let imagen = info.cover_image || info.thumb || null;
         let tracks = [];
 
-        // Detalle completo del release (tracks + imagen HD)
         try {
-          await sleep(1000);
+          await sleep(1200);
           const detR = await fetch(
             `https://api.discogs.com/releases/${releaseId}`,
             { headers: {
@@ -263,19 +261,16 @@ app.get('/api/discogs/coleccion', async (req, res) => {
               'User-Agent': 'SelectorDiscos/1.0'
             }}
           );
-          const detD = await detR.json();
+          const texto2 = await detR.text();
+          if (!texto2 || texto2.trim() === '') throw new Error('Respuesta vacía');
+          const detD = JSON.parse(texto2);
 
-          // Imagen HD
           if (detD.images && detD.images.length) {
             imagen = detD.images[0].uri || imagen;
           }
-
-          // Rating
           if (detD.community?.rating?.average) {
             rating = Math.round(detD.community.rating.average * 10) / 10;
           }
-
-          // Tracks
           if (detD.tracklist && detD.tracklist.length) {
             tracks = detD.tracklist
               .filter(t => t.type_ === 'track' && t.title)
@@ -285,15 +280,9 @@ app.get('/api/discogs/coleccion', async (req, res) => {
                 duracion: t.duration || ''
               }));
           }
-
-          // Precio
           if (detD.lowest_price) {
             precioMin = detD.lowest_price;
           }
-          if (detD.community?.have && detD.community?.want) {
-            // Guardamos have/want para estadísticas
-          }
-
         } catch(e) {
           console.log('Error detalle '+releaseId+': '+e.message);
         }
@@ -320,7 +309,6 @@ app.get('/api/discogs/coleccion', async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 });
-
 app.get('*', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
