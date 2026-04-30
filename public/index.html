@@ -275,6 +275,25 @@
     <button class="clear-btn" style="width:100%;padding:10px;margin-top:4px;" onclick="limpiarHistorial()">Borrar historial</button>
   </div>
 
+ <div class="section" id="sec-stats">
+  <div class="card">
+    <div class="card-title">Resumen</div>
+    <div id="stats-resumen"></div>
+  </div>
+  <div class="card">
+    <div class="card-title">Discos más recomendados</div>
+    <div id="stats-discos"></div>
+  </div>
+  <div class="card">
+    <div class="card-title">Géneros más escuchados</div>
+    <div id="stats-generos"></div>
+  </div>
+  <div class="card">
+    <div class="card-title">Artistas más recomendados</div>
+    <div id="stats-artistas"></div>
+  </div>
+</div>
+  
   <div class="section" id="sec-preferencias">
     <div class="card">
       <div class="card-title">Géneros favoritos <span style="font-weight:400;color:var(--text3);font-size:11px;text-transform:none;letter-spacing:0">(para búsqueda en Spotify)</span></div>
@@ -329,7 +348,8 @@ function showTab(tab) {
   document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
   document.querySelector('[onclick="showTab(\''+tab+'\')"]').classList.add('active');
   document.getElementById('sec-' + tab).classList.add('active');
-  if (tab === 'historial') cargarHistorial();
+if (tab === 'historial') cargarHistorial();
+if (tab === 'stats') mostrarStats();
 }
 
 function selectMood(btn, mood) {
@@ -923,6 +943,87 @@ async function sincronizarDiscogs() {
     btn.disabled = false;
     btn.innerHTML = '🔄 Sincronizar con Discogs';
   }
+}
+function mostrarStats() {
+  const hist = JSON.parse(localStorage.getItem('historial_recomendaciones') || '[]');
+  if (!hist.length) {
+    document.getElementById('stats-resumen').innerHTML = '<div class="empty-state">Todavía no hay estadísticas.<br/>Hacé algunas recomendaciones primero.</div>';
+    document.getElementById('stats-discos').innerHTML = '';
+    document.getElementById('stats-generos').innerHTML = '';
+    document.getElementById('stats-artistas').innerHTML = '';
+    return;
+  }
+
+  const todosLosDiscos = hist.flatMap(h => h.discos);
+  const totalSesiones = hist.length;
+  const totalRecomendaciones = todosLosDiscos.length;
+
+  // Resumen
+  document.getElementById('stats-resumen').innerHTML =
+    '<div class="info-row" style="display:flex;justify-content:space-around;padding:8px 0;">'+
+      '<div style="text-align:center"><div style="font-size:24px;font-weight:500;">'+totalSesiones+'</div><div style="font-size:12px;color:var(--text2)">Sesiones</div></div>'+
+      '<div style="text-align:center"><div style="font-size:24px;font-weight:500;">'+totalRecomendaciones+'</div><div style="font-size:12px;color:var(--text2)">Recomendaciones</div></div>'+
+      '<div style="text-align:center"><div style="font-size:24px;font-weight:500;">'+state.library.length+'</div><div style="font-size:12px;color:var(--text2)">Discos</div></div>'+
+    '</div>';
+
+  // Top discos
+  const contadorDiscos = {};
+  todosLosDiscos.forEach(d => {
+    const key = d.toLowerCase();
+    contadorDiscos[key] = (contadorDiscos[key] || 0) + 1;
+  });
+  const topDiscos = Object.entries(contadorDiscos).sort((a,b) => b[1]-a[1]).slice(0,5);
+  document.getElementById('stats-discos').innerHTML = topDiscos.length ?
+    topDiscos.map((d,i) =>
+      '<div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:0.5px solid var(--border);">'+
+        '<div style="font-size:18px;font-weight:500;color:var(--text3);min-width:24px;">'+(i+1)+'</div>'+
+        '<div style="flex:1;font-size:13px;">'+d[0]+'</div>'+
+        '<div style="font-size:12px;background:var(--purple-bg);color:var(--purple);padding:2px 8px;border-radius:20px;">'+d[1]+'x</div>'+
+      '</div>'
+    ).join('') : '<div class="empty-state">Sin datos</div>';
+
+  // Top géneros
+  const contadorGeneros = {};
+  hist.flatMap(h => h.discos).forEach(disco => {
+    const discoInfo = state.library.find(d => (d.album+' — '+d.artist).toLowerCase() === disco.toLowerCase());
+    if (discoInfo && discoInfo.genre) {
+      contadorGeneros[discoInfo.genre] = (contadorGeneros[discoInfo.genre] || 0) + 1;
+    }
+  });
+  const topGeneros = Object.entries(contadorGeneros).sort((a,b) => b[1]-a[1]).slice(0,5);
+  document.getElementById('stats-generos').innerHTML = topGeneros.length ?
+    topGeneros.map((g,i) => {
+      const pct = Math.round(g[1]/totalRecomendaciones*100);
+      return '<div style="padding:6px 0;">'+
+        '<div style="display:flex;justify-content:space-between;margin-bottom:4px;">'+
+          '<span style="font-size:13px;">'+g[0]+'</span>'+
+          '<span style="font-size:12px;color:var(--text2);">'+g[1]+' ('+pct+'%)</span>'+
+        '</div>'+
+        '<div style="height:6px;background:var(--bg2);border-radius:3px;">'+
+          '<div style="height:6px;background:#7f77dd;border-radius:3px;width:'+pct+'%"></div>'+
+        '</div>'+
+      '</div>';
+    }).join('') : '<div class="empty-state">Sin datos</div>';
+
+  // Top artistas
+  const contadorArtistas = {};
+  hist.flatMap(h => h.discos).forEach(disco => {
+    const partes = disco.split(' — ');
+    if (partes.length >= 2) {
+      const artista = partes[1].trim();
+      contadorArtistas[artista] = (contadorArtistas[artista] || 0) + 1;
+    }
+  });
+
+  const topArtistas = Object.entries(contadorArtistas).sort((a,b) => b[1]-a[1]).slice(0,5);
+  document.getElementById('stats-artistas').innerHTML = topArtistas.length ?
+    topArtistas.map((a,i) =>
+      '<div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:0.5px solid var(--border);">'+
+        '<div style="font-size:18px;font-weight:500;color:var(--text3);min-width:24px;">'+(i+1)+'</div>'+
+        '<div style="flex:1;font-size:13px;">'+a[0]+'</div>'+
+        '<div style="font-size:12px;background:var(--teal-bg);color:var(--teal);padding:2px 8px;border-radius:20px;">'+a[1]+'x</div>'+
+      '</div>'
+    ).join('') : '<div class="empty-state">Sin datos</div>';
 }
   
 function renderLibrary() {
