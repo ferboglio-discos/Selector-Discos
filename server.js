@@ -219,6 +219,11 @@ app.get('/api/valoraciones', (req, res) => {
 app.get('/api/discogs/coleccion', async (req, res) => {
   const usuario = 'ferboglio';
   const token = process.env.DISCOGS_TOKEN;
+
+  async function sleep(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+  }
+
   try {
     let pagina = 1;
     let todosLosDiscos = [];
@@ -245,40 +250,53 @@ app.get('/api/discogs/coleccion', async (req, res) => {
         let precioMin = null;
         let precioMax = null;
         let precioMedio = null;
+        let imagen = info.cover_image || info.thumb || null;
+        let tracks = [];
 
+        // Detalle completo del release (tracks + imagen HD)
         try {
-          const statsR = await fetch(
-            `https://api.discogs.com/releases/${releaseId}/stats`,
+          await sleep(1000);
+          const detR = await fetch(
+            `https://api.discogs.com/releases/${releaseId}`,
             { headers: {
               'Authorization': 'Discogs token=' + token,
               'User-Agent': 'SelectorDiscos/1.0'
             }}
           );
-          const statsD = await statsR.json();
-          if (statsD.community?.rating?.average) {
-            rating = Math.round(statsD.community.rating.average * 10) / 10;
-          }
-        } catch(e) {}
+          const detD = await detR.json();
 
-        try {
-          const precioR = await fetch(
-            `https://api.discogs.com/marketplace/price_suggestions/${releaseId}`,
-            { headers: {
-              'Authorization': 'Discogs token=' + token,
-              'User-Agent': 'SelectorDiscos/1.0'
-            }}
-          );
-          const precioD = await precioR.json();
-          const precios = Object.values(precioD);
-          if (precios.length) {
-            const valores = precios.map(p => p.value).filter(v => v > 0);
-            if (valores.length) {
-              precioMin = Math.min(...valores);
-              precioMax = Math.max(...valores);
-              precioMedio = Math.round(valores.reduce((a,b) => a+b, 0) / valores.length * 100) / 100;
-            }
+          // Imagen HD
+          if (detD.images && detD.images.length) {
+            imagen = detD.images[0].uri || imagen;
           }
-        } catch(e) {}
+
+          // Rating
+          if (detD.community?.rating?.average) {
+            rating = Math.round(detD.community.rating.average * 10) / 10;
+          }
+
+          // Tracks
+          if (detD.tracklist && detD.tracklist.length) {
+            tracks = detD.tracklist
+              .filter(t => t.type_ === 'track' && t.title)
+              .map(t => ({
+                posicion: t.position || '',
+                titulo: t.title,
+                duracion: t.duration || ''
+              }));
+          }
+
+          // Precio
+          if (detD.lowest_price) {
+            precioMin = detD.lowest_price;
+          }
+          if (detD.community?.have && detD.community?.want) {
+            // Guardamos have/want para estadísticas
+          }
+
+        } catch(e) {
+          console.log('Error detalle '+releaseId+': '+e.message);
+        }
 
         todosLosDiscos.push({
           album: info.title,
@@ -290,8 +308,8 @@ app.get('/api/discogs/coleccion', async (req, res) => {
           discogs_id: releaseId,
           rating: rating,
           precio_min: precioMin,
-          precio_max: precioMax,
-          precio_medio: precioMedio
+          imagen: imagen,
+          tracks: tracks
         });
       }
       pagina++;
