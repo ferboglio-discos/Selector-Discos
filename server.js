@@ -235,29 +235,70 @@ app.get('/api/discogs/coleccion', async (req, res) => {
       const data = await r.json();
       if (data.error) throw new Error(data.error);
       if (!data.releases || !data.releases.length) break;
-
       totalPaginas = data.pagination?.pages || 1;
-      console.log('Pagina '+pagina+' de '+totalPaginas+', discos en esta pagina: '+data.releases.length);
 
-      data.releases.forEach(item => {
+      for (const item of data.releases) {
         const info = item.basic_information;
+        const releaseId = info.id;
+
+        let rating = null;
+        let precioMin = null;
+        let precioMax = null;
+        let precioMedio = null;
+
+        try {
+          const statsR = await fetch(
+            `https://api.discogs.com/releases/${releaseId}/stats`,
+            { headers: {
+              'Authorization': 'Discogs token=' + token,
+              'User-Agent': 'SelectorDiscos/1.0'
+            }}
+          );
+          const statsD = await statsR.json();
+          if (statsD.community?.rating?.average) {
+            rating = Math.round(statsD.community.rating.average * 10) / 10;
+          }
+        } catch(e) {}
+
+        try {
+          const precioR = await fetch(
+            `https://api.discogs.com/marketplace/price_suggestions/${releaseId}`,
+            { headers: {
+              'Authorization': 'Discogs token=' + token,
+              'User-Agent': 'SelectorDiscos/1.0'
+            }}
+          );
+          const precioD = await precioR.json();
+          const precios = Object.values(precioD);
+          if (precios.length) {
+            const valores = precios.map(p => p.value).filter(v => v > 0);
+            if (valores.length) {
+              precioMin = Math.min(...valores);
+              precioMax = Math.max(...valores);
+              precioMedio = Math.round(valores.reduce((a,b) => a+b, 0) / valores.length * 100) / 100;
+            }
+          }
+        } catch(e) {}
+
         todosLosDiscos.push({
           album: info.title,
           artist: info.artists.map(a => a.name).join(', ').replace(/\s*\(\d+\)\s*/g, '').trim(),
           year: info.year ? info.year.toString() : '',
           genre: info.genres?.[0] || info.styles?.[0] || 'Otro',
           type: info.formats?.[0]?.name?.toLowerCase().includes('cd') ? 'cd' : 'vinyl',
-          source: 'discogs'
+          source: 'discogs',
+          discogs_id: releaseId,
+          rating: rating,
+          precio_min: precioMin,
+          precio_max: precioMax,
+          precio_medio: precioMedio
         });
-      });
-
+      }
       pagina++;
     } while (pagina <= totalPaginas);
 
-    console.log('Total discos traidos: '+todosLosDiscos.length);
     res.json({ discos: todosLosDiscos, total: todosLosDiscos.length });
   } catch(err) {
-    console.log('Error Discogs: '+err.message);
     res.status(500).json({ error: err.message });
   }
 });
