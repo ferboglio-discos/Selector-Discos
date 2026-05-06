@@ -901,42 +901,41 @@ async function sorprendeme() {
     btn.innerHTML = '🎲 Sorprendeme';
   }
 }
-  
-async function sincronizarDiscogs() {
+ async function sincronizarDiscogs() {
   const btn = document.getElementById('btn-discogs');
   const result = document.getElementById('discogs-result');
   btn.disabled = true;
-  btn.innerHTML = '<span class="spinner"></span>Sincronizando con Discogs...';
+  btn.innerHTML = '<span class="spinner"></span>Sincronizando con Discogs... (puede tardar 2-3 min)';
   result.innerHTML = '';
   try {
     const res = await fetch('/api/discogs/coleccion');
     const data = await res.json();
     if (data.error) throw new Error(data.error);
-    let agregados = 0, actualizados = 0;
+
+    // Eliminar todos los discos de Discogs anteriores
+    state.library = state.library.filter(d => d.source !== 'discogs');
+
+    // Agregar todos los de Discogs frescos con todos sus datos
     data.discos.forEach(disco => {
-      const idx = state.library.findIndex(d =>
-        d.album.toLowerCase() === disco.album.toLowerCase() &&
-        d.artist.toLowerCase() === disco.artist.toLowerCase() &&
-        d.source === 'discogs'
-      );
-      if (idx >= 0) {
-        state.library[idx] = disco;
-        actualizados++;
-      } else {
-        const existe = state.library.some(d =>
-          d.album.toLowerCase() === disco.album.toLowerCase() &&
-          d.artist.toLowerCase() === disco.artist.toLowerCase()
-        );
-        if (!existe) {
-          state.library.push(disco);
-          agregados++;
-        }
-      }
+      state.library.push({
+        album: disco.album,
+        artist: disco.artist,
+        year: disco.year || '',
+        genre: disco.genre || 'Otro',
+        type: disco.type || 'vinyl',
+        source: 'discogs',
+        discogs_id: disco.discogs_id || null,
+        rating: disco.rating || null,
+        precio_min: disco.precio_min || null,
+        imagen: disco.imagen || null,
+        tracks: disco.tracks || []
+      });
     });
+
     saveLibrary();
     renderLibrary();
     renderGeneros();
-    result.innerHTML = '<div class="import-result success">✓ Sincronización completa. '+agregados+' discos nuevos, '+actualizados+' actualizados. Total en biblioteca: '+state.library.length+'</div>';
+    result.innerHTML = '<div class="import-result success">✓ '+data.total+' discos sincronizados desde Discogs. Total biblioteca: '+state.library.length+'</div>';
   } catch(e) {
     result.innerHTML = '<div class="import-result error">Error: '+e.message+'</div>';
   } finally {
@@ -944,6 +943,7 @@ async function sincronizarDiscogs() {
     btn.innerHTML = '🔄 Sincronizar con Discogs';
   }
 }
+ 
 function mostrarStats() {
   const hist = JSON.parse(localStorage.getItem('historial_recomendaciones') || '[]');
   if (!hist.length) {
