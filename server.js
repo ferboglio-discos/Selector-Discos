@@ -216,77 +216,30 @@ app.get('/api/valoraciones', (req, res) => {
   res.json({ valoraciones });
 });
 
+// Endpoint rápido — solo datos básicos
 app.get('/api/discogs/coleccion', async (req, res) => {
   const usuario = 'ferboglio';
   const token = process.env.DISCOGS_TOKEN;
-
-  async function sleep(ms) {
-    return new Promise(resolve => setTimeout(resolve, ms));
-  }
-
   try {
     let pagina = 1;
     let todosLosDiscos = [];
     let totalPaginas = 1;
-
     do {
       const r = await fetch(
-        `https://api.discogs.com/users/${usuario}/collection/folders/0/releases?per_page=100&page=${pagina}&sort=added&sort_order=desc`,
+        `https://api.discogs.com/users/${usuario}/collection/folders/0/releases?per_page=100&page=${pagina}`,
         { headers: {
           'Authorization': 'Discogs token=' + token,
           'User-Agent': 'SelectorDiscos/1.0'
         }}
       );
-      const texto1 = await r.text();
-      if (!texto1 || texto1.trim() === '') throw new Error('Respuesta vacía de colección');
-      const data = JSON.parse(texto1);
+      const texto = await r.text();
+      if (!texto || texto.trim() === '') break;
+      const data = JSON.parse(texto);
       if (data.error) throw new Error(data.error);
       if (!data.releases || !data.releases.length) break;
       totalPaginas = data.pagination?.pages || 1;
-
-      for (const item of data.releases) {
+      data.releases.forEach(item => {
         const info = item.basic_information;
-        const releaseId = info.id;
-        let rating = null;
-        let precioMin = null;
-        let imagen = info.cover_image || info.thumb || null;
-        let tracks = [];
-
-        try {
-          await sleep(1200);
-          const detR = await fetch(
-            `https://api.discogs.com/releases/${releaseId}`,
-            { headers: {
-              'Authorization': 'Discogs token=' + token,
-              'User-Agent': 'SelectorDiscos/1.0'
-            }}
-          );
-          const texto2 = await detR.text();
-          if (!texto2 || texto2.trim() === '') throw new Error('Respuesta vacía');
-          const detD = JSON.parse(texto2);
-
-          if (detD.images && detD.images.length) {
-            imagen = detD.images[0].uri || imagen;
-          }
-          if (detD.community?.rating?.average) {
-            rating = Math.round(detD.community.rating.average * 10) / 10;
-          }
-          if (detD.tracklist && detD.tracklist.length) {
-            tracks = detD.tracklist
-              .filter(t => t.type_ === 'track' && t.title)
-              .map(t => ({
-                posicion: t.position || '',
-                titulo: t.title,
-                duracion: t.duration || ''
-              }));
-          }
-          if (detD.lowest_price) {
-            precioMin = detD.lowest_price;
-          }
-        } catch(e) {
-          console.log('Error detalle '+releaseId+': '+e.message);
-        }
-
         todosLosDiscos.push({
           album: info.title,
           artist: info.artists.map(a => a.name).join(', ').replace(/\s*\(\d+\)\s*/g, '').trim(),
@@ -294,21 +247,50 @@ app.get('/api/discogs/coleccion', async (req, res) => {
           genre: info.genres?.[0] || info.styles?.[0] || 'Otro',
           type: info.formats?.[0]?.name?.toLowerCase().includes('cd') ? 'cd' : 'vinyl',
           source: 'discogs',
-          discogs_id: releaseId,
-          rating: rating,
-          precio_min: precioMin,
-          imagen: imagen,
-          tracks: tracks
+          discogs_id: info.id,
+          imagen: info.cover_image || info.thumb || null,
+          rating: null,
+          precio_min: null,
+          tracks: []
         });
-      }
+      });
       pagina++;
     } while (pagina <= totalPaginas);
-
     res.json({ discos: todosLosDiscos, total: todosLosDiscos.length });
   } catch(err) {
     res.status(500).json({ error: err.message });
   }
 });
+
+// Endpoint de detalle — imagen HD, tracks y rating de UN disco
+app.get('/api/discogs/detalle/:id', async (req, res) => {
+  const token = process.env.DISCOGS_TOKEN;
+  const releaseId = req.params.id;
+  try {
+    const r = await fetch(
+      `https://api.discogs.com/releases/${releaseId}`,
+      { headers: {
+        'Authorization': 'Discogs token=' + token,
+        'User-Agent': 'SelectorDiscos/1.0'
+      }}
+    );
+    const texto = await r.text();
+    if (!texto || texto.trim() === '') return res.json({});
+    const data = JSON.parse(texto);
+    const imagen = data.images?.[0]?.uri || null;
+    const rating = data.community?.rating?.average
+      ? Math.round(data.community.rating.average * 10) / 10
+      : null;
+    const precio_min = data.lowest_price || null;
+    const tracks = (data.tracklist || [])
+      .filter(t => t.type_ === 'track' && t.title)
+      .map(t => ({ posicion: t.position || '', titulo: t.title, duracion: t.duration || '' }));
+    res.json({ imagen, rating, precio_min, tracks });
+  } catch(err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 app.get('*', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
