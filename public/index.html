@@ -905,37 +905,46 @@ async function sorprendeme() {
   const btn = document.getElementById('btn-discogs');
   const result = document.getElementById('discogs-result');
   btn.disabled = true;
-  btn.innerHTML = '<span class="spinner"></span>Sincronizando con Discogs... (puede tardar 2-3 min)';
+  btn.innerHTML = '<span class="spinner"></span>Sincronizando...';
   result.innerHTML = '';
   try {
     const res = await fetch('/api/discogs/coleccion');
     const data = await res.json();
     if (data.error) throw new Error(data.error);
 
-    // Eliminar todos los discos de Discogs anteriores
+    // Reemplazar discos de Discogs con datos básicos
     state.library = state.library.filter(d => d.source !== 'discogs');
-
-    // Agregar todos los de Discogs frescos con todos sus datos
-    data.discos.forEach(disco => {
-      state.library.push({
-        album: disco.album,
-        artist: disco.artist,
-        year: disco.year || '',
-        genre: disco.genre || 'Otro',
-        type: disco.type || 'vinyl',
-        source: 'discogs',
-        discogs_id: disco.discogs_id || null,
-        rating: disco.rating || null,
-        precio_min: disco.precio_min || null,
-        imagen: disco.imagen || null,
-        tracks: disco.tracks || []
-      });
-    });
-
+    data.discos.forEach(disco => state.library.push(disco));
     saveLibrary();
     renderLibrary();
     renderGeneros();
-    result.innerHTML = '<div class="import-result success">✓ '+data.total+' discos sincronizados desde Discogs. Total biblioteca: '+state.library.length+'</div>';
+    result.innerHTML = '<div class="import-result success">✓ '+data.total+' discos sincronizados. Cargando detalles en segundo plano...</div>';
+
+    // Enriquecer en segundo plano de a uno
+    let enriquecidos = 0;
+    for (const disco of data.discos) {
+      if (!disco.discogs_id) continue;
+      try {
+        await new Promise(r => setTimeout(r, 1200));
+        const detRes = await fetch('/api/discogs/detalle/'+disco.discogs_id);
+        const det = await detRes.json();
+        const idx = state.library.findIndex(d => d.discogs_id === disco.discogs_id);
+        if (idx >= 0) {
+          if (det.imagen) state.library[idx].imagen = det.imagen;
+          if (det.rating) state.library[idx].rating = det.rating;
+          if (det.precio_min) state.library[idx].precio_min = det.precio_min;
+          if (det.tracks && det.tracks.length) state.library[idx].tracks = det.tracks;
+          enriquecidos++;
+          if (enriquecidos % 10 === 0) {
+            saveLibrary();
+            result.innerHTML = '<div class="import-result success">✓ Enriqueciendo... '+enriquecidos+'/'+data.total+' discos procesados.</div>';
+          }
+        }
+      } catch(e) {}
+    }
+    saveLibrary();
+    renderLibrary();
+    result.innerHTML = '<div class="import-result success">✓ Sincronización completa. '+data.total+' discos con imagen, rating y tracklist.</div>';
   } catch(e) {
     result.innerHTML = '<div class="import-result error">Error: '+e.message+'</div>';
   } finally {
