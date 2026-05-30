@@ -1092,17 +1092,20 @@ function verDetalle(i) {
     d.tracks.map(t => '<div style="display:flex;gap:8px;padding:4px 0;border-bottom:0.5px solid var(--border);font-size:12px;"><span style="color:var(--text3);min-width:24px;">'+t.posicion+'</span><span style="flex:1;">'+t.titulo+'</span><span style="color:var(--text3);">'+t.duracion+'</span></div>').join('') :
     '<div style="font-size:13px;color:var(--text2)">Sin información de tracks</div>';
 
+  const resenaKey = 'resena_'+i+'_'+(d.discogs_id||d.album.replace(/\s/g,''));
+  const resenaGuardada = localStorage.getItem(resenaKey);
+
   const modal = document.createElement('div');
   modal.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:1000;display:flex;align-items:flex-end;';
   modal.innerHTML =
-    '<div style="background:var(--bg);border-radius:16px 16px 0 0;padding:1.5rem;width:100%;max-height:80vh;overflow-y:auto;">'+
+    '<div style="background:var(--bg);border-radius:16px 16px 0 0;padding:1.5rem;width:100%;max-height:85vh;overflow-y:auto;">'+
       '<div style="display:flex;gap:14px;align-items:flex-start;margin-bottom:16px;">'+
         (d.imagen ? '<img src="'+d.imagen+'" style="width:80px;height:80px;object-fit:cover;border-radius:8px;flex-shrink:0;"/>' : '<div style="width:80px;height:80px;background:var(--bg2);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:32px;">'+(d.type==='vinyl'?'⚫':'💿')+'</div>')+
         '<div style="flex:1;min-width:0;">'+
           '<div style="font-size:16px;font-weight:500;margin-bottom:4px;">'+d.album+'</div>'+
           '<div style="font-size:14px;color:var(--text2);margin-bottom:8px;">'+d.artist+'</div>'+
           '<div style="display:flex;gap:8px;flex-wrap:wrap;">'+
-            '<span class="badge badge-amber">'+d.year+'</span>'+
+            (d.year?'<span class="badge badge-amber">'+d.year+'</span>':'')+
             '<span class="badge badge-teal">'+d.genre+'</span>'+
             (d.type==='vinyl' ? '<span class="badge badge-purple">Vinilo</span>' : '<span class="badge badge-blue">CD</span>')+
           '</div>'+
@@ -1120,11 +1123,85 @@ function verDetalle(i) {
       '</div>'+
       '<div style="font-size:12px;font-weight:500;color:var(--text2);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:8px;">Tracklist</div>'+
       tracks+
-      '<button onclick="this.parentElement.parentElement.remove()" style="width:100%;margin-top:16px;padding:12px;background:var(--bg2);border:none;border-radius:8px;font-size:14px;cursor:pointer;color:var(--text);">Cerrar</button>'+
+      '<div style="margin-top:16px;" id="resena-container-'+i+'">'+
+        (resenaGuardada ?
+          '<div style="background:var(--bg2);border-radius:8px;padding:1rem;">'+
+            '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">'+
+              '<div style="font-size:11px;font-weight:500;color:var(--text2);text-transform:uppercase;letter-spacing:0.05em;">📖 Reseña completa</div>'+
+              '<button onclick="generarResena('+i+',\''+resenaKey+'\',true)" style="font-size:11px;padding:4px 10px;background:none;border:0.5px solid var(--border);border-radius:6px;cursor:pointer;color:var(--text2);">🔄 Actualizar</button>'+
+            '</div>'+
+            '<div style="font-size:13px;line-height:1.8;color:var(--text);">'+resenaGuardada+'</div>'+
+          '</div>' :
+          '<button onclick="generarResena('+i+',\''+resenaKey+'\',false)" style="width:100%;padding:12px;background:var(--purple-bg);border:0.5px solid #7f77dd;border-radius:8px;font-size:14px;font-weight:500;cursor:pointer;color:var(--purple);">📖 Ver reseña completa</button>'
+        )+
+      '</div>'+
+      '<button onclick="this.parentElement.parentElement.remove()" style="width:100%;margin-top:10px;padding:12px;background:var(--bg2);border:none;border-radius:8px;font-size:14px;cursor:pointer;color:var(--text);">Cerrar</button>'+
     '</div>';
   modal.addEventListener('click', e => { if (e.target === modal) modal.remove(); });
   document.body.appendChild(modal);
 }
+
+async function generarResena(i, resenaKey, forzar) {
+  const d = state.library[i];
+  if (!d) return;
+  const container = document.getElementById('resena-container-'+i);
+  container.innerHTML = '<div style="text-align:center;padding:1rem;color:var(--text2);"><span class="spinner"></span> Generando reseña...</div>';
+
+  const tracklist = d.tracks && d.tracks.length
+    ? d.tracks.map(t => t.posicion+'. '+t.titulo+(t.duracion?' ('+t.duracion+')':'')).join(', ')
+    : 'No disponible';
+
+  const prompt =
+    'Sos un crítico musical experto con profundo conocimiento de la historia de la música.\n\n'+
+    'Escribí una reseña completa y detallada del siguiente disco:\n\n'+
+    'Álbum: "'+d.album+'"\n'+
+    'Artista: '+d.artist+'\n'+
+    (d.year?'Año: '+d.year+'\n':'')+
+    'Género: '+d.genre+'\n'+
+    'Formato: '+(d.type==='vinyl'?'Vinilo':'CD')+'\n'+
+    (tracklist !== 'No disponible' ? 'Tracklist: '+tracklist+'\n' : '')+
+    '\nLa reseña debe incluir:\n'+
+    '1. **Contexto histórico** — época, qué pasaba en la música y el mundo cuando salió\n'+
+    '2. **Músicos y producción** — integrantes, productor, estudio de grabación\n'+
+    '3. **El sonido** — descripción del estilo, instrumentación, producción\n'+
+    '4. **Canciones destacadas** — las 2-3 más importantes y por qué\n'+
+    '5. **Opinión de la crítica** — cómo fue recibido en su época y su legado hoy\n'+
+    '6. **Por qué vale la pena escucharlo** — qué lo hace especial y único\n\n'+
+    (forzar ? 'Generá una perspectiva diferente a la anterior, enfocate en aspectos distintos.\n\n' : '')+
+    'Escribí en español, con pasión y conocimiento. Máximo 400 palabras.';
+
+  try {
+    const res = await fetch('/api/recomendar', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ prompt })
+    });
+    const data = await res.json();
+    if (data.error) throw new Error(data.error);
+
+    const html = data.resultado
+      .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+      .replace(/\n\n/g, '</p><p>')
+      .replace(/\n/g, '<br/>');
+
+    // Guardar en localStorage
+    try { localStorage.setItem(resenaKey, '<p>'+html+'</p>'); } catch(e) {}
+
+    container.innerHTML =
+      '<div style="background:var(--bg2);border-radius:8px;padding:1rem;">'+
+        '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">'+
+          '<div style="font-size:11px;font-weight:500;color:var(--text2);text-transform:uppercase;letter-spacing:0.05em;">📖 Reseña completa</div>'+
+          '<button onclick="generarResena('+i+',\''+resenaKey+'\',true)" style="font-size:11px;padding:4px 10px;background:none;border:0.5px solid var(--border);border-radius:6px;cursor:pointer;color:var(--text2);">🔄 Actualizar</button>'+
+        '</div>'+
+        '<div style="font-size:13px;line-height:1.8;color:var(--text);"><p>'+html+'</p></div>'+
+      '</div>';
+  } catch(e) {
+    container.innerHTML =
+      '<div style="font-size:13px;color:var(--red);padding:8px;">Error al generar la reseña: '+e.message+'</div>'+
+      '<button onclick="generarResena('+i+',\''+resenaKey+'\',false)" style="width:100%;margin-top:8px;padding:10px;background:var(--purple-bg);border:0.5px solid #7f77dd;border-radius:8px;font-size:13px;cursor:pointer;color:var(--purple);">Reintentar</button>';
+  }
+}
+
   
 function renderLibrary() {
   const filter = (document.getElementById('lib-filter')?.value || '').toLowerCase();
