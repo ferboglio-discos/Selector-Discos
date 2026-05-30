@@ -290,6 +290,22 @@ app.get('/api/discogs/detalle/:id', async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 });
+app.get('/api/test-discogs', async (req, res) => {
+  const token = process.env.DISCOGS_TOKEN;
+  try {
+    const r = await fetch(
+      'https://api.discogs.com/users/ferboglio/collection/folders/0/releases?per_page=5&page=1',
+      { headers: {
+        'Authorization': 'Discogs token=' + token,
+        'User-Agent': 'SelectorDiscos/1.0'
+      }}
+    );
+    const texto = await r.text();
+    res.json({ status: r.status, primeros200: texto.substring(0, 200) });
+  } catch(err) {
+    res.json({ error: err.message });
+  }
+});
 
 app.get('*', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
