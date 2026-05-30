@@ -907,44 +907,91 @@ async function sorprendeme() {
   btn.disabled = true;
   btn.innerHTML = '<span class="spinner"></span>Sincronizando...';
   result.innerHTML = '';
+  
+  const TOKEN = 'ORkLGIpewdiBaDmpzwQtoghAqyQCvCtAhGhGkmgH';
+  const USUARIO = 'ferboglio';
+  
   try {
-    const res = await fetch('/api/discogs/coleccion');
-    const data = await res.json();
-    if (data.error) throw new Error(data.error);
+    let pagina = 1;
+    let todosLosDiscos = [];
+    let totalPaginas = 1;
 
-    // Reemplazar discos de Discogs con datos básicos
+    do {
+      const r = await fetch(
+        'https://api.discogs.com/users/'+USUARIO+'/collection/folders/0/releases?per_page=100&page='+pagina,
+        { headers: {
+          'Authorization': 'Discogs token=' + TOKEN,
+          'User-Agent': 'SelectorDiscos/1.0'
+        }}
+      );
+      const data = await r.json();
+      if (data.error) throw new Error(data.error);
+      if (!data.releases || !data.releases.length) break;
+      totalPaginas = data.pagination?.pages || 1;
+
+      data.releases.forEach(item => {
+        const info = item.basic_information;
+        todosLosDiscos.push({
+          album: info.title,
+          artist: info.artists.map(a => a.name).join(', ').replace(/\s*\(\d+\)\s*/g, '').trim(),
+          year: info.year ? info.year.toString() : '',
+          genre: info.genres?.[0] || info.styles?.[0] || 'Otro',
+          type: info.formats?.[0]?.name?.toLowerCase().includes('cd') ? 'cd' : 'vinyl',
+          source: 'discogs',
+          discogs_id: info.id,
+          imagen: info.cover_image || info.thumb || null,
+          rating: null,
+          precio_min: null,
+          tracks: []
+        });
+      });
+      pagina++;
+    } while (pagina <= totalPaginas);
+
+    // Reemplazar discos de Discogs
     state.library = state.library.filter(d => d.source !== 'discogs');
-    data.discos.forEach(disco => state.library.push(disco));
+    todosLosDiscos.forEach(disco => state.library.push(disco));
     saveLibrary();
     renderLibrary();
     renderGeneros();
-    result.innerHTML = '<div class="import-result success">✓ '+data.total+' discos sincronizados. Cargando detalles en segundo plano...</div>';
+    result.innerHTML = '<div class="import-result success">✓ '+todosLosDiscos.length+' discos sincronizados. Total biblioteca: '+state.library.length+'</div>';
 
-    // Enriquecer en segundo plano de a uno
+    // Enriquecer con detalles en segundo plano
     let enriquecidos = 0;
-    for (const disco of data.discos) {
+    for (const disco of todosLosDiscos) {
       if (!disco.discogs_id) continue;
       try {
         await new Promise(r => setTimeout(r, 1200));
-        const detRes = await fetch('/api/discogs/detalle/'+disco.discogs_id);
-        const det = await detRes.json();
+        const detR = await fetch(
+          'https://api.discogs.com/releases/'+disco.discogs_id,
+          { headers: {
+            'Authorization': 'Discogs token=' + TOKEN,
+            'User-Agent': 'SelectorDiscos/1.0'
+          }}
+        );
+        const det = await detR.json();
         const idx = state.library.findIndex(d => d.discogs_id === disco.discogs_id);
         if (idx >= 0) {
-          if (det.imagen) state.library[idx].imagen = det.imagen;
-          if (det.rating) state.library[idx].rating = det.rating;
-          if (det.precio_min) state.library[idx].precio_min = det.precio_min;
-          if (det.tracks && det.tracks.length) state.library[idx].tracks = det.tracks;
+          if (det.images?.[0]?.uri) state.library[idx].imagen = det.images[0].uri;
+          if (det.community?.rating?.average) state.library[idx].rating = Math.round(det.community.rating.average * 10) / 10;
+          if (det.lowest_price) state.library[idx].precio_min = det.lowest_price;
+          if (det.tracklist?.length) {
+            state.library[idx].tracks = det.tracklist
+              .filter(t => t.type_ === 'track' && t.title)
+              .map(t => ({ posicion: t.position || '', titulo: t.title, duracion: t.duration || '' }));
+          }
           enriquecidos++;
           if (enriquecidos % 10 === 0) {
             saveLibrary();
-            result.innerHTML = '<div class="import-result success">✓ Enriqueciendo... '+enriquecidos+'/'+data.total+' discos procesados.</div>';
+            result.innerHTML = '<div class="import-result success">✓ Enriqueciendo... '+enriquecidos+'/'+todosLosDiscos.length+' discos.</div>';
           }
         }
       } catch(e) {}
     }
     saveLibrary();
     renderLibrary();
-    result.innerHTML = '<div class="import-result success">✓ Sincronización completa. '+data.total+' discos con imagen, rating y tracklist.</div>';
+    result.innerHTML = '<div class="import-result success">✓ Sincronización completa. '+todosLosDiscos.length+' discos con imagen, rating y tracklist.</div>';
+
   } catch(e) {
     result.innerHTML = '<div class="import-result error">Error: '+e.message+'</div>';
   } finally {
@@ -952,6 +999,7 @@ async function sorprendeme() {
     btn.innerHTML = '🔄 Sincronizar con Discogs';
   }
 }
+
  
 function mostrarStats() {
   const hist = JSON.parse(localStorage.getItem('historial_recomendaciones') || '[]');
