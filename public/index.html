@@ -1202,7 +1202,8 @@ async function generarResena(i, resenaKey, forzar) {
   }
 }
 
-  
+let artistaExpandido = null;
+
 function renderLibrary() {
   const filter = (document.getElementById('lib-filter')?.value || '').toLowerCase();
   const filtered = state.library.filter(d =>
@@ -1210,31 +1211,71 @@ function renderLibrary() {
     d.artist.toLowerCase().includes(filter) ||
     (d.genre||'').toLowerCase().includes(filter)
   );
-  const totalPages = Math.ceil(filtered.length / PAGE_SIZE) || 1;
-  if (currentPage >= totalPages) currentPage = totalPages - 1;
-  const page = filtered.slice(currentPage * PAGE_SIZE, (currentPage+1) * PAGE_SIZE);
+
   document.getElementById('lib-count').textContent = '('+state.library.length+' discos)';
   const list = document.getElementById('library-list');
-  if (!state.library.length) { list.innerHTML = '<div class="empty-state">No hay discos.<br/>Importá un Excel o agregá manualmente.</div>'; document.getElementById('pager').innerHTML = ''; return; }
-  if (!page.length) { list.innerHTML = '<div class="empty-state">Sin resultados.</div>'; document.getElementById('pager').innerHTML = ''; return; }
-  list.innerHTML = page.map(d => {
-    const i = state.library.indexOf(d);
-    return '<div class="library-row" onclick="verDetalle('+i+')" style="cursor:pointer;">'+
-      '<div class="disc-icon" style="overflow:hidden;border-radius:50%;">'+
-        (d.imagen ? '<img src="'+d.imagen+'" style="width:36px;height:36px;object-fit:cover;border-radius:50%;" onerror="this.parentElement.innerHTML=\''+(d.type==='vinyl'?'⚫':'💿')+'\'"/>' : (d.type==='vinyl'?'⚫':'💿'))+
+  document.getElementById('pager').innerHTML = '';
+
+  if (!state.library.length) {
+    list.innerHTML = '<div class="empty-state">No hay discos.<br/>Importá un Excel o agregá manualmente.</div>';
+    return;
+  }
+  if (!filtered.length) {
+    list.innerHTML = '<div class="empty-state">Sin resultados.</div>';
+    return;
+  }
+
+  // Agrupar por artista
+  const porArtista = {};
+  filtered.forEach(d => {
+    const key = d.artist || 'Sin artista';
+    if (!porArtista[key]) porArtista[key] = [];
+    porArtista[key].push(d);
+  });
+
+  // Ordenar artistas alfabéticamente
+  const artistas = Object.keys(porArtista).sort((a,b) => a.localeCompare(b));
+
+  list.innerHTML = artistas.map(artista => {
+    const discos = porArtista[artista];
+    const expandido = artistaExpandido === artista;
+    const imagen = discos.find(d => d.imagen)?.imagen || null;
+    const discosHtml = expandido ? discos.map(d => {
+      const i = state.library.indexOf(d);
+      return '<div class="library-row" onclick="verDetalle('+i+')" style="cursor:pointer;padding-left:48px;">'+
+        '<div class="disc-icon" style="overflow:hidden;border-radius:50%;width:32px;height:32px;min-width:32px;">'+
+          (d.imagen ? '<img src="'+d.imagen+'" style="width:32px;height:32px;object-fit:cover;border-radius:50%;" onerror="this.parentElement.innerHTML=\''+(d.type==='vinyl'?'⚫':'💿')+'\'"/>' : (d.type==='vinyl'?'⚫':'💿'))+
+        '</div>'+
+        '<div class="disc-info">'+
+          '<div class="disc-title">'+d.album+'</div>'+
+          '<div class="disc-sub">'+(d.year?d.year+' · ':'')+d.genre+(d.rating?' · ⭐'+d.rating:'')+'</div>'+
+        '</div>'+
+        '<span class="disc-type">'+(d.type==='vinyl'?'Vinilo':'CD')+'</span>'+
+        '<button class="del-btn" onclick="event.stopPropagation();eliminarDisco('+i+')" style="flex-shrink:0;">✕</button>'+
+      '</div>';
+    }).join('') : '';
+
+    return '<div>'+
+      '<div onclick="toggleArtista(\''+artista.replace(/'/g,"\\'")+'\')" style="display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:0.5px solid var(--border);cursor:pointer;">'+
+        '<div style="width:40px;height:40px;border-radius:50%;background:var(--bg2);border:0.5px solid var(--border);display:flex;align-items:center;justify-content:center;flex-shrink:0;overflow:hidden;">'+
+          (imagen ? '<img src="'+imagen+'" style="width:40px;height:40px;object-fit:cover;border-radius:50%;"/>' : '<span style="font-size:18px;">🎵</span>')+
+        '</div>'+
+        '<div style="flex:1;min-width:0;">'+
+          '<div style="font-size:14px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">'+artista+'</div>'+
+          '<div style="font-size:12px;color:var(--text2);">'+discos.length+' disco'+(discos.length>1?'s':'')+'</div>'+
+        '</div>'+
+        '<span style="font-size:14px;color:var(--text3);transition:transform 0.2s;">'+(expandido?'▾':'▸')+'</span>'+
       '</div>'+
-      '<div class="disc-info">'+
-        '<div class="disc-title">'+d.album+'</div>'+
-        '<div class="disc-sub">'+d.artist+(d.year?' · '+d.year:'')+(d.genre?' · '+d.genre:'')+(d.rating?' · ⭐'+d.rating:'')+(d.precio_min?' · USD'+d.precio_min:'')+'</div>'+
-      '</div>'+
-      '<span class="disc-type">'+(d.type==='vinyl'?'Vinilo':'CD')+'</span>'+
-      '<button class="del-btn" onclick="event.stopPropagation();eliminarDisco('+i+')">✕</button>'+
+      (expandido ? '<div style="background:var(--bg2);border-radius:var(--radius);margin:4px 0 8px 0;">'+discosHtml+'</div>' : '')+
     '</div>';
   }).join('');
-  const pager = document.getElementById('pager');
-  if (totalPages <= 1) { pager.innerHTML = ''; return; }
-  pager.innerHTML = '<button onclick="changePage(-1)" '+(currentPage===0?'disabled':'')+'>← Anterior</button><span>Página '+(currentPage+1)+' de '+totalPages+'</span><button onclick="changePage(1)" '+(currentPage>=totalPages-1?'disabled':'')+'>Siguiente →</button>';
 }
+
+function toggleArtista(artista) {
+  artistaExpandido = artistaExpandido === artista ? null : artista;
+  renderLibrary();
+}
+  
 
 function changePage(dir) { currentPage += dir; renderLibrary(); }
 
