@@ -1260,11 +1260,84 @@ function renderLibrary() {
         '<div style="width:40px;height:40px;border-radius:50%;background:var(--bg2);border:0.5px solid var(--border);display:flex;align-items:center;justify-content:center;flex-shrink:0;overflow:hidden;">'+
           (imagen ? '<img src="'+imagen+'" style="width:40px;height:40px;object-fit:cover;border-radius:50%;"/>' : '<span style="font-size:18px;">🎵</span>')+
         '</div>'+
-        '<div style="flex:1;min-width:0;">'+
-          '<div style="font-size:14px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">'+artista+'</div>'+
-          '<div style="font-size:12px;color:var(--text2);">'+discos.length+' disco'+(discos.length>1?'s':'')+'</div>'+
+        function verResenaArtista(artista, discografia) {
+  const resenaKey = 'resena_artista_'+artista.replace(/\s/g,'_').replace(/[^a-zA-Z0-9_]/g,'');
+  const resenaGuardada = localStorage.getItem(resenaKey);
+
+  const modal = document.createElement('div');
+  modal.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:1000;display:flex;align-items:flex-end;';
+  modal.innerHTML =
+    '<div style="background:var(--bg);border-radius:16px 16px 0 0;padding:1.5rem;width:100%;max-height:85vh;overflow-y:auto;">'+
+      '<div style="margin-bottom:16px;">'+
+        '<div style="font-size:18px;font-weight:500;margin-bottom:4px;">'+artista+'</div>'+
+        '<div style="font-size:13px;color:var(--text2);">'+discografia.length+' disco'+(discografia.length>1?'s':'')+' en tu biblioteca</div>'+
+      '</div>'+
+      '<div id="resena-artista-container">'+
+        (resenaGuardada ?
+          '<div style="background:var(--bg2);border-radius:8px;padding:1rem;">'+
+            '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">'+
+              '<div style="font-size:11px;font-weight:500;color:var(--text2);text-transform:uppercase;letter-spacing:0.05em;">📖 Reseña del artista</div>'+
+              '<button onclick="generarResenaArtista(\''+artista.replace(/'/g,"\\'")+'\','+JSON.stringify(discografia).replace(/'/g,"\\'")+',\''+resenaKey+'\',true)" style="font-size:11px;padding:4px 10px;background:none;border:0.5px solid var(--border);border-radius:6px;cursor:pointer;color:var(--text2);">🔄 Actualizar</button>'+
+            '</div>'+
+            '<div style="font-size:13px;line-height:1.8;color:var(--text);">'+resenaGuardada+'</div>'+
+          '</div>' :
+          '<button onclick="generarResenaArtista(\''+artista.replace(/'/g,"\\'")+'\','+JSON.stringify(discografia).replace(/'/g,"\\'")+',\''+resenaKey+'\',false)" style="width:100%;padding:12px;background:var(--purple-bg);border:0.5px solid #7f77dd;border-radius:8px;font-size:14px;font-weight:500;cursor:pointer;color:var(--purple);">📖 Generar reseña del artista</button>'
+        )+
+      '</div>'+
+      '<button onclick="this.parentElement.parentElement.remove()" style="width:100%;margin-top:10px;padding:12px;background:var(--bg2);border:none;border-radius:8px;font-size:14px;cursor:pointer;color:var(--text);">Cerrar</button>'+
+    '</div>';
+  modal.addEventListener('click', e => { if (e.target === modal) modal.remove(); });
+  document.body.appendChild(modal);
+}
+
+async function generarResenaArtista(artista, discografia, resenaKey, forzar) {
+  const container = document.getElementById('resena-artista-container');
+  container.innerHTML = '<div style="text-align:center;padding:1rem;color:var(--text2);"><span class="spinner"></span> Generando reseña...</div>';
+
+  const prompt =
+    'Sos un crítico musical experto con profundo conocimiento de la historia de la música.\n\n'+
+    'Escribí una reseña completa sobre el artista o banda "'+artista+'".\n\n'+
+    'Discos de este artista en la biblioteca del usuario: '+discografia.join(', ')+'\n\n'+
+    'La reseña debe incluir:\n'+
+    '1. **Historia y formación** — orígenes, cómo se formó, integrantes principales\n'+
+    '2. **Evolución musical** — cómo fue cambiando su sonido a lo largo del tiempo\n'+
+    '3. **Estilo y características** — qué los hace únicos, su sonido distintivo\n'+
+    '4. **Discografía destacada** — sus álbumes más importantes y por qué\n'+
+    '5. **Legado e influencia** — qué aportaron a la música y a quiénes influyeron\n'+
+    '6. **Dato curioso** — algo interesante o poco conocido sobre el artista\n\n'+
+    (forzar ? 'Generá una perspectiva diferente a la anterior, enfocate en aspectos distintos.\n\n' : '')+
+    'Escribí en español, con pasión y conocimiento. Máximo 400 palabras. NO hables de discos específicos en detalle — eso es para la reseña individual de cada disco.';
+
+  try {
+    const res = await fetch('/api/recomendar', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ prompt })
+    });
+    const data = await res.json();
+    if (data.error) throw new Error(data.error);
+
+    const html = data.resultado
+      .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+      .replace(/\n\n/g, '</p><p>')
+      .replace(/\n/g, '<br/>');
+
+    try { localStorage.setItem(resenaKey, '<p>'+html+'</p>'); } catch(e) {}
+
+    container.innerHTML =
+      '<div style="background:var(--bg2);border-radius:8px;padding:1rem;">'+
+        '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">'+
+          '<div style="font-size:11px;font-weight:500;color:var(--text2);text-transform:uppercase;letter-spacing:0.05em;">📖 Reseña del artista</div>'+
+          '<button onclick="generarResenaArtista(\''+artista.replace(/'/g,"\\'")+'\','+JSON.stringify(discografia).replace(/'/g,"\\'")+',\''+resenaKey+'\',true)" style="font-size:11px;padding:4px 10px;background:none;border:0.5px solid var(--border);border-radius:6px;cursor:pointer;color:var(--text2);">🔄 Actualizar</button>'+
         '</div>'+
-        '<span style="font-size:14px;color:var(--text3);transition:transform 0.2s;">'+(expandido?'▾':'▸')+'</span>'+
+        '<div style="font-size:13px;line-height:1.8;color:var(--text);"><p>'+html+'</p></div>'+
+      '</div>';
+  } catch(e) {
+    container.innerHTML =
+      '<div style="font-size:13px;color:var(--red);padding:8px;">Error: '+e.message+'</div>'+
+      '<button onclick="generarResenaArtista(\''+artista.replace(/'/g,"\\'")+'\','+JSON.stringify(discografia).replace(/'/g,"\\'")+',\''+resenaKey+'\',false)" style="width:100%;margin-top:8px;padding:10px;background:var(--purple-bg);border:0.5px solid #7f77dd;border-radius:8px;font-size:13px;cursor:pointer;color:var(--purple);">Reintentar</button>';
+  }
+}
       '</div>'+
       (expandido ? '<div style="background:var(--bg2);border-radius:var(--radius);margin:4px 0 8px 0;">'+discosHtml+'</div>' : '')+
     '</div>';
