@@ -1342,6 +1342,7 @@ function renderLibrary() {
     if (!porArtista[key]) porArtista[key] = [];
     porArtista[key].push(d);
   });
+  _artistasCache = artistas;
   const artistas = Object.keys(porArtista).sort((a,b) => a.localeCompare(b));
 
   list.innerHTML = artistas.map(artista => {
