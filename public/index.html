@@ -1151,7 +1151,13 @@ function verResenaArtista(artista, discografia) {
           '<button onclick="generarResenaArtista(window._artistaResena,window._discografiaResena,\''+resenaKey+'\',false)" style="width:100%;padding:12px;background:var(--purple-bg);border:0.5px solid #7f77dd;border-radius:8px;font-size:14px;font-weight:500;cursor:pointer;color:var(--purple);">📖 Generar reseña del artista</button>'
         )+
       '</div>'+
-      '<button onclick="this.parentElement.parentElement.remove()" style="width:100%;margin-top:10px;padding:12px;background:var(--bg2);border:none;border-radius:8px;font-size:14px;cursor:pointer;color:var(--text);">Cerrar</button>'+
+    (d.type==='vinyl' ?
+  '<div style="margin-top:10px;" id="waxwing-container-'+i+'">'+
+    '<button onclick="generarConfigWaxwing('+i+')" style="width:100%;padding:12px;background:#2c2c2a;border:none;border-radius:8px;font-size:14px;font-weight:500;cursor:pointer;color:#f1efe8;">🎛️ Config Waxwing</button>'+
+  '</div>' : ''
+)+
+  
+    '<button onclick="this.parentElement.parentElement.remove()" style="width:100%;margin-top:10px;padding:12px;background:var(--bg2);border:none;border-radius:8px;font-size:14px;cursor:pointer;color:var(--text);">Cerrar</button>'+
     '</div>';
   window._artistaResena = artista;
   window._discografiaResena = discografia;
