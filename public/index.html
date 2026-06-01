@@ -1359,8 +1359,8 @@ function renderLibrary() {
           '<div class="disc-sub">'+(d.year?d.year+' · ':'')+d.genre+(d.rating?' · ⭐'+d.rating:'')+'</div>'+
         '</div>'+
         '<span class="disc-type">'+(d.type==='vinyl'?'Vinilo':'CD')+'</span>'+
-        '<button class="del-btn" onclick="event.stopPropagation();eliminarDisco('+i+')" style="flex-shrink:0;">✕</button>'+
-      '</div>';
+        '<button onclick="event.stopPropagation();verResenaArtistaByIndex(\''+artistas.indexOf(artista)+'\')" style="font-size:11px;padding:4px 8px;background:var(--purple-bg);border:0.5px solid #7f77dd;border-radius:6px;cursor:pointer;color:var(--purple);white-space:nowrap;margin-right:8px;">📖 Artista</button>'+
+        '</div>'+
     }).join('') : '';
 
     const artistaEsc = artista.replace(/\\/g,'\\\\').replace(/'/g,"\\'");
