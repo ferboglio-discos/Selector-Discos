@@ -1203,6 +1203,125 @@ async function generarResenaArtista(artista, discografia, resenaKey, forzar) {
     container.innerHTML = '<div style="font-size:13px;color:var(--red);padding:8px;">Error: '+e.message+'</div>';
   }
 }
+async function generarConfigWaxwing(i) {
+  const d = state.library[i];
+  if (!d) return;
+  const container = document.getElementById('waxwing-container-'+i);
+  const waxwingKey = 'waxwing_'+i+'_'+(d.discogs_id||d.album.replace(/\s/g,''));
+  const guardado = localStorage.getItem(waxwingKey);
+
+  if (guardado) {
+    container.innerHTML = crearPanelWaxwing(guardado, i, waxwingKey);
+    return;
+  }
+
+  container.innerHTML = '<div style="text-align:center;padding:1rem;color:var(--text2);"><span class="spinner"></span> Calculando configuración óptima...</div>';
+
+  const prompt =
+    'Sos un experto en reproducción de vinilos y en el preamplificador phono Waxwing de Parks Audio.\n\n'+
+    'Generá la configuración óptima del Waxwing para el siguiente disco:\n\n'+
+    'Álbum: "'+d.album+'"\n'+
+    'Artista: '+d.artist+'\n'+
+    (d.year?'Año: '+d.year+'\n':'')+
+    'Género: '+d.genre+'\n'+
+    (d.tracks&&d.tracks.length?'Tracklist: '+d.tracks.map(t=>t.titulo).join(', ')+'\n':'')+
+    '\nConsiderá: el género musical, la década de grabación/prensado, el tipo de masterización típica de esa época, '+
+    'si es mono o stereo, si puede tener ruido de superficie, saturación de graves, brillos excesivos, etc.\n\n'+
+    'Respondé SOLO con este formato JSON exacto, sin texto adicional, sin explicaciones fuera del JSON:\n\n'+
+    '{\n'+
+    '  "WARMTH": 0,\n'+
+    '  "AIR": 0,\n'+
+    '  "TREBLE": 0,\n'+
+    '  "BASS": 0,\n'+
+    '  "BASS_BOOST": "Off",\n'+
+    '  "HI": "20kHz",\n'+
+    '  "LO": "25Hz",\n'+
+    '  "MODE": "Stereo",\n'+
+    '  "MAGIC": "On",\n'+
+    '  "FX": "Off",\n'+
+    '  "DERUMBLE": "Off",\n'+
+    '  "EQ": "Phono",\n'+
+    '  "razon": "Explicación breve de 2-3 oraciones justificando la configuración"\n'+
+    '}\n\n'+
+    'Rangos válidos:\n'+
+    '- WARMTH, AIR, TREBLE, BASS: enteros de -6 a +6\n'+
+    '- BASS_BOOST: "Off" o "On"\n'+
+    '- HI: uno de estos valores: "5kHz","7kHz","8kHz","9kHz","10kHz","11kHz","12kHz","13kHz","15kHz","20kHz","30kHz","48kHz"\n'+
+    '- LO: uno de estos valores: "25Hz","30Hz","35Hz","40Hz","45Hz","50Hz","70Hz","100Hz"\n'+
+    '- MODE: "Stereo", "Mono", "Super Mono"\n'+
+    '- MAGIC: "Off" o "On"\n'+
+    '- FX: "Off", "Tube 2H", "Tape 3H"\n'+
+    '- DERUMBLE: "Off" o "On"\n'+
+    '- EQ: "Phono", "Teldec LP", "London LP", "AES LP", "NAB LP", "Columbia LP", "CCIR 78", "Columbia 78"\n';
+
+  try {
+    const res = await fetch('/api/recomendar', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ prompt })
+    });
+    const data = await res.json();
+    if (data.error) throw new Error(data.error);
+
+    const texto = data.resultado.replace(/```json|```/g,'').trim();
+    const config = JSON.parse(texto);
+    const configStr = JSON.stringify(config);
+    try { localStorage.setItem(waxwingKey, configStr); } catch(e) {}
+    container.innerHTML = crearPanelWaxwing(configStr, i, waxwingKey);
+  } catch(e) {
+    container.innerHTML =
+      '<div style="font-size:13px;color:var(--red);padding:8px;">Error: '+e.message+'</div>'+
+      '<button onclick="generarConfigWaxwing('+i+')" style="width:100%;margin-top:8px;padding:10px;background:#2c2c2a;border:none;border-radius:8px;font-size:13px;cursor:pointer;color:#f1efe8;">Reintentar</button>';
+  }
+}
+
+function crearPanelWaxwing(configStr, i, waxwingKey) {
+  let config;
+  try { config = JSON.parse(configStr); } catch(e) { return '<div style="color:var(--red);font-size:13px;">Error al leer configuración</div>'; }
+
+  const param = (label, valor, color) =>
+    '<div style="display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:0.5px solid var(--border);">'+
+      '<span style="font-size:12px;color:var(--text2);font-weight:500;">'+label+'</span>'+
+      '<span style="font-size:13px;font-weight:600;color:'+(color||'var(--text)')+';">'+valor+'</span>'+
+    '</div>';
+
+  const colorNum = v => {
+    const n = parseInt(v);
+    if (n > 0) return '#1d9e75';
+    if (n < 0) return '#d85a30';
+    return 'var(--text)';
+  };
+
+  const fmt = v => (parseInt(v) > 0 ? '+'+v : ''+v);
+
+  return '<div style="background:var(--bg2);border-radius:8px;padding:1rem;margin-top:4px;">'+
+    '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">'+
+      '<div style="font-size:11px;font-weight:500;color:var(--text2);text-transform:uppercase;letter-spacing:0.05em;">🎛️ Config Waxwing</div>'+
+      '<button onclick="localStorage.removeItem(\''+waxwingKey+'\');generarConfigWaxwing('+i+')" style="font-size:11px;padding:4px 10px;background:none;border:0.5px solid var(--border);border-radius:6px;cursor:pointer;color:var(--text2);">🔄 Recalcular</button>'+
+    '</div>'+
+    '<div style="display:grid;grid-template-columns:1fr 1fr;gap:0 16px;">'+
+      '<div>'+
+        param('WARMTH', fmt(config.WARMTH), colorNum(config.WARMTH))+
+        param('AIR', fmt(config.AIR), colorNum(config.AIR))+
+        param('TREBLE', fmt(config.TREBLE), colorNum(config.TREBLE))+
+        param('BASS', fmt(config.BASS), colorNum(config.BASS))+
+        param('BASS BOOST', config.BASS_BOOST, config.BASS_BOOST==='On'?'#1d9e75':'var(--text)')+
+        param('FX', config.FX)+
+      '</div>'+
+      '<div>'+
+        param('HI', config.HI)+
+        param('LO', config.LO)+
+        param('MODE', config.MODE)+
+        param('MAGIC', config.MAGIC, config.MAGIC==='On'?'#1d9e75':'var(--text)')+
+        param('DERUMBLE', config.DERUMBLE, config.DERUMBLE==='On'?'#1d9e75':'var(--text)')+
+        param('EQ', config.EQ)+
+      '</div>'+
+    '</div>'+
+    (config.razon ?
+      '<div style="margin-top:10px;padding:8px;background:var(--bg);border-radius:6px;font-size:12px;color:var(--text2);line-height:1.6;">'+config.razon+'</div>'
+    : '')+
+  '</div>';
+}
 
 function renderLibrary() {
   const filter = (document.getElementById('lib-filter')?.value || '').toLowerCase();
