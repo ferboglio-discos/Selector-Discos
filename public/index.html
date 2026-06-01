@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -168,33 +167,21 @@
     <div class="card">
       <div class="card-title">Fuente de recomendación</div>
       <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;">
-        <button class="fuente-btn" onclick="selectFuente(this,'biblioteca')" id="fuente-biblioteca" style="padding:10px 6px;border:0.5px solid #7f77dd;border-radius:var(--radius);background:var(--purple-bg);color:var(--purple);font-size:12px;cursor:pointer;text-align:center;line-height:1.4;">
-          <span style="font-size:18px;display:block;margin-bottom:3px">📀</span>Mi biblioteca
-        </button>
-        <button class="fuente-btn" onclick="selectFuente(this,'spotify')" id="fuente-spotify" style="padding:10px 6px;border:0.5px solid var(--border);border-radius:var(--radius);background:var(--bg2);color:var(--text);font-size:12px;cursor:pointer;text-align:center;line-height:1.4;">
-          <span style="font-size:18px;display:block;margin-bottom:3px">🎵</span>Spotify
-        </button>
-        <button class="fuente-btn" onclick="selectFuente(this,'ambos')" id="fuente-ambos" style="padding:10px 6px;border:0.5px solid var(--border);border-radius:var(--radius);background:var(--bg2);color:var(--text);font-size:12px;cursor:pointer;text-align:center;line-height:1.4;">
-          <span style="font-size:18px;display:block;margin-bottom:3px">🔀</span>Ambos
-        </button>
+        <button class="fuente-btn" onclick="selectFuente(this,'biblioteca')" id="fuente-biblioteca" style="padding:10px 6px;border:0.5px solid #7f77dd;border-radius:var(--radius);background:var(--purple-bg);color:var(--purple);font-size:12px;cursor:pointer;text-align:center;line-height:1.4;"><span style="font-size:18px;display:block;margin-bottom:3px">📀</span>Mi biblioteca</button>
+        <button class="fuente-btn" onclick="selectFuente(this,'spotify')" id="fuente-spotify" style="padding:10px 6px;border:0.5px solid var(--border);border-radius:var(--radius);background:var(--bg2);color:var(--text);font-size:12px;cursor:pointer;text-align:center;line-height:1.4;"><span style="font-size:18px;display:block;margin-bottom:3px">🎵</span>Spotify</button>
+        <button class="fuente-btn" onclick="selectFuente(this,'ambos')" id="fuente-ambos" style="padding:10px 6px;border:0.5px solid var(--border);border-radius:var(--radius);background:var(--bg2);color:var(--text);font-size:12px;cursor:pointer;text-align:center;line-height:1.4;"><span style="font-size:18px;display:block;margin-bottom:3px">🔀</span>Ambos</button>
       </div>
     </div>
     <div class="card">
       <div class="card-title">Género musical <span style="font-weight:400;color:var(--text3);font-size:11px;text-transform:none;letter-spacing:0">(opcional)</span></div>
-      <div class="genre-grid" id="genre-grid">
-        <div class="empty-state" style="padding:0.5rem;grid-column:1/-1;font-size:12px">Cargando géneros...</div>
-      </div>
+      <div class="genre-grid" id="genre-grid"><div class="empty-state" style="padding:0.5rem;grid-column:1/-1;font-size:12px">Cargando géneros...</div></div>
     </div>
     <div class="card">
       <div class="card-title">Ocasión</div>
       <select id="ocasion">
         <option value="">Sin especificar</option>
-        <option>Solo en casa</option>
-        <option>Con amigos</option>
-        <option>Cena romántica</option>
-        <option>Trabajo o estudio</option>
-        <option>Fiesta</option>
-        <option>Meditación</option>
+        <option>Solo en casa</option><option>Con amigos</option><option>Cena romántica</option>
+        <option>Trabajo o estudio</option><option>Fiesta</option><option>Meditación</option>
       </select>
     </div>
     <div class="card">
@@ -269,27 +256,15 @@
   </div>
 
   <div class="section" id="sec-stats">
-    <div class="card">
-      <div class="card-title">Resumen</div>
-      <div id="stats-resumen"></div>
-    </div>
-    <div class="card">
-      <div class="card-title">Discos más recomendados</div>
-      <div id="stats-discos"></div>
-    </div>
-    <div class="card">
-      <div class="card-title">Géneros más escuchados</div>
-      <div id="stats-generos"></div>
-    </div>
-    <div class="card">
-      <div class="card-title">Artistas más recomendados</div>
-      <div id="stats-artistas"></div>
-    </div>
+    <div class="card"><div class="card-title">Resumen</div><div id="stats-resumen"></div></div>
+    <div class="card"><div class="card-title">Discos más recomendados</div><div id="stats-discos"></div></div>
+    <div class="card"><div class="card-title">Géneros más escuchados</div><div id="stats-generos"></div></div>
+    <div class="card"><div class="card-title">Artistas más recomendados</div><div id="stats-artistas"></div></div>
   </div>
 
   <div class="section" id="sec-preferencias">
     <div class="card">
-      <div class="card-title">Géneros favoritos <span style="font-weight:400;color:var(--text3);font-size:11px;text-transform:none;letter-spacing:0">(para búsqueda en Spotify)</span></div>
+      <div class="card-title">Géneros favoritos</div>
       <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;">
         <button class="pref-btn" onclick="togglePref('generos','Rock')">Rock</button>
         <button class="pref-btn" onclick="togglePref('generos','Rock progresivo')">Rock progresivo</button>
@@ -327,9 +302,9 @@
 </div>
 
 <script>
-const PAGE_SIZE = 15;
 let currentPage = 0;
 let artistaExpandido = null;
+let _artistasCache = [];
 let state = {
   library: JSON.parse(localStorage.getItem('vinyl_library') || '[]'),
   mood: null, genero: null, weather: null, fuente: 'biblioteca'
@@ -342,7 +317,7 @@ function showTab(tab) {
   document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
   document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
   document.querySelector('[onclick="showTab(\''+tab+'\')"]').classList.add('active');
-  document.getElementById('sec-' + tab).classList.add('active');
+  document.getElementById('sec-'+tab).classList.add('active');
   if (tab === 'historial') cargarHistorial();
   if (tab === 'stats') mostrarStats();
 }
@@ -354,23 +329,15 @@ function selectMood(btn, mood) {
 
 function selectFuente(btn, fuente) {
   document.querySelectorAll('.fuente-btn').forEach(b => {
-    b.style.background = 'var(--bg2)';
-    b.style.borderColor = 'var(--border)';
-    b.style.color = 'var(--text)';
+    b.style.background='var(--bg2)'; b.style.borderColor='var(--border)'; b.style.color='var(--text)';
   });
-  btn.style.background = 'var(--purple-bg)';
-  btn.style.borderColor = '#7f77dd';
-  btn.style.color = 'var(--purple)';
+  btn.style.background='var(--purple-bg)'; btn.style.borderColor='#7f77dd'; btn.style.color='var(--purple)';
   state.fuente = fuente;
 }
 
 function selectGenero(btn, genero) {
-  if (state.genero === genero) {
-    btn.classList.remove('selected'); state.genero = null;
-  } else {
-    document.querySelectorAll('.genre-btn').forEach(b => b.classList.remove('selected'));
-    btn.classList.add('selected'); state.genero = genero;
-  }
+  if (state.genero === genero) { btn.classList.remove('selected'); state.genero = null; }
+  else { document.querySelectorAll('.genre-btn').forEach(b => b.classList.remove('selected')); btn.classList.add('selected'); state.genero = genero; }
   updateContexto();
 }
 
@@ -415,14 +382,10 @@ async function fetchClima() {
     if (data.error) throw new Error(data.error);
     state.weather = data;
     document.getElementById('clima-auto').innerHTML =
-      '<div class="weather-auto">'+
-        '<span style="font-size:36px">'+data.emoji+'</span>'+
-        '<div class="weather-info">'+
-          '<div class="weather-temp-big">'+data.temp+'°C</div>'+
-          '<div class="weather-desc">'+data.desc+'</div>'+
-          '<div class="weather-city">'+data.city+' · Viento '+data.wind+' km/h</div>'+
-        '</div>'+
-      '</div>';
+      '<div class="weather-auto"><span style="font-size:36px">'+data.emoji+'</span>'+
+      '<div class="weather-info"><div class="weather-temp-big">'+data.temp+'°C</div>'+
+      '<div class="weather-desc">'+data.desc+'</div>'+
+      '<div class="weather-city">'+data.city+' · Viento '+data.wind+' km/h</div></div></div>';
     updateContexto();
   } catch(e) {
     document.getElementById('clima-auto').innerHTML = '<div class="empty-state" style="padding:0.5rem;color:var(--red)">No se pudo obtener el clima.</div>';
@@ -432,25 +395,15 @@ async function fetchClima() {
 function renderGeneros() {
   const generos = [...new Set(state.library.map(d => d.genre).filter(Boolean))].sort();
   const grid = document.getElementById('genre-grid');
-  if (!generos.length) {
-    grid.innerHTML = '<div class="empty-state" style="padding:0.5rem;grid-column:1/-1;font-size:12px">Cargá discos para ver los géneros.</div>';
-    return;
-  }
-  grid.innerHTML = generos.map(g =>
-    '<button class="genre-btn'+(state.genero===g?' selected':'')+'" onclick="selectGenero(this,\''+g.replace(/'/g,"\\'")+'\')">'+g+'</button>'
-  ).join('');
+  if (!generos.length) { grid.innerHTML = '<div class="empty-state" style="padding:0.5rem;grid-column:1/-1;font-size:12px">Cargá discos para ver los géneros.</div>'; return; }
+  grid.innerHTML = generos.map(g => '<button class="genre-btn'+(state.genero===g?' selected':'')+'" onclick="selectGenero(this,\''+g.replace(/'/g,"\\'")+'\')">'+g+'</button>').join('');
 }
 
 function cargarHistorial() {
   const hist = JSON.parse(localStorage.getItem('historial_recomendaciones') || '[]');
   const el = document.getElementById('historial-list');
   if (!hist.length) { el.innerHTML = '<div class="empty-state">Todavía no hay historial.</div>'; return; }
-  el.innerHTML = hist.map(h =>
-    '<div class="hist-row">'+
-      '<div class="hist-date">'+h.fecha+'</div>'+
-      '<div class="hist-discos">'+h.discos.join('<br/>')+'</div>'+
-    '</div>'
-  ).join('');
+  el.innerHTML = hist.map(h => '<div class="hist-row"><div class="hist-date">'+h.fecha+'</div><div class="hist-discos">'+h.discos.join('<br/>')+'</div></div>').join('');
 }
 
 function limpiarHistorial() {
@@ -462,8 +415,7 @@ function limpiarHistorial() {
 function guardarHistorialLocal(discos) {
   try {
     const hist = JSON.parse(localStorage.getItem('historial_recomendaciones') || '[]');
-    const fecha = new Date().toLocaleDateString('es-AR');
-    hist.unshift({ fecha, discos });
+    hist.unshift({ fecha: new Date().toLocaleDateString('es-AR'), discos });
     if (hist.length > 30) hist.splice(30);
     localStorage.setItem('historial_recomendaciones', JSON.stringify(hist));
   } catch(e) {}
@@ -472,7 +424,7 @@ function guardarHistorialLocal(discos) {
 function getHistorialTexto() {
   const hist = JSON.parse(localStorage.getItem('historial_recomendaciones') || '[]');
   if (!hist.length) return 'Sin historial previo.';
-  return '⚠️ HISTORIAL — REGLA ESTRICTA: Los siguientes discos YA fueron recomendados recientemente. ESTÁ PROHIBIDO recomendarlos de nuevo salvo que sea absolutamente el único disco adecuado. Buscá siempre discos diferentes:\n' +
+  return '⚠️ HISTORIAL — REGLA ESTRICTA: Los siguientes discos YA fueron recomendados. ESTÁ PROHIBIDO repetirlos:\n' +
     hist.slice(0,8).map(h => '- '+h.discos.join(', ')).join('\n');
 }
 
@@ -483,15 +435,8 @@ function parseRecomendaciones(texto) {
 }
 
 function extraerEfemeride(texto) {
-  const patrones = [
-    /📅 EFEMÉRIDE:([\s\S]*?)(?=---|\*\*\d+\.|\*\*")/,
-    /📅 EFEMÉRIDE:([\s\S]*?)(?=\n\n\*\*)/,
-    /📅 EFEMÉRIDE:([\s\S]+)/,
-  ];
-  for (const p of patrones) {
-    const match = texto.match(p);
-    if (match && match[1].trim().length > 5) return match[1].trim();
-  }
+  const patrones = [/📅 EFEMÉRIDE:([\s\S]*?)(?=---|\*\*\d+\.|\*\*")/, /📅 EFEMÉRIDE:([\s\S]*?)(?=\n\n\*\*)/, /📅 EFEMÉRIDE:([\s\S]+)/];
+  for (const p of patrones) { const m = texto.match(p); if (m && m[1].trim().length > 5) return m[1].trim(); }
   return null;
 }
 
@@ -510,8 +455,7 @@ function extraerAlbumArtista(bloque) {
 }
 
 async function buscarConInfo(i) {
-  const info = window._recInfo[i];
-  if (!info) return;
+  const info = window._recInfo[i]; if (!info) return;
   const btn = document.getElementById('spotify-btn-'+i);
   if (btn) { btn.disabled = true; btn.textContent = 'Buscando...'; }
   try {
@@ -520,39 +464,18 @@ async function buscarConInfo(i) {
     const container = document.getElementById('spotify-container-'+i);
     if (!container) return;
     if (data.found) {
-      if (data.image) {
-        const coverEl = document.getElementById('rec-cover-'+i);
-        if (coverEl) coverEl.innerHTML = '<img src="'+data.image+'" class="rec-cover" alt="cover"/>';
-      }
-      container.innerHTML =
-        '<div class="spotify-box">'+
-          '<div class="spotify-box-title">✓ Encontrado en Spotify</div>'+
-          '<div class="spotify-box-album">'+data.name+'</div>'+
-          '<div class="spotify-box-artist">'+data.artist+'</div>'+
-          '<a href="'+data.url+'" target="_blank" class="spotify-link">Abrir en Spotify</a>'+
-        '</div>';
-    } else {
-      container.innerHTML = '<div class="spotify-not-found">No encontrado en Spotify</div>';
-    }
-  } catch(e) {
-    const container = document.getElementById('spotify-container-'+i);
-    if (container) container.innerHTML = '<div class="spotify-not-found">Error al buscar</div>';
-  }
+      if (data.image) { const c = document.getElementById('rec-cover-'+i); if(c) c.innerHTML='<img src="'+data.image+'" class="rec-cover" alt="cover"/>'; }
+      container.innerHTML = '<div class="spotify-box"><div class="spotify-box-title">✓ Encontrado en Spotify</div><div class="spotify-box-album">'+data.name+'</div><div class="spotify-box-artist">'+data.artist+'</div><a href="'+data.url+'" target="_blank" class="spotify-link">Abrir en Spotify</a></div>';
+    } else { container.innerHTML = '<div class="spotify-not-found">No encontrado en Spotify</div>'; }
+  } catch(e) { const c = document.getElementById('spotify-container-'+i); if(c) c.innerHTML='<div class="spotify-not-found">Error al buscar</div>'; }
 }
 
 async function valorar(i, album, artist, valor) {
   try {
-    await fetch('/api/valoraciones/agregar', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ album, artist, valor })
-    });
+    await fetch('/api/valoraciones/agregar', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({album,artist,valor}) });
     const div = document.getElementById('valoracion-'+i);
     if (div) div.innerHTML = '<span style="font-size:13px;color:var(--green);">✓ Valoración guardada '+valor+'</span>';
-  } catch(e) {
-    const div = document.getElementById('valoracion-'+i);
-    if (div) div.innerHTML = '<span style="font-size:12px;color:var(--red);">Error al guardar</span>';
-  }
+  } catch(e) { const div=document.getElementById('valoracion-'+i); if(div) div.innerHTML='<span style="font-size:12px;color:var(--red);">Error</span>'; }
 }
 
 function renderResultados(texto, resultDiv) {
@@ -565,29 +488,19 @@ function renderResultados(texto, resultDiv) {
   if (efemeride) {
     headerHtml = '<div style="background:var(--amber-bg);border:0.5px solid #ba7517;border-radius:var(--radius-lg);padding:1rem 1.25rem;margin-bottom:12px;">'+
       '<div style="font-size:11px;font-weight:500;color:var(--amber);margin-bottom:6px;text-transform:uppercase;letter-spacing:0.05em">📅 Efeméride del día</div>'+
-      '<div style="font-size:13px;color:var(--amber);line-height:1.7;">'+efemeride+'</div>'+
-    '</div>';
+      '<div style="font-size:13px;color:var(--amber);line-height:1.7;">'+efemeride+'</div></div>';
   }
   resultDiv.innerHTML = headerHtml + bloques.map((bloque, i) => {
     const info = extraerAlbumArtista(bloque);
     window._recInfo[i] = info;
     if (info) discosRecomendados.push(info.album+(info.artist?' — '+info.artist:''));
-    const html = bloque
-      .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
-      .replace(/\n\n/g, '</p><p>')
-      .replace(/\n/g, '<br/>');
+    const html = bloque.replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>').replace(/\n\n/g,'</p><p>').replace(/\n/g,'<br/>');
     return '<div class="rec-card" style="border-left:4px solid '+colors[i]+'">'+
       '<div style="display:flex;gap:14px;align-items:flex-start;margin-bottom:12px">'+
         '<div id="rec-cover-'+i+'" class="rec-cover-placeholder">⚫</div>'+
-        '<div style="flex:1;min-width:0">'+
-          '<div style="font-size:11px;color:var(--text3);margin-bottom:3px">Recomendación '+(i+1)+' de '+bloques.length+'</div>'+
-          '<div style="font-size:14px;line-height:1.6"><p>'+html+'</p></div>'+
-        '</div>'+
-      '</div>'+
-      '<div id="spotify-container-'+i+'">'+
-        (info ? '<button id="spotify-btn-'+i+'" class="spotify-search-btn" onclick="buscarConInfo('+i+')">🎵 Buscar en Spotify</button>' : '')+
-      '</div>'+
-    '</div>';
+        '<div style="flex:1;min-width:0"><div style="font-size:11px;color:var(--text3);margin-bottom:3px">Recomendación '+(i+1)+' de '+bloques.length+'</div>'+
+        '<div style="font-size:14px;line-height:1.6"><p>'+html+'</p></div></div></div>'+
+      '<div id="spotify-container-'+i+'">'+(info?'<button id="spotify-btn-'+i+'" class="spotify-search-btn" onclick="buscarConInfo('+i+')">🎵 Buscar en Spotify</button>':'')+'</div></div>';
   }).join('');
   if (discosRecomendados.length) guardarHistorialLocal(discosRecomendados);
 }
@@ -599,847 +512,419 @@ function renderResultadosSpotify(texto, spotifyResultados, resultDiv) {
   resultDiv.innerHTML = bloques.map((bloque, i) => {
     const info = extraerAlbumArtista(bloque);
     window._recInfo[i] = info;
-    const spotMatch = info && spotifyResultados ? spotifyResultados.find(s =>
-      s && s.album && (
-        s.album.toLowerCase().includes((info.album||'').toLowerCase().substring(0,10)) ||
-        (info.album||'').toLowerCase().includes(s.album.toLowerCase().substring(0,10))
-      )
-    ) : null;
-    const html = bloque
-      .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
-      .replace(/\n\n/g, '</p><p>')
-      .replace(/\n/g, '<br/>');
-    const albumNombre = spotMatch ? spotMatch.album : (info ? info.album : '');
-    const artistaNombre = spotMatch ? spotMatch.artist : (info ? info.artist : '');
+    const spotMatch = info && spotifyResultados ? spotifyResultados.find(s => s&&s.album&&(s.album.toLowerCase().includes((info.album||'').toLowerCase().substring(0,10))||(info.album||'').toLowerCase().includes(s.album.toLowerCase().substring(0,10)))) : null;
+    const html = bloque.replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>').replace(/\n\n/g,'</p><p>').replace(/\n/g,'<br/>');
+    const albumNombre = spotMatch?spotMatch.album:(info?info.album:'');
+    const artistaNombre = spotMatch?spotMatch.artist:(info?info.artist:'');
     return '<div class="rec-card" style="border-left:4px solid '+colors[i]+'">'+
       '<div style="display:flex;gap:14px;align-items:flex-start;margin-bottom:12px">'+
         '<div id="rec-cover-'+i+'" class="rec-cover-placeholder">'+(spotMatch&&spotMatch.image?'<img src="'+spotMatch.image+'" class="rec-cover" alt="cover"/>':'🎵')+'</div>'+
-        '<div style="flex:1;min-width:0">'+
-          '<div style="font-size:11px;color:var(--text3);margin-bottom:3px">Recomendación '+(i+1)+' de '+bloques.length+' · Spotify</div>'+
-          '<div style="font-size:14px;line-height:1.6"><p>'+html+'</p></div>'+
-        '</div>'+
-      '</div>'+
-      (spotMatch ?
-        '<div class="spotify-box">'+
-          '<div class="spotify-box-title">✓ Disponible en Spotify</div>'+
-          '<div class="spotify-box-album">'+spotMatch.album+'</div>'+
-          '<div class="spotify-box-artist">'+spotMatch.artist+'</div>'+
-          '<a href="'+spotMatch.url+'" target="_blank" class="spotify-link">Abrir en Spotify</a>'+
-        '</div>' :
-        (info ? '<div id="spotify-container-'+i+'"><button id="spotify-btn-'+i+'" class="spotify-search-btn" onclick="buscarConInfo('+i+')">🎵 Buscar en Spotify</button></div>' : '')
-      )+
+        '<div style="flex:1;min-width:0"><div style="font-size:11px;color:var(--text3);margin-bottom:3px">Recomendación '+(i+1)+' de '+bloques.length+' · Spotify</div>'+
+        '<div style="font-size:14px;line-height:1.6"><p>'+html+'</p></div></div></div>'+
+      (spotMatch?'<div class="spotify-box"><div class="spotify-box-title">✓ Disponible en Spotify</div><div class="spotify-box-album">'+spotMatch.album+'</div><div class="spotify-box-artist">'+spotMatch.artist+'</div><a href="'+spotMatch.url+'" target="_blank" class="spotify-link">Abrir en Spotify</a></div>':(info?'<div id="spotify-container-'+i+'"><button id="spotify-btn-'+i+'" class="spotify-search-btn" onclick="buscarConInfo('+i+')">🎵 Buscar en Spotify</button></div>':''))+
       '<div id="valoracion-'+i+'" style="display:flex;gap:8px;margin-top:10px;align-items:center;">'+
         '<span style="font-size:12px;color:var(--text2);">¿Te gustó?</span>'+
         '<button onclick="valorar('+i+',\''+albumNombre.replace(/'/g,"\\'")+'\',\''+artistaNombre.replace(/'/g,"\\'")+'\',\'👍\')" style="padding:6px 14px;border:0.5px solid var(--border);border-radius:var(--radius);background:var(--bg2);font-size:16px;cursor:pointer;">👍</button>'+
         '<button onclick="valorar('+i+',\''+albumNombre.replace(/'/g,"\\'")+'\',\''+artistaNombre.replace(/'/g,"\\'")+'\',\'👎\')" style="padding:6px 14px;border:0.5px solid var(--border);border-radius:var(--radius);background:var(--bg2);font-size:16px;cursor:pointer;">👎</button>'+
-      '</div>'+
-    '</div>';
+      '</div></div>';
   }).join('');
 }
 
 function recomendar() {
-  if (!state.library.length && state.fuente === 'biblioteca') { alert('Tu biblioteca está vacía.'); showTab('biblioteca'); return; }
+  if (!state.library.length && state.fuente==='biblioteca') { alert('Tu biblioteca está vacía.'); showTab('biblioteca'); return; }
   if (!state.mood) { alert('Seleccioná un estado de ánimo.'); return; }
   const btn = document.getElementById('btn-rec');
   const resultDiv = document.getElementById('resultado');
-  btn.disabled = true;
-  btn.innerHTML = '<span class="spinner"></span>Analizando...';
-  resultDiv.innerHTML = '';
-  const s = getSeason(), tod = getTimeOfDay(), w = state.weather;
-  const timeStr = new Date().toLocaleTimeString('es-AR', {hour:'2-digit', minute:'2-digit'});
-  const weatherText = w ? 'Clima: '+w.desc+', '+w.temp+'°C' : 'Clima no disponible';
+  btn.disabled = true; btn.innerHTML = '<span class="spinner"></span>Analizando...'; resultDiv.innerHTML = '';
+  const s=getSeason(), tod=getTimeOfDay(), w=state.weather;
+  const timeStr = new Date().toLocaleTimeString('es-AR',{hour:'2-digit',minute:'2-digit'});
+  const weatherText = w?'Clima: '+w.desc+', '+w.temp+'°C':'Clima no disponible';
   const nota = document.getElementById('nota-extra').value.trim();
-  const ocasion = document.getElementById('ocasion').value || 'Sin especificar';
-  if (state.fuente === 'spotify') { recomendarSpotify(tod, s, weatherText, nota, ocasion, btn, resultDiv); return; }
-  if (state.fuente === 'ambos') { recomendarAmbos(tod, s, weatherText, nota, ocasion, btn, resultDiv); return; }
+  const ocasion = document.getElementById('ocasion').value||'Sin especificar';
+  if (state.fuente==='spotify') { recomendarSpotify(tod,s,weatherText,nota,ocasion,btn,resultDiv); return; }
+  if (state.fuente==='ambos') { recomendarAmbos(tod,s,weatherText,nota,ocasion,btn,resultDiv); return; }
   let libFiltrada = state.library;
   if (state.genero) {
-    libFiltrada = state.library.filter(d => (d.genre||'').toLowerCase() === state.genero.toLowerCase());
-    if (!libFiltrada.length) {
-      resultDiv.innerHTML = '<div class="rec-card" style="color:var(--red)">No hay discos del género "'+state.genero+'".</div>';
-      btn.disabled = false; btn.innerHTML = 'Recomendar discos'; return;
-    }
+    libFiltrada = state.library.filter(d=>(d.genre||'').toLowerCase()===state.genero.toLowerCase());
+    if (!libFiltrada.length) { resultDiv.innerHTML='<div class="rec-card" style="color:var(--red)">No hay discos del género "'+state.genero+'".</div>'; btn.disabled=false; btn.innerHTML='Recomendar discos'; return; }
   }
-  const libraryText = libFiltrada.map((d,i) =>
-    (i+1)+'. "'+d.album+'" de '+d.artist+(d.year?' ('+d.year+')':'')+(d.genre?', '+d.genre:'')+' ['+(d.type==='vinyl'?'Vinilo':'CD')+']'
-  ).join('\n');
-  const generoTexto = state.genero ? 'Género filtrado: '+state.genero : 'Toda la biblioteca';
+  const libraryText = libFiltrada.map((d,i)=>(i+1)+'. "'+d.album+'" de '+d.artist+(d.year?' ('+d.year+')':'')+(d.genre?', '+d.genre:'')+' ['+(d.type==='vinyl'?'Vinilo':'CD')+']').join('\n');
+  const generoTexto = state.genero?'Género filtrado: '+state.genero:'Toda la biblioteca';
   const hoy = new Date();
-  const dia = hoy.getDate();
-  const mes = hoy.toLocaleString('es-AR', { month: 'long' });
-  const anio = hoy.getFullYear();
   const histReciente = getHistorialTexto();
   const prompt =
-    'Sos un sommelier musical experto y estricto con profundo conocimiento de la historia de la música.\n\n'+
-    'FECHA DE HOY: '+dia+' de '+mes+' de '+anio+'\n\n'+
-    'EFEMÉRIDES: Si hoy es una fecha notable en la historia del rock o la música (nacimiento o muerte de un músico importante, un hito cultural) escribí un párrafo breve comenzando con "📅 EFEMÉRIDE:" y terminá con "---". IMPORTANTE: NO menciones fechas de lanzamiento de álbumes. Solo hechos sobre personas o movimientos que conozcas con certeza. Si no hay nada relevante omití esta sección.\n\n'+
-    'BIBLIOTECA (SOLO podés recomendar de esta lista):\n\n'+libraryText+'\n\n'+
-    'REGLA ABSOLUTA: Solo podés recomendar discos numerados en la lista. NUNCA inventes discos.\n\n'+
-    histReciente+'\n\n'+
-    'CONTEXTO:\n- Momento: '+tod.name+' ('+timeStr+'), '+getDayType()+'\n'+
-    '- Época: '+s.name+' (hemisferio sur)\n- '+weatherText+'\n'+
-    '- Estado de ánimo: '+state.mood+'\n- Ocasión: '+ocasion+'\n- '+generoTexto+'\n'+
-    (nota?'- Nota: '+nota+'\n':'')+
-    '\nRecomendá exactamente 3 discos. Formato:\n\n'+
-    '**1. "Nombre del álbum" — Artista (Año)**\n[género] [formato]\n\nRazón: 2-3 oraciones.\n\nCómo escucharlo: sugerencia.\n\n---\n\n'+
-    '**2. "Nombre del álbum" — Artista (Año)**\n[género] [formato]\n\nRazón: 2-3 oraciones.\n\nCómo escucharlo: sugerencia.\n\n---\n\n'+
-    '**3. "Nombre del álbum" — Artista (Año)**\n[género] [formato]\n\nRazón: 2-3 oraciones.\n\nCómo escucharlo: sugerencia.\n\n---';
-  fetch('/api/recomendar', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ prompt })
-  })
-  .then(r => r.json())
-  .then(data => {
-    if (data.error) throw new Error(data.error);
-    renderResultados(data.resultado, resultDiv);
-  })
-  .catch(e => { resultDiv.innerHTML = '<div class="rec-card" style="color:var(--red)">Error: '+e.message+'</div>'; })
-  .finally(() => { btn.disabled = false; btn.innerHTML = 'Recomendar discos'; });
+    'Sos un sommelier musical experto y estricto.\n\nFECHA DE HOY: '+hoy.getDate()+' de '+hoy.toLocaleString('es-AR',{month:'long'})+' de '+hoy.getFullYear()+'\n\n'+
+    'EFEMÉRIDES: Si hoy es fecha notable en la historia del rock (nacimiento/muerte de músico, hito cultural) escribí "📅 EFEMÉRIDE:" terminando en "---". NO menciones lanzamientos de álbumes. Omití si no hay nada certero.\n\n'+
+    'BIBLIOTECA (SOLO podés recomendar de esta lista):\n\n'+libraryText+'\n\nREGLA ABSOLUTA: Solo discos de la lista. NUNCA inventes.\n\n'+
+    histReciente+'\n\nCONTEXTO:\n- Momento: '+tod.name+' ('+timeStr+'), '+getDayType()+'\n- Época: '+s.name+' (hemisferio sur)\n- '+weatherText+'\n- Estado de ánimo: '+state.mood+'\n- Ocasión: '+ocasion+'\n- '+generoTexto+'\n'+(nota?'- Nota: '+nota+'\n':'')+
+    '\nRecomendá exactamente 3 discos:\n\n**1. "Álbum" — Artista (Año)**\n[género] [formato]\n\nRazón: 2-3 oraciones.\n\nCómo escucharlo: sugerencia.\n\n---\n\n**2. "Álbum" — Artista (Año)**\n[género] [formato]\n\nRazón: 2-3 oraciones.\n\nCómo escucharlo: sugerencia.\n\n---\n\n**3. "Álbum" — Artista (Año)**\n[género] [formato]\n\nRazón: 2-3 oraciones.\n\nCómo escucharlo: sugerencia.\n\n---';
+  fetch('/api/recomendar',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({prompt})})
+    .then(r=>r.json()).then(data=>{if(data.error)throw new Error(data.error);renderResultados(data.resultado,resultDiv);})
+    .catch(e=>{resultDiv.innerHTML='<div class="rec-card" style="color:var(--red)">Error: '+e.message+'</div>';})
+    .finally(()=>{btn.disabled=false;btn.innerHTML='Recomendar discos';});
 }
 
-async function recomendarSpotify(tod, s, weatherText, nota, ocasion, btn, resultDiv) {
+async function recomendarSpotify(tod,s,weatherText,nota,ocasion,btn,resultDiv) {
   try {
-    const pref = JSON.parse(localStorage.getItem('preferencias') || '{"generos":[],"decadas":[]}');
-    if (!pref.generos.length && !pref.decadas.length) {
-      resultDiv.innerHTML = '<div class="rec-card" style="color:var(--amber)">⚠️ Configurá tus preferencias antes de buscar en Spotify.</div>';
-      btn.disabled = false; btn.innerHTML = 'Recomendar discos'; return;
-    }
-    const spotRes = await fetch('/api/spotify/recomendar', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ generos: pref.generos, decadas: pref.decadas, mood: state.mood, ocasion, clima: weatherText })
-    });
+    const pref = JSON.parse(localStorage.getItem('preferencias')||'{"generos":[],"decadas":[]}');
+    if (!pref.generos.length&&!pref.decadas.length) { resultDiv.innerHTML='<div class="rec-card" style="color:var(--amber)">⚠️ Configurá tus preferencias antes de buscar en Spotify.</div>'; btn.disabled=false; btn.innerHTML='Recomendar discos'; return; }
+    const spotRes = await fetch('/api/spotify/recomendar',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({generos:pref.generos,decadas:pref.decadas,mood:state.mood,ocasion,clima:weatherText})});
     const spotData = await spotRes.json();
     if (spotData.error) throw new Error(spotData.error);
-    if (!spotData.resultados || !spotData.resultados.length) throw new Error('Sin resultados en Spotify');
+    if (!spotData.resultados||!spotData.resultados.length) throw new Error('Sin resultados en Spotify');
     const hoy = new Date();
-    const listaSpotify = spotData.resultados.map((d,i) => (i+1)+'. "'+d.album+'" de '+d.artist+(d.year?' ('+d.year+')':'')).join('\n');
-    let positivos = '', negativos = '';
-    try {
-      const valRes = await fetch('/api/valoraciones');
-      const valData = await valRes.json();
-      positivos = valData.valoraciones.filter(v => v.valor === '👍').map(v => v.album+' — '+v.artist).join(', ');
-      negativos = valData.valoraciones.filter(v => v.valor === '👎').map(v => v.album+' — '+v.artist).join(', ');
-    } catch(e) {}
-    const prompt =
-      'Sos un sommelier musical experto.\n\n'+
-      'FECHA DE HOY: '+hoy.getDate()+' de '+hoy.toLocaleString('es-AR',{month:'long'})+' de '+hoy.getFullYear()+'\n\n'+
-      'Elegí los 3 álbumes más apropiados de esta lista para el contexto. Solo podés elegir de esta lista:\n\n'+
-      listaSpotify+'\n\n'+
-      (positivos ? 'DISCOS QUE LE GUSTARON (priorizá estilos similares): '+positivos+'\n\n' : '')+
-      (negativos ? 'DISCOS QUE NO LE GUSTARON (evitá estilos similares): '+negativos+'\n\n' : '')+
-      'CONTEXTO:\n- Momento: '+tod.name+', '+getDayType()+'\n- Época: '+s.name+'\n- '+weatherText+'\n'+
-      '- Estado de ánimo: '+state.mood+'\n- Ocasión: '+ocasion+'\n'+
-      (nota?'- Nota: '+nota+'\n':'')+
-      '\nFormato:\n\n**Número. "Nombre del álbum" — Artista (Año)**\n\nRazón: 2-3 oraciones.\n\nCómo escucharlo: sugerencia.\n\n---';
-    const recRes = await fetch('/api/recomendar', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ prompt })
-    });
+    const listaSpotify = spotData.resultados.map((d,i)=>(i+1)+'. "'+d.album+'" de '+d.artist+(d.year?' ('+d.year+')':'')).join('\n');
+    let positivos='',negativos='';
+    try { const vr=await fetch('/api/valoraciones'); const vd=await vr.json(); positivos=vd.valoraciones.filter(v=>v.valor==='👍').map(v=>v.album+' — '+v.artist).join(', '); negativos=vd.valoraciones.filter(v=>v.valor==='👎').map(v=>v.album+' — '+v.artist).join(', '); } catch(e){}
+    const prompt='Sos un sommelier musical experto.\n\nFECHA: '+hoy.getDate()+' de '+hoy.toLocaleString('es-AR',{month:'long'})+' de '+hoy.getFullYear()+'\n\nElegí 3 álbumes de esta lista:\n\n'+listaSpotify+'\n\n'+(positivos?'GUSTARON: '+positivos+'\n\n':'')+(negativos?'NO GUSTARON: '+negativos+'\n\n':'')+'CONTEXTO:\n- '+tod.name+', '+getDayType()+'\n- '+s.name+'\n- '+weatherText+'\n- '+state.mood+'\n- '+ocasion+'\n'+(nota?'- '+nota+'\n':'')+'\n**Número. "Álbum" — Artista (Año)**\n\nRazón: 2-3 oraciones.\n\nCómo escucharlo: sugerencia.\n\n---';
+    const recRes = await fetch('/api/recomendar',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({prompt})});
     const recData = await recRes.json();
     if (recData.error) throw new Error(recData.error);
-    renderResultadosSpotify(recData.resultado, spotData.resultados, resultDiv);
-  } catch(e) {
-    resultDiv.innerHTML = '<div class="rec-card" style="color:var(--red)">Error: '+e.message+'</div>';
-  } finally {
-    btn.disabled = false; btn.innerHTML = 'Recomendar discos';
-  }
+    renderResultadosSpotify(recData.resultado,spotData.resultados,resultDiv);
+  } catch(e) { resultDiv.innerHTML='<div class="rec-card" style="color:var(--red)">Error: '+e.message+'</div>'; }
+  finally { btn.disabled=false; btn.innerHTML='Recomendar discos'; }
 }
 
-async function recomendarAmbos(tod, s, weatherText, nota, ocasion, btn, resultDiv) {
+async function recomendarAmbos(tod,s,weatherText,nota,ocasion,btn,resultDiv) {
   try {
-    const pref = JSON.parse(localStorage.getItem('preferencias') || '{"generos":[],"decadas":[]}');
-    const hoy = new Date();
-    const dia = hoy.getDate();
-    const mes = hoy.toLocaleString('es-AR', { month: 'long' });
-    const anio = hoy.getFullYear();
-    let libFiltrada = state.library;
-    if (state.genero) libFiltrada = state.library.filter(d => (d.genre||'').toLowerCase() === state.genero.toLowerCase());
-    const libraryText = libFiltrada.map((d,i) => (i+1)+'. "'+d.album+'" de '+d.artist+(d.year?' ('+d.year+')':'')+(d.genre?', '+d.genre:'')+' ['+(d.type==='vinyl'?'Vinilo':'CD')+']').join('\n');
-    let spotifyExtra = '';
-    if (pref.generos.length || pref.decadas.length) {
+    const pref=JSON.parse(localStorage.getItem('preferencias')||'{"generos":[],"decadas":[]}');
+    const hoy=new Date();
+    let libFiltrada=state.library;
+    if(state.genero) libFiltrada=state.library.filter(d=>(d.genre||'').toLowerCase()===state.genero.toLowerCase());
+    const libraryText=libFiltrada.map((d,i)=>(i+1)+'. "'+d.album+'" de '+d.artist+(d.year?' ('+d.year+')':'')+(d.genre?', '+d.genre:'')+' ['+(d.type==='vinyl'?'Vinilo':'CD')+']').join('\n');
+    let spotifyExtra='';
+    if(pref.generos.length||pref.decadas.length) {
       try {
-        const spotRes = await fetch('/api/spotify/recomendar', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ generos: pref.generos, decadas: pref.decadas, mood: state.mood, ocasion, clima: weatherText })
-        });
-        const spotData = await spotRes.json();
-        if (spotData.resultados && spotData.resultados.length) {
-          spotifyExtra = '\n\nADEMÁS podés recomendar hasta 1 disco de esta lista de Spotify (indicalo como "Sugerencia Spotify"):\n'+
-            spotData.resultados.slice(0,8).map((d,i)=>(i+1)+'. "'+d.album+'" de '+d.artist+(d.year?' ('+d.year+')':'')).join('\n');
-          window._spotifyResultados = spotData.resultados;
-        }
-      } catch(e) {}
+        const sr=await fetch('/api/spotify/recomendar',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({generos:pref.generos,decadas:pref.decadas,mood:state.mood,ocasion,clima:weatherText})});
+        const sd=await sr.json();
+        if(sd.resultados&&sd.resultados.length) { spotifyExtra='\n\nADEMÁS podés recomendar hasta 1 disco de Spotify:\n'+sd.resultados.slice(0,8).map((d,i)=>(i+1)+'. "'+d.album+'" de '+d.artist+(d.year?' ('+d.year+')':'')).join('\n'); window._spotifyResultados=sd.resultados; }
+      } catch(e){}
     }
-    const histReciente = getHistorialTexto();
-    const prompt =
-      'Sos un sommelier musical experto.\n\n'+
-      'FECHA DE HOY: '+dia+' de '+mes+' de '+anio+'\n\n'+
-      'EFEMÉRIDES: Si hoy es fecha notable en la historia del rock mencionalo con "📅 EFEMÉRIDE:" terminando en "---".\n\n'+
-      'BIBLIOTECA (SOLO podés recomendar de acá):\n\n'+libraryText+'\n\n'+
-      'REGLA: Solo recomendá discos de la biblioteca con su número exacto.'+spotifyExtra+'\n\n'+
-      histReciente+'\n\n'+
-      'CONTEXTO:\n- Momento: '+tod.name+', '+getDayType()+'\n- Época: '+s.name+'\n- '+weatherText+'\n'+
-      '- Estado de ánimo: '+state.mood+'\n- Ocasión: '+ocasion+'\n'+
-      (nota?'- Nota: '+nota+'\n':'')+
-      '\nRecomendá 2 discos de la biblioteca y opcionalmente 1 de Spotify. Formato:\n\n'+
-      '**Número. "Nombre del álbum" — Artista (Año)**\n[fuente: Mi biblioteca / Spotify]\n\nRazón: 2-3 oraciones.\n\nCómo escucharlo: sugerencia.\n\n---';
-    const recRes = await fetch('/api/recomendar', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ prompt })
-    });
-    const recData = await recRes.json();
-    if (recData.error) throw new Error(recData.error);
-    renderResultados(recData.resultado, resultDiv);
-  } catch(e) {
-    resultDiv.innerHTML = '<div class="rec-card" style="color:var(--red)">Error: '+e.message+'</div>';
-  } finally {
-    btn.disabled = false; btn.innerHTML = 'Recomendar discos';
-  }
+    const histReciente=getHistorialTexto();
+    const prompt='Sos un sommelier musical experto.\n\nFECHA: '+hoy.getDate()+' de '+hoy.toLocaleString('es-AR',{month:'long'})+' de '+hoy.getFullYear()+'\n\nEFEMÉRIDES: Si hay fecha notable mencionala con "📅 EFEMÉRIDE:" terminando en "---".\n\nBIBLIOTECA:\n\n'+libraryText+'\n\nREGLA: Solo discos de la biblioteca.'+spotifyExtra+'\n\n'+histReciente+'\n\nCONTEXTO:\n- '+tod.name+', '+getDayType()+'\n- '+s.name+'\n- '+weatherText+'\n- '+state.mood+'\n- '+ocasion+'\n'+(nota?'- '+nota+'\n':'')+'\n2 discos de biblioteca + opcional 1 de Spotify:\n\n**Número. "Álbum" — Artista (Año)**\n[fuente: Mi biblioteca / Spotify]\n\nRazón: 2-3 oraciones.\n\nCómo escucharlo: sugerencia.\n\n---';
+    const rr=await fetch('/api/recomendar',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({prompt})});
+    const rd=await rr.json();
+    if(rd.error) throw new Error(rd.error);
+    renderResultados(rd.resultado,resultDiv);
+  } catch(e) { resultDiv.innerHTML='<div class="rec-card" style="color:var(--red)">Error: '+e.message+'</div>'; }
+  finally { btn.disabled=false; btn.innerHTML='Recomendar discos'; }
 }
 
-function togglePref(tipo, valor) {
-  const idx = preferencias[tipo].indexOf(valor);
-  if (idx >= 0) preferencias[tipo].splice(idx, 1);
-  else preferencias[tipo].push(valor);
+function togglePref(tipo,valor) {
+  const idx=preferencias[tipo].indexOf(valor);
+  if(idx>=0) preferencias[tipo].splice(idx,1); else preferencias[tipo].push(valor);
   renderPreferencias();
 }
 
 function renderPreferencias() {
-  document.querySelectorAll('.pref-btn').forEach(btn => {
-    const onclick = btn.getAttribute('onclick');
-    const match = onclick.match(/togglePref\('(\w+)','(.+?)'\)/);
-    if (match) {
-      const tipo = match[1], valor = match[2];
-      if (preferencias[tipo] && preferencias[tipo].includes(valor)) {
-        btn.style.background = 'var(--purple-bg)';
-        btn.style.borderColor = '#7f77dd';
-        btn.style.color = 'var(--purple)';
-      } else {
-        btn.style.background = 'var(--bg2)';
-        btn.style.borderColor = 'var(--border)';
-        btn.style.color = 'var(--text)';
-      }
-    }
+  document.querySelectorAll('.pref-btn').forEach(btn=>{
+    const m=btn.getAttribute('onclick').match(/togglePref\('(\w+)','(.+?)'\)/);
+    if(m) { const t=m[1],v=m[2]; if(preferencias[t]&&preferencias[t].includes(v)){btn.style.background='var(--purple-bg)';btn.style.borderColor='#7f77dd';btn.style.color='var(--purple)';}else{btn.style.background='var(--bg2)';btn.style.borderColor='var(--border)';btn.style.color='var(--text)';} }
   });
-  const resumen = document.getElementById('pref-resumen');
-  if (resumen) {
-    const g = preferencias.generos.length ? '🎸 Géneros: '+preferencias.generos.join(', ') : '';
-    const d = preferencias.decadas.length ? '📅 Décadas: '+preferencias.decadas.join(', ') : '';
-    resumen.innerHTML = [g,d].filter(Boolean).join('<br/>') || 'Sin preferencias configuradas.';
-  }
+  const r=document.getElementById('pref-resumen');
+  if(r){ const g=preferencias.generos.length?'🎸 Géneros: '+preferencias.generos.join(', '):''; const d=preferencias.decadas.length?'📅 Décadas: '+preferencias.decadas.join(', '):''; r.innerHTML=[g,d].filter(Boolean).join('<br/>')||'Sin preferencias configuradas.'; }
 }
 
 function guardarPreferencias() {
-  try { localStorage.setItem('preferencias', JSON.stringify(preferencias)); } catch(e) {}
+  try{localStorage.setItem('preferencias',JSON.stringify(preferencias));}catch(e){}
   alert('Preferencias guardadas correctamente.');
 }
 
 async function sorprendeme() {
-  if (!state.library.length) { alert('Tu biblioteca está vacía.'); return; }
-  const btn = document.getElementById('btn-sorpresa');
-  const resultDiv = document.getElementById('resultado');
-  btn.disabled = true;
-  btn.innerHTML = '<span class="spinner"></span>Buscando una joya olvidada...';
-  resultDiv.innerHTML = '';
-  const hist = JSON.parse(localStorage.getItem('historial_recomendaciones') || '[]');
-  const recomendados = new Set(hist.flatMap(h => h.discos.map(d => d.toLowerCase())));
-  const noRecomendados = state.library.filter(d => !recomendados.has((d.album+' — '+d.artist).toLowerCase()));
-  const pool = noRecomendados.length >= 5 ? noRecomendados : state.library;
-  const shuffled = [...pool].sort(() => Math.random() - 0.5);
-  const candidatos = shuffled.slice(0, 20);
-  const lista = candidatos.map((d,i) =>
-    (i+1)+'. "'+d.album+'" de '+d.artist+(d.year?' ('+d.year+')':'')+(d.genre?', '+d.genre:'')+' ['+(d.type==='vinyl'?'Vinilo':'CD')+']'
-  ).join('\n');
-  const hoy = new Date();
-  const s = getSeason(), tod = getTimeOfDay(), w = state.weather;
-  const weatherText = w ? 'Clima: '+w.desc+', '+w.temp+'°C' : 'Clima no disponible';
-  const prompt =
-    'Sos un sommelier musical experto.\n\n'+
-    'FECHA DE HOY: '+hoy.getDate()+' de '+hoy.toLocaleString('es-AR',{month:'long'})+' de '+hoy.getFullYear()+'\n\n'+
-    'MODO SORPRESA: Elegí UN SOLO disco de esta lista que sea especial, subestimado o que merezca más atención.\n\n'+
-    'CANDIDATOS:\n\n'+lista+'\n\n'+
-    'CONTEXTO:\n- Momento: '+tod.name+', '+getDayType()+'\n- Época: '+s.name+'\n- '+weatherText+'\n\n'+
-    'Respondé con UN solo disco en este formato:\n\n'+
-    '**1. "Nombre del álbum" — Artista (Año)**\n[género] [formato]\n\n'+
-    'Por qué es una joya olvidada: 2-3 oraciones.\n\nCómo escucharlo: sugerencia concreta.\n\n---';
+  if(!state.library.length){alert('Tu biblioteca está vacía.');return;}
+  const btn=document.getElementById('btn-sorpresa'),resultDiv=document.getElementById('resultado');
+  btn.disabled=true; btn.innerHTML='<span class="spinner"></span>Buscando una joya olvidada...'; resultDiv.innerHTML='';
+  const hist=JSON.parse(localStorage.getItem('historial_recomendaciones')||'[]');
+  const recomendados=new Set(hist.flatMap(h=>h.discos.map(d=>d.toLowerCase())));
+  const noRec=state.library.filter(d=>!recomendados.has((d.album+' — '+d.artist).toLowerCase()));
+  const pool=noRec.length>=5?noRec:state.library;
+  const candidatos=[...pool].sort(()=>Math.random()-0.5).slice(0,20);
+  const lista=candidatos.map((d,i)=>(i+1)+'. "'+d.album+'" de '+d.artist+(d.year?' ('+d.year+')':'')+(d.genre?', '+d.genre:'')+' ['+(d.type==='vinyl'?'Vinilo':'CD')+']').join('\n');
+  const hoy=new Date(),s=getSeason(),tod=getTimeOfDay(),w=state.weather;
+  const weatherText=w?'Clima: '+w.desc+', '+w.temp+'°C':'Clima no disponible';
+  const prompt='Sos un sommelier musical experto.\n\nFECHA: '+hoy.getDate()+' de '+hoy.toLocaleString('es-AR',{month:'long'})+' de '+hoy.getFullYear()+'\n\nMODO SORPRESA: Elegí UN SOLO disco especial o subestimado.\n\nCANDIDATOS:\n\n'+lista+'\n\nCONTEXTO:\n- '+tod.name+', '+getDayType()+'\n- '+s.name+'\n- '+weatherText+'\n\n**1. "Álbum" — Artista (Año)**\n[género] [formato]\n\nPor qué es una joya olvidada: 2-3 oraciones.\n\nCómo escucharlo: sugerencia.\n\n---';
   try {
-    const res = await fetch('/api/recomendar', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ prompt })
-    });
-    const data = await res.json();
-    if (data.error) throw new Error(data.error);
-    renderResultados(data.resultado, resultDiv);
-  } catch(e) {
-    resultDiv.innerHTML = '<div class="rec-card" style="color:var(--red)">Error: '+e.message+'</div>';
-  } finally {
-    btn.disabled = false;
-    btn.innerHTML = '🎲 Sorprendeme';
-  }
+    const res=await fetch('/api/recomendar',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({prompt})});
+    const data=await res.json(); if(data.error)throw new Error(data.error);
+    renderResultados(data.resultado,resultDiv);
+  } catch(e){resultDiv.innerHTML='<div class="rec-card" style="color:var(--red)">Error: '+e.message+'</div>';}
+  finally{btn.disabled=false;btn.innerHTML='🎲 Sorprendeme';}
 }
 
 async function sincronizarDiscogs() {
-  const btn = document.getElementById('btn-discogs');
-  const result = document.getElementById('discogs-result');
-  btn.disabled = true;
-  btn.innerHTML = '<span class="spinner"></span>Sincronizando...';
-  result.innerHTML = '';
-  const TOKEN = 'ORkLGIpewdiBaDmpzwQtoghAqyQCvCtAhGhGkmgH';
-  const USUARIO = 'ferboglio';
+  const btn=document.getElementById('btn-discogs'),result=document.getElementById('discogs-result');
+  btn.disabled=true; btn.innerHTML='<span class="spinner"></span>Sincronizando...'; result.innerHTML='';
+  const TOKEN='ORkLGIpewdiBaDmpzwQtoghAqyQCvCtAhGhGkmgH',USUARIO='ferboglio';
   try {
-    let pagina = 1;
-    let todosLosDiscos = [];
-    let totalPaginas = 1;
+    let pagina=1,todosLosDiscos=[],totalPaginas=1;
     do {
-      const r = await fetch(
-        'https://api.discogs.com/users/'+USUARIO+'/collection/folders/0/releases?per_page=100&page='+pagina,
-        { headers: { 'Authorization': 'Discogs token='+TOKEN, 'User-Agent': 'SelectorDiscos/1.0' }}
-      );
-      const data = await r.json();
-      if (data.error) throw new Error(data.error);
-      if (!data.releases || !data.releases.length) break;
-      totalPaginas = data.pagination?.pages || 1;
-      data.releases.forEach(item => {
-        const info = item.basic_information;
-        todosLosDiscos.push({
-          album: info.title,
-          artist: info.artists.map(a => a.name).join(', ').replace(/\s*\(\d+\)\s*/g, '').trim(),
-          year: info.year ? info.year.toString() : '',
-          genre: info.genres?.[0] || info.styles?.[0] || 'Otro',
-          type: info.formats?.[0]?.name?.toLowerCase().includes('cd') ? 'cd' : 'vinyl',
-          source: 'discogs',
-          discogs_id: info.id,
-          imagen: info.cover_image || info.thumb || null,
-          rating: null, precio_min: null, tracks: []
-        });
-      });
+      const r=await fetch('https://api.discogs.com/users/'+USUARIO+'/collection/folders/0/releases?per_page=100&page='+pagina,{headers:{'Authorization':'Discogs token='+TOKEN,'User-Agent':'SelectorDiscos/1.0'}});
+      const data=await r.json(); if(data.error)throw new Error(data.error); if(!data.releases||!data.releases.length)break;
+      totalPaginas=data.pagination?.pages||1;
+      data.releases.forEach(item=>{const info=item.basic_information;todosLosDiscos.push({album:info.title,artist:info.artists.map(a=>a.name).join(', ').replace(/\s*\(\d+\)\s*/g,'').trim(),year:info.year?info.year.toString():'',genre:info.genres?.[0]||info.styles?.[0]||'Otro',type:info.formats?.[0]?.name?.toLowerCase().includes('cd')?'cd':'vinyl',source:'discogs',discogs_id:info.id,imagen:info.cover_image||info.thumb||null,rating:null,precio_min:null,tracks:[]});});
       pagina++;
-    } while (pagina <= totalPaginas);
-
-    state.library = state.library.filter(d => d.source !== 'discogs');
-    todosLosDiscos.forEach(disco => state.library.push(disco));
-    saveLibrary(); renderLibrary(); renderGeneros();
-    result.innerHTML = '<div class="import-result success">✓ '+todosLosDiscos.length+' discos sincronizados. Total: '+state.library.length+'. Cargando detalles...</div>';
-
-    let enriquecidos = 0;
-    for (const disco of todosLosDiscos) {
-      if (!disco.discogs_id) continue;
-      try {
-        await new Promise(r => setTimeout(r, 1200));
-        const detR = await fetch('https://api.discogs.com/releases/'+disco.discogs_id,
-          { headers: { 'Authorization': 'Discogs token='+TOKEN, 'User-Agent': 'SelectorDiscos/1.0' }}
-        );
-        const det = await detR.json();
-        const idx = state.library.findIndex(d => d.discogs_id === disco.discogs_id);
-        if (idx >= 0) {
-          if (det.images?.[0]?.uri) state.library[idx].imagen = det.images[0].uri;
-          if (det.community?.rating?.average) state.library[idx].rating = Math.round(det.community.rating.average * 10) / 10;
-          if (det.lowest_price) state.library[idx].precio_min = det.lowest_price;
-          if (det.tracklist?.length) {
-            state.library[idx].tracks = det.tracklist
-              .filter(t => t.type_ === 'track' && t.title)
-              .map(t => ({ posicion: t.position || '', titulo: t.title, duracion: t.duration || '' }));
-          }
+    } while(pagina<=totalPaginas);
+    state.library=state.library.filter(d=>d.source!=='discogs');
+    todosLosDiscos.forEach(d=>state.library.push(d));
+    saveLibrary();renderLibrary();renderGeneros();
+    result.innerHTML='<div class="import-result success">✓ '+todosLosDiscos.length+' discos. Cargando detalles...</div>';
+    let enriquecidos=0;
+    for(const disco of todosLosDiscos){
+      if(!disco.discogs_id)continue;
+      try{
+        await new Promise(r=>setTimeout(r,1200));
+        const dr=await fetch('https://api.discogs.com/releases/'+disco.discogs_id,{headers:{'Authorization':'Discogs token='+TOKEN,'User-Agent':'SelectorDiscos/1.0'}});
+        const det=await dr.json();
+        const idx=state.library.findIndex(d=>d.discogs_id===disco.discogs_id);
+        if(idx>=0){
+          if(det.images?.[0]?.uri)state.library[idx].imagen=det.images[0].uri;
+          if(det.community?.rating?.average)state.library[idx].rating=Math.round(det.community.rating.average*10)/10;
+          if(det.lowest_price)state.library[idx].precio_min=det.lowest_price;
+          if(det.tracklist?.length)state.library[idx].tracks=det.tracklist.filter(t=>t.type_==='track'&&t.title).map(t=>({posicion:t.position||'',titulo:t.title,duracion:t.duration||''}));
           enriquecidos++;
-          if (enriquecidos % 10 === 0) {
-            saveLibrary();
-            result.innerHTML = '<div class="import-result success">✓ Enriqueciendo... '+enriquecidos+'/'+todosLosDiscos.length+'</div>';
-          }
+          if(enriquecidos%10===0){saveLibrary();result.innerHTML='<div class="import-result success">✓ Enriqueciendo... '+enriquecidos+'/'+todosLosDiscos.length+'</div>';}
         }
-      } catch(e) {}
+      }catch(e){}
     }
-    saveLibrary(); renderLibrary();
-    result.innerHTML = '<div class="import-result success">✓ Sincronización completa. '+todosLosDiscos.length+' discos.</div>';
-  } catch(e) {
-    result.innerHTML = '<div class="import-result error">Error: '+e.message+'</div>';
-  } finally {
-    btn.disabled = false;
-    btn.innerHTML = '🔄 Sincronizar con Discogs';
-  }
+    saveLibrary();renderLibrary();
+    result.innerHTML='<div class="import-result success">✓ Sincronización completa. '+todosLosDiscos.length+' discos.</div>';
+  }catch(e){result.innerHTML='<div class="import-result error">Error: '+e.message+'</div>';}
+  finally{btn.disabled=false;btn.innerHTML='🔄 Sincronizar con Discogs';}
 }
 
 function mostrarStats() {
-  const hist = JSON.parse(localStorage.getItem('historial_recomendaciones') || '[]');
-  if (!hist.length) {
-    document.getElementById('stats-resumen').innerHTML = '<div class="empty-state">Todavía no hay estadísticas.</div>';
-    ['stats-discos','stats-generos','stats-artistas'].forEach(id => document.getElementById(id).innerHTML = '');
-    return;
-  }
-  const todosLosDiscos = hist.flatMap(h => h.discos);
-  const totalSesiones = hist.length;
-  const totalRecomendaciones = todosLosDiscos.length;
-  document.getElementById('stats-resumen').innerHTML =
-    '<div style="display:flex;justify-content:space-around;padding:8px 0;">'+
-      '<div style="text-align:center"><div style="font-size:24px;font-weight:500;">'+totalSesiones+'</div><div style="font-size:12px;color:var(--text2)">Sesiones</div></div>'+
-      '<div style="text-align:center"><div style="font-size:24px;font-weight:500;">'+totalRecomendaciones+'</div><div style="font-size:12px;color:var(--text2)">Recomendaciones</div></div>'+
-      '<div style="text-align:center"><div style="font-size:24px;font-weight:500;">'+state.library.length+'</div><div style="font-size:12px;color:var(--text2)">Discos</div></div>'+
-    '</div>';
-  const contadorDiscos = {};
-  todosLosDiscos.forEach(d => { const k = d.toLowerCase(); contadorDiscos[k] = (contadorDiscos[k]||0)+1; });
-  const topDiscos = Object.entries(contadorDiscos).sort((a,b)=>b[1]-a[1]).slice(0,5);
-  document.getElementById('stats-discos').innerHTML = topDiscos.length ?
-    topDiscos.map((d,i) =>
-      '<div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:0.5px solid var(--border);">'+
-        '<div style="font-size:18px;font-weight:500;color:var(--text3);min-width:24px;">'+(i+1)+'</div>'+
-        '<div style="flex:1;font-size:13px;">'+d[0]+'</div>'+
-        '<div style="font-size:12px;background:var(--purple-bg);color:var(--purple);padding:2px 8px;border-radius:20px;">'+d[1]+'x</div>'+
-      '</div>'
-    ).join('') : '<div class="empty-state">Sin datos</div>';
-  const contadorGeneros = {};
-  todosLosDiscos.forEach(disco => {
-    const info = state.library.find(d => (d.album+' — '+d.artist).toLowerCase() === disco.toLowerCase());
-    if (info && info.genre) contadorGeneros[info.genre] = (contadorGeneros[info.genre]||0)+1;
-  });
-  const topGeneros = Object.entries(contadorGeneros).sort((a,b)=>b[1]-a[1]).slice(0,5);
-  document.getElementById('stats-generos').innerHTML = topGeneros.length ?
-    topGeneros.map(g => {
-      const pct = Math.round(g[1]/totalRecomendaciones*100);
-      return '<div style="padding:6px 0;">'+
-        '<div style="display:flex;justify-content:space-between;margin-bottom:4px;"><span style="font-size:13px;">'+g[0]+'</span><span style="font-size:12px;color:var(--text2);">'+g[1]+' ('+pct+'%)</span></div>'+
-        '<div style="height:6px;background:var(--bg2);border-radius:3px;"><div style="height:6px;background:#7f77dd;border-radius:3px;width:'+pct+'%"></div></div>'+
-      '</div>';
-    }).join('') : '<div class="empty-state">Sin datos</div>';
-  const contadorArtistas = {};
-  todosLosDiscos.forEach(disco => {
-    const partes = disco.split(' — ');
-    if (partes.length >= 2) { const a = partes[1].trim(); contadorArtistas[a] = (contadorArtistas[a]||0)+1; }
-  });
-  const topArtistas = Object.entries(contadorArtistas).sort((a,b)=>b[1]-a[1]).slice(0,5);
-  document.getElementById('stats-artistas').innerHTML = topArtistas.length ?
-    topArtistas.map((a,i) =>
-      '<div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:0.5px solid var(--border);">'+
-        '<div style="font-size:18px;font-weight:500;color:var(--text3);min-width:24px;">'+(i+1)+'</div>'+
-        '<div style="flex:1;font-size:13px;">'+a[0]+'</div>'+
-        '<div style="font-size:12px;background:var(--teal-bg);color:var(--teal);padding:2px 8px;border-radius:20px;">'+a[1]+'x</div>'+
-      '</div>'
-    ).join('') : '<div class="empty-state">Sin datos</div>';
+  const hist=JSON.parse(localStorage.getItem('historial_recomendaciones')||'[]');
+  if(!hist.length){document.getElementById('stats-resumen').innerHTML='<div class="empty-state">Todavía no hay estadísticas.</div>';['stats-discos','stats-generos','stats-artistas'].forEach(id=>document.getElementById(id).innerHTML='');return;}
+  const todos=hist.flatMap(h=>h.discos),total=hist.length,totalR=todos.length;
+  document.getElementById('stats-resumen').innerHTML='<div style="display:flex;justify-content:space-around;padding:8px 0;"><div style="text-align:center"><div style="font-size:24px;font-weight:500;">'+total+'</div><div style="font-size:12px;color:var(--text2)">Sesiones</div></div><div style="text-align:center"><div style="font-size:24px;font-weight:500;">'+totalR+'</div><div style="font-size:12px;color:var(--text2)">Recomendaciones</div></div><div style="text-align:center"><div style="font-size:24px;font-weight:500;">'+state.library.length+'</div><div style="font-size:12px;color:var(--text2)">Discos</div></div></div>';
+  const cD={};todos.forEach(d=>{const k=d.toLowerCase();cD[k]=(cD[k]||0)+1;});
+  document.getElementById('stats-discos').innerHTML=Object.entries(cD).sort((a,b)=>b[1]-a[1]).slice(0,5).map((d,i)=>'<div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:0.5px solid var(--border);"><div style="font-size:18px;font-weight:500;color:var(--text3);min-width:24px;">'+(i+1)+'</div><div style="flex:1;font-size:13px;">'+d[0]+'</div><div style="font-size:12px;background:var(--purple-bg);color:var(--purple);padding:2px 8px;border-radius:20px;">'+d[1]+'x</div></div>').join('')||'<div class="empty-state">Sin datos</div>';
+  const cG={};todos.forEach(disco=>{const info=state.library.find(d=>(d.album+' — '+d.artist).toLowerCase()===disco.toLowerCase());if(info&&info.genre)cG[info.genre]=(cG[info.genre]||0)+1;});
+  document.getElementById('stats-generos').innerHTML=Object.entries(cG).sort((a,b)=>b[1]-a[1]).slice(0,5).map(g=>{const p=Math.round(g[1]/totalR*100);return'<div style="padding:6px 0;"><div style="display:flex;justify-content:space-between;margin-bottom:4px;"><span style="font-size:13px;">'+g[0]+'</span><span style="font-size:12px;color:var(--text2);">'+g[1]+' ('+p+'%)</span></div><div style="height:6px;background:var(--bg2);border-radius:3px;"><div style="height:6px;background:#7f77dd;border-radius:3px;width:'+p+'%"></div></div></div>';}).join('')||'<div class="empty-state">Sin datos</div>';
+  const cA={};todos.forEach(disco=>{const p=disco.split(' — ');if(p.length>=2){const a=p[1].trim();cA[a]=(cA[a]||0)+1;}});
+  document.getElementById('stats-artistas').innerHTML=Object.entries(cA).sort((a,b)=>b[1]-a[1]).slice(0,5).map((a,i)=>'<div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:0.5px solid var(--border);"><div style="font-size:18px;font-weight:500;color:var(--text3);min-width:24px;">'+(i+1)+'</div><div style="flex:1;font-size:13px;">'+a[0]+'</div><div style="font-size:12px;background:var(--teal-bg);color:var(--teal);padding:2px 8px;border-radius:20px;">'+a[1]+'x</div></div>').join('')||'<div class="empty-state">Sin datos</div>';
 }
 
 function verDetalle(i) {
-  const d = state.library[i];
-  if (!d) return;
-  const precio = d.precio_min ? 'USD '+d.precio_min : 'Sin datos';
-  const rating = d.rating ? '⭐ '+d.rating+'/5' : 'Sin rating';
-  const tracks = d.tracks && d.tracks.length ?
-    d.tracks.map(t => '<div style="display:flex;gap:8px;padding:4px 0;border-bottom:0.5px solid var(--border);font-size:12px;"><span style="color:var(--text3);min-width:24px;">'+t.posicion+'</span><span style="flex:1;">'+t.titulo+'</span><span style="color:var(--text3);">'+t.duracion+'</span></div>').join('') :
-    '<div style="font-size:13px;color:var(--text2)">Sin información de tracks</div>';
-  const resenaKey = 'resena_'+i+'_'+(d.discogs_id||d.album.replace(/\s/g,''));
-  const resenaGuardada = localStorage.getItem(resenaKey);
-  const modal = document.createElement('div');
-  modal.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:1000;display:flex;align-items:flex-end;';
-  modal.innerHTML =
+  const d=state.library[i]; if(!d)return;
+  const precio=d.precio_min?'USD '+d.precio_min:'Sin datos';
+  const rating=d.rating?'⭐ '+d.rating+'/5':'Sin rating';
+  const tracks=d.tracks&&d.tracks.length?d.tracks.map(t=>'<div style="display:flex;gap:8px;padding:4px 0;border-bottom:0.5px solid var(--border);font-size:12px;"><span style="color:var(--text3);min-width:24px;">'+t.posicion+'</span><span style="flex:1;">'+t.titulo+'</span><span style="color:var(--text3);">'+t.duracion+'</span></div>').join(''):'<div style="font-size:13px;color:var(--text2)">Sin información de tracks</div>';
+  const resenaKey='resena_'+i+'_'+(d.discogs_id||d.album.replace(/\s/g,''));
+  const resenaGuardada=localStorage.getItem(resenaKey);
+  const waxwingKey='waxwing_'+i+'_'+(d.discogs_id||d.album.replace(/\s/g,''));
+  const modal=document.createElement('div');
+  modal.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:1000;display:flex;align-items:flex-end;';
+  modal.innerHTML=
     '<div style="background:var(--bg);border-radius:16px 16px 0 0;padding:1.5rem;width:100%;max-height:85vh;overflow-y:auto;">'+
       '<div style="display:flex;gap:14px;align-items:flex-start;margin-bottom:16px;">'+
-        (d.imagen ? '<img src="'+d.imagen+'" style="width:80px;height:80px;object-fit:cover;border-radius:8px;flex-shrink:0;"/>' : '<div style="width:80px;height:80px;background:var(--bg2);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:32px;">'+(d.type==='vinyl'?'⚫':'💿')+'</div>')+
+        (d.imagen?'<img src="'+d.imagen+'" style="width:80px;height:80px;object-fit:cover;border-radius:8px;flex-shrink:0;"/>':(d.type==='vinyl'?'<div style="width:80px;height:80px;background:var(--bg2);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:32px;">⚫</div>':'<div style="width:80px;height:80px;background:var(--bg2);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:32px;">💿</div>'))+
         '<div style="flex:1;min-width:0;">'+
           '<div style="font-size:16px;font-weight:500;margin-bottom:4px;">'+d.album+'</div>'+
           '<div style="font-size:14px;color:var(--text2);margin-bottom:8px;">'+d.artist+'</div>'+
-          '<div style="display:flex;gap:8px;flex-wrap:wrap;">'+
-            (d.year?'<span class="badge badge-amber">'+d.year+'</span>':'')+
-            '<span class="badge badge-teal">'+d.genre+'</span>'+
-            (d.type==='vinyl'?'<span class="badge badge-purple">Vinilo</span>':'<span class="badge badge-blue">CD</span>')+
-          '</div>'+
+          '<div style="display:flex;gap:8px;flex-wrap:wrap;">'+(d.year?'<span class="badge badge-amber">'+d.year+'</span>':'')+'<span class="badge badge-teal">'+d.genre+'</span>'+(d.type==='vinyl'?'<span class="badge badge-purple">Vinilo</span>':'<span class="badge badge-blue">CD</span>')+'</div>'+
         '</div>'+
       '</div>'+
       '<div style="display:flex;gap:12px;margin-bottom:16px;">'+
-        '<div style="flex:1;background:var(--bg2);border-radius:8px;padding:10px;text-align:center;">'+
-          '<div style="font-size:11px;color:var(--text2);margin-bottom:4px;">VALORACIÓN</div>'+
-          '<div style="font-size:16px;font-weight:500;">'+rating+'</div>'+
-        '</div>'+
-        '<div style="flex:1;background:var(--bg2);border-radius:8px;padding:10px;text-align:center;">'+
-          '<div style="font-size:11px;color:var(--text2);margin-bottom:4px;">VALOR MÍNIMO</div>'+
-          '<div style="font-size:16px;font-weight:500;">'+precio+'</div>'+
-        '</div>'+
+        '<div style="flex:1;background:var(--bg2);border-radius:8px;padding:10px;text-align:center;"><div style="font-size:11px;color:var(--text2);margin-bottom:4px;">VALORACIÓN</div><div style="font-size:16px;font-weight:500;">'+rating+'</div></div>'+
+        '<div style="flex:1;background:var(--bg2);border-radius:8px;padding:10px;text-align:center;"><div style="font-size:11px;color:var(--text2);margin-bottom:4px;">VALOR MÍNIMO</div><div style="font-size:16px;font-weight:500;">'+precio+'</div></div>'+
       '</div>'+
       '<div style="font-size:12px;font-weight:500;color:var(--text2);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:8px;">Tracklist</div>'+
       tracks+
       '<div style="margin-top:16px;" id="resena-container-'+i+'">'+
-        (resenaGuardada ?
-          '<div style="background:var(--bg2);border-radius:8px;padding:1rem;">'+
-            '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">'+
-              '<div style="font-size:11px;font-weight:500;color:var(--text2);text-transform:uppercase;letter-spacing:0.05em;">📖 Reseña completa</div>'+
-              '<button onclick="generarResena('+i+',\''+resenaKey+'\',true)" style="font-size:11px;padding:4px 10px;background:none;border:0.5px solid var(--border);border-radius:6px;cursor:pointer;color:var(--text2);">🔄 Actualizar</button>'+
-            '</div>'+
-            '<div style="font-size:13px;line-height:1.8;color:var(--text);">'+resenaGuardada+'</div>'+
-          '</div>' :
+        (resenaGuardada?
+          '<div style="background:var(--bg2);border-radius:8px;padding:1rem;"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;"><div style="font-size:11px;font-weight:500;color:var(--text2);text-transform:uppercase;letter-spacing:0.05em;">📖 Reseña completa</div><button onclick="generarResena('+i+',\''+resenaKey+'\',true)" style="font-size:11px;padding:4px 10px;background:none;border:0.5px solid var(--border);border-radius:6px;cursor:pointer;color:var(--text2);">🔄 Actualizar</button></div><div style="font-size:13px;line-height:1.8;color:var(--text);">'+resenaGuardada+'</div></div>':
           '<button onclick="generarResena('+i+',\''+resenaKey+'\',false)" style="width:100%;padding:12px;background:var(--purple-bg);border:0.5px solid #7f77dd;border-radius:8px;font-size:14px;font-weight:500;cursor:pointer;color:var(--purple);">📖 Ver reseña completa</button>'
+        )+
+      '</div>'+
+      (d.type==='vinyl'?'<div style="margin-top:10px;" id="waxwing-container-'+i+'"><button onclick="generarConfigWaxwing('+i+')" style="width:100%;padding:12px;background:#2c2c2a;border:none;border-radius:8px;font-size:14px;font-weight:500;cursor:pointer;color:#f1efe8;">🎛️ Config Waxwing</button></div>':'')+
+      '<button onclick="this.parentElement.parentElement.remove()" style="width:100%;margin-top:10px;padding:12px;background:var(--bg2);border:none;border-radius:8px;font-size:14px;cursor:pointer;color:var(--text);">Cerrar</button>'+
+    '</div>';
+  modal.addEventListener('click',e=>{if(e.target===modal)modal.remove();});
+  document.body.appendChild(modal);
+}
+
+async function generarResena(i,resenaKey,forzar) {
+  const d=state.library[i]; if(!d)return;
+  const container=document.getElementById('resena-container-'+i);
+  container.innerHTML='<div style="text-align:center;padding:1rem;color:var(--text2);"><span class="spinner"></span> Generando reseña...</div>';
+  const tracklist=d.tracks&&d.tracks.length?d.tracks.map(t=>t.posicion+'. '+t.titulo+(t.duracion?' ('+t.duracion+')':'')).join(', '):'No disponible';
+  const prompt='Sos un crítico musical experto.\n\nEscribí una reseña completa del disco:\n\nÁlbum: "'+d.album+'"\nArtista: '+d.artist+'\n'+(d.year?'Año: '+d.year+'\n':'')+'Género: '+d.genre+'\nFormato: '+(d.type==='vinyl'?'Vinilo':'CD')+'\n'+(tracklist!=='No disponible'?'Tracklist: '+tracklist+'\n':'')+'\n1. **Contexto histórico**\n2. **Músicos y producción**\n3. **El sonido**\n4. **Canciones destacadas**\n5. **Opinión de la crítica**\n6. **Por qué vale la pena**\n\n'+(forzar?'Perspectiva diferente a la anterior.\n\n':'')+'Español, pasión. Máximo 400 palabras. Solo este disco.';
+  try {
+    const res=await fetch('/api/recomendar',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({prompt})});
+    const data=await res.json(); if(data.error)throw new Error(data.error);
+    const html=data.resultado.replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>').replace(/\n\n/g,'</p><p>').replace(/\n/g,'<br/>');
+    try{localStorage.setItem(resenaKey,'<p>'+html+'</p>');}catch(e){}
+    container.innerHTML='<div style="background:var(--bg2);border-radius:8px;padding:1rem;"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;"><div style="font-size:11px;font-weight:500;color:var(--text2);text-transform:uppercase;letter-spacing:0.05em;">📖 Reseña completa</div><button onclick="generarResena('+i+',\''+resenaKey+'\',true)" style="font-size:11px;padding:4px 10px;background:none;border:0.5px solid var(--border);border-radius:6px;cursor:pointer;color:var(--text2);">🔄 Actualizar</button></div><div style="font-size:13px;line-height:1.8;color:var(--text);"><p>'+html+'</p></div></div>';
+  } catch(e) { container.innerHTML='<div style="font-size:13px;color:var(--red);padding:8px;">Error: '+e.message+'</div>'; }
+}
+
+async function generarConfigWaxwing(i) {
+  const d=state.library[i]; if(!d)return;
+  const container=document.getElementById('waxwing-container-'+i);
+  const waxwingKey='waxwing_'+i+'_'+(d.discogs_id||d.album.replace(/\s/g,''));
+  const guardado=localStorage.getItem(waxwingKey);
+  if(guardado){container.innerHTML=crearPanelWaxwing(guardado,i,waxwingKey);return;}
+  container.innerHTML='<div style="text-align:center;padding:1rem;color:var(--text2);"><span class="spinner"></span> Calculando configuración óptima...</div>';
+  const prompt='Sos un experto en el preamplificador phono Waxwing de Parks Audio.\n\nGenerá la configuración óptima para:\n\nÁlbum: "'+d.album+'"\nArtista: '+d.artist+'\n'+(d.year?'Año: '+d.year+'\n':'')+'Género: '+d.genre+'\n'+(d.tracks&&d.tracks.length?'Tracklist: '+d.tracks.map(t=>t.titulo).join(', ')+'\n':'')+'\nConsiderá género, década, masterización típica, mono/stereo, ruido de superficie, etc.\n\nRespondé SOLO con JSON exacto:\n\n{"WARMTH":0,"AIR":0,"TREBLE":0,"BASS":0,"BASS_BOOST":"Off","HI":"20kHz","LO":"25Hz","MODE":"Stereo","MAGIC":"On","FX":"Off","DERUMBLE":"Off","EQ":"Phono","razon":"2-3 oraciones justificando"}\n\nRangos:\n- WARMTH,AIR,TREBLE,BASS: -6 a +6\n- BASS_BOOST: "Off" o "On"\n- HI: "5kHz","7kHz","8kHz","9kHz","10kHz","11kHz","12kHz","13kHz","15kHz","20kHz","30kHz","48kHz"\n- LO: "25Hz","30Hz","35Hz","40Hz","45Hz","50Hz","70Hz","100Hz"\n- MODE: "Stereo","Mono","Super Mono"\n- MAGIC: "Off" o "On"\n- FX: "Off","Tube 2H","Tape 3H"\n- DERUMBLE: "Off" o "On"\n- EQ: "Phono","Teldec LP","London LP","AES LP","NAB LP","Columbia LP","CCIR 78","Columbia 78"';
+  try {
+    const res=await fetch('/api/recomendar',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({prompt})});
+    const data=await res.json(); if(data.error)throw new Error(data.error);
+    const config=JSON.parse(data.resultado.replace(/```json|```/g,'').trim());
+    const configStr=JSON.stringify(config);
+    try{localStorage.setItem(waxwingKey,configStr);}catch(e){}
+    container.innerHTML=crearPanelWaxwing(configStr,i,waxwingKey);
+  } catch(e) {
+    container.innerHTML='<div style="font-size:13px;color:var(--red);padding:8px;">Error: '+e.message+'</div><button onclick="generarConfigWaxwing('+i+')" style="width:100%;margin-top:8px;padding:10px;background:#2c2c2a;border:none;border-radius:8px;font-size:13px;cursor:pointer;color:#f1efe8;">Reintentar</button>';
+  }
+}
+
+function crearPanelWaxwing(configStr,i,waxwingKey) {
+  let config; try{config=JSON.parse(configStr);}catch(e){return'<div style="color:var(--red);font-size:13px;">Error al leer configuración</div>';}
+  const param=(label,valor,color)=>'<div style="display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:0.5px solid var(--border);"><span style="font-size:12px;color:var(--text2);font-weight:500;">'+label+'</span><span style="font-size:13px;font-weight:600;color:'+(color||'var(--text)')+';">'+valor+'</span></div>';
+  const colorNum=v=>{const n=parseInt(v);if(n>0)return'#1d9e75';if(n<0)return'#d85a30';return'var(--text)';};
+  const fmt=v=>(parseInt(v)>0?'+'+v:''+v);
+  return '<div style="background:var(--bg2);border-radius:8px;padding:1rem;margin-top:4px;">'+
+    '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;"><div style="font-size:11px;font-weight:500;color:var(--text2);text-transform:uppercase;letter-spacing:0.05em;">🎛️ Config Waxwing</div><button onclick="localStorage.removeItem(\''+waxwingKey+'\');generarConfigWaxwing('+i+')" style="font-size:11px;padding:4px 10px;background:none;border:0.5px solid var(--border);border-radius:6px;cursor:pointer;color:var(--text2);">🔄 Recalcular</button></div>'+
+    '<div style="display:grid;grid-template-columns:1fr 1fr;gap:0 16px;">'+
+      '<div>'+param('WARMTH',fmt(config.WARMTH),colorNum(config.WARMTH))+param('AIR',fmt(config.AIR),colorNum(config.AIR))+param('TREBLE',fmt(config.TREBLE),colorNum(config.TREBLE))+param('BASS',fmt(config.BASS),colorNum(config.BASS))+param('BASS BOOST',config.BASS_BOOST,config.BASS_BOOST==='On'?'#1d9e75':'var(--text)')+param('FX',config.FX)+'</div>'+
+      '<div>'+param('HI',config.HI)+param('LO',config.LO)+param('MODE',config.MODE)+param('MAGIC',config.MAGIC,config.MAGIC==='On'?'#1d9e75':'var(--text)')+param('DERUMBLE',config.DERUMBLE,config.DERUMBLE==='On'?'#1d9e75':'var(--text)')+param('EQ',config.EQ)+'</div>'+
+    '</div>'+
+    (config.razon?'<div style="margin-top:10px;padding:8px;background:var(--bg);border-radius:6px;font-size:12px;color:var(--text2);line-height:1.6;">'+config.razon+'</div>':'')+
+  '</div>';
+}
+
+function verResenaArtistaByIndex(idx) {
+  const artista=_artistasCache[parseInt(idx)]; if(!artista)return;
+  const discos=state.library.filter(d=>d.artist===artista);
+  verResenaArtista(artista,discos.map(d=>d.album));
+}
+
+function verResenaArtista(artista,discografia) {
+  const resenaKey='resena_artista_'+artista.replace(/\s/g,'_').replace(/[^a-zA-Z0-9_]/g,'');
+  const resenaGuardada=localStorage.getItem(resenaKey);
+  window._artistaResena=artista; window._discografiaResena=discografia;
+  const modal=document.createElement('div');
+  modal.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:1000;display:flex;align-items:flex-end;';
+  modal.innerHTML=
+    '<div style="background:var(--bg);border-radius:16px 16px 0 0;padding:1.5rem;width:100%;max-height:85vh;overflow-y:auto;">'+
+      '<div style="margin-bottom:16px;"><div style="font-size:18px;font-weight:500;margin-bottom:4px;">'+artista+'</div><div style="font-size:13px;color:var(--text2);">'+discografia.length+' disco'+(discografia.length>1?'s':'')+' en tu biblioteca</div></div>'+
+      '<div id="resena-artista-container">'+
+        (resenaGuardada?
+          '<div style="background:var(--bg2);border-radius:8px;padding:1rem;"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;"><div style="font-size:11px;font-weight:500;color:var(--text2);text-transform:uppercase;letter-spacing:0.05em;">📖 Reseña del artista</div><button onclick="generarResenaArtista(window._artistaResena,window._discografiaResena,\''+resenaKey+'\',true)" style="font-size:11px;padding:4px 10px;background:none;border:0.5px solid var(--border);border-radius:6px;cursor:pointer;color:var(--text2);">🔄 Actualizar</button></div><div style="font-size:13px;line-height:1.8;color:var(--text);">'+resenaGuardada+'</div></div>':
+          '<button onclick="generarResenaArtista(window._artistaResena,window._discografiaResena,\''+resenaKey+'\',false)" style="width:100%;padding:12px;background:var(--purple-bg);border:0.5px solid #7f77dd;border-radius:8px;font-size:14px;font-weight:500;cursor:pointer;color:var(--purple);">📖 Generar reseña del artista</button>'
         )+
       '</div>'+
       '<button onclick="this.parentElement.parentElement.remove()" style="width:100%;margin-top:10px;padding:12px;background:var(--bg2);border:none;border-radius:8px;font-size:14px;cursor:pointer;color:var(--text);">Cerrar</button>'+
     '</div>';
-  modal.addEventListener('click', e => { if (e.target === modal) modal.remove(); });
+  modal.addEventListener('click',e=>{if(e.target===modal)modal.remove();});
   document.body.appendChild(modal);
 }
 
-async function generarResena(i, resenaKey, forzar) {
-  const d = state.library[i];
-  if (!d) return;
-  const container = document.getElementById('resena-container-'+i);
-  container.innerHTML = '<div style="text-align:center;padding:1rem;color:var(--text2);"><span class="spinner"></span> Generando reseña...</div>';
-  const tracklist = d.tracks && d.tracks.length
-    ? d.tracks.map(t => t.posicion+'. '+t.titulo+(t.duracion?' ('+t.duracion+')':'')).join(', ')
-    : 'No disponible';
-  const prompt =
-    'Sos un crítico musical experto con profundo conocimiento de la historia de la música.\n\n'+
-    'Escribí una reseña completa y detallada del siguiente disco:\n\n'+
-    'Álbum: "'+d.album+'"\nArtista: '+d.artist+'\n'+(d.year?'Año: '+d.year+'\n':'')+'Género: '+d.genre+'\n'+
-    'Formato: '+(d.type==='vinyl'?'Vinilo':'CD')+'\n'+(tracklist!=='No disponible'?'Tracklist: '+tracklist+'\n':'')+
-    '\nLa reseña debe incluir:\n'+
-    '1. **Contexto histórico** — época, qué pasaba en la música cuando salió\n'+
-    '2. **Músicos y producción** — integrantes, productor, estudio\n'+
-    '3. **El sonido** — estilo, instrumentación, producción\n'+
-    '4. **Canciones destacadas** — las 2-3 más importantes\n'+
-    '5. **Opinión de la crítica** — recepción y legado\n'+
-    '6. **Por qué vale la pena escucharlo**\n\n'+
-    (forzar?'Generá una perspectiva diferente a la anterior.\n\n':'')+
-    'Escribí en español, con pasión. Máximo 400 palabras. Enfocate exclusivamente en este disco.';
+async function generarResenaArtista(artista,discografia,resenaKey,forzar) {
+  const container=document.getElementById('resena-artista-container');
+  container.innerHTML='<div style="text-align:center;padding:1rem;color:var(--text2);"><span class="spinner"></span> Generando reseña...</div>';
+  const prompt='Sos un crítico musical experto.\n\nEscribí una reseña completa sobre "'+artista+'".\n\nDiscos en biblioteca: '+discografia.join(', ')+'\n\n1. **Historia y formación**\n2. **Evolución musical**\n3. **Estilo y características**\n4. **Discografía destacada**\n5. **Legado e influencia**\n6. **Dato curioso**\n\n'+(forzar?'Perspectiva diferente.\n\n':'')+'Español, pasión. Máximo 400 palabras. NO hables de discos específicos en detalle.';
   try {
-    const res = await fetch('/api/recomendar', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ prompt })
-    });
-    const data = await res.json();
-    if (data.error) throw new Error(data.error);
-    const html = data.resultado.replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>').replace(/\n\n/g,'</p><p>').replace(/\n/g,'<br/>');
-    try { localStorage.setItem(resenaKey, '<p>'+html+'</p>'); } catch(e) {}
-    container.innerHTML =
-      '<div style="background:var(--bg2);border-radius:8px;padding:1rem;">'+
-        '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">'+
-          '<div style="font-size:11px;font-weight:500;color:var(--text2);text-transform:uppercase;letter-spacing:0.05em;">📖 Reseña completa</div>'+
-          '<button onclick="generarResena('+i+',\''+resenaKey+'\',true)" style="font-size:11px;padding:4px 10px;background:none;border:0.5px solid var(--border);border-radius:6px;cursor:pointer;color:var(--text2);">🔄 Actualizar</button>'+
-        '</div>'+
-        '<div style="font-size:13px;line-height:1.8;color:var(--text);"><p>'+html+'</p></div>'+
-      '</div>';
-  } catch(e) {
-    container.innerHTML = '<div style="font-size:13px;color:var(--red);padding:8px;">Error: '+e.message+'</div>';
-  }
-}
-
-function verResenaArtistaIdx(artista) {
-  const discos = state.library.filter(d => d.artist === artista);
-  const discografia = discos.map(d => d.album);
-  verResenaArtista(artista, discografia);
-}
-
-function verResenaArtista(artista, discografia) {
-  const resenaKey = 'resena_artista_'+artista.replace(/\s/g,'_').replace(/[^a-zA-Z0-9_]/g,'');
-  const resenaGuardada = localStorage.getItem(resenaKey);
-  const modal = document.createElement('div');
-  modal.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:1000;display:flex;align-items:flex-end;';
-  modal.innerHTML =
-    '<div style="background:var(--bg);border-radius:16px 16px 0 0;padding:1.5rem;width:100%;max-height:85vh;overflow-y:auto;">'+
-      '<div style="margin-bottom:16px;">'+
-        '<div style="font-size:18px;font-weight:500;margin-bottom:4px;">'+artista+'</div>'+
-        '<div style="font-size:13px;color:var(--text2);">'+discografia.length+' disco'+(discografia.length>1?'s':'')+' en tu biblioteca</div>'+
-      '</div>'+
-      '<div id="resena-artista-container">'+
-        (resenaGuardada ?
-          '<div style="background:var(--bg2);border-radius:8px;padding:1rem;">'+
-            '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">'+
-              '<div style="font-size:11px;font-weight:500;color:var(--text2);text-transform:uppercase;letter-spacing:0.05em;">📖 Reseña del artista</div>'+
-              '<button onclick="generarResenaArtista(window._artistaResena,window._discografiaResena,\''+resenaKey+'\',true)" style="font-size:11px;padding:4px 10px;background:none;border:0.5px solid var(--border);border-radius:6px;cursor:pointer;color:var(--text2);">🔄 Actualizar</button>'+
-            '</div>'+
-            '<div style="font-size:13px;line-height:1.8;color:var(--text);">'+resenaGuardada+'</div>'+
-          '</div>' :
-          '<button onclick="generarResenaArtista(window._artistaResena,window._discografiaResena,\''+resenaKey+'\',false)" style="width:100%;padding:12px;background:var(--purple-bg);border:0.5px solid #7f77dd;border-radius:8px;font-size:14px;font-weight:500;cursor:pointer;color:var(--purple);">📖 Generar reseña del artista</button>'
-        )+
-      '</div>'+
-    (d.type==='vinyl' ?
-  '<div style="margin-top:10px;" id="waxwing-container-'+i+'">'+
-    '<button onclick="generarConfigWaxwing('+i+')" style="width:100%;padding:12px;background:#2c2c2a;border:none;border-radius:8px;font-size:14px;font-weight:500;cursor:pointer;color:#f1efe8;">🎛️ Config Waxwing</button>'+
-  '</div>' : ''
-)+
-  
-    '<button onclick="this.parentElement.parentElement.remove()" style="width:100%;margin-top:10px;padding:12px;background:var(--bg2);border:none;border-radius:8px;font-size:14px;cursor:pointer;color:var(--text);">Cerrar</button>'+
-    '</div>';
-  window._artistaResena = artista;
-  window._discografiaResena = discografia;
-  modal.addEventListener('click', e => { if (e.target === modal) modal.remove(); });
-  document.body.appendChild(modal);
-}
-
-async function generarResenaArtista(artista, discografia, resenaKey, forzar) {
-  const container = document.getElementById('resena-artista-container');
-  container.innerHTML = '<div style="text-align:center;padding:1rem;color:var(--text2);"><span class="spinner"></span> Generando reseña...</div>';
-  const prompt =
-    'Sos un crítico musical experto con profundo conocimiento de la historia de la música.\n\n'+
-    'Escribí una reseña completa sobre el artista o banda "'+artista+'".\n\n'+
-    'Discos en la biblioteca del usuario: '+discografia.join(', ')+'\n\n'+
-    'La reseña debe incluir:\n'+
-    '1. **Historia y formación** — orígenes, integrantes principales\n'+
-    '2. **Evolución musical** — cómo fue cambiando su sonido\n'+
-    '3. **Estilo y características** — qué los hace únicos\n'+
-    '4. **Discografía destacada** — sus álbumes más importantes\n'+
-    '5. **Legado e influencia** — qué aportaron a la música\n'+
-    '6. **Dato curioso** — algo interesante o poco conocido\n\n'+
-    (forzar?'Generá una perspectiva diferente a la anterior.\n\n':'')+
-    'Escribí en español, con pasión. Máximo 400 palabras. NO hables de discos específicos en detalle.';
-  try {
-    const res = await fetch('/api/recomendar', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ prompt })
-    });
-    const data = await res.json();
-    if (data.error) throw new Error(data.error);
-    const html = data.resultado.replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>').replace(/\n\n/g,'</p><p>').replace(/\n/g,'<br/>');
-    try { localStorage.setItem(resenaKey, '<p>'+html+'</p>'); } catch(e) {}
-    container.innerHTML =
-      '<div style="background:var(--bg2);border-radius:8px;padding:1rem;">'+
-        '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">'+
-          '<div style="font-size:11px;font-weight:500;color:var(--text2);text-transform:uppercase;letter-spacing:0.05em;">📖 Reseña del artista</div>'+
-          '<button onclick="generarResenaArtista(window._artistaResena,window._discografiaResena,\''+resenaKey+'\',true)" style="font-size:11px;padding:4px 10px;background:none;border:0.5px solid var(--border);border-radius:6px;cursor:pointer;color:var(--text2);">🔄 Actualizar</button>'+
-        '</div>'+
-        '<div style="font-size:13px;line-height:1.8;color:var(--text);"><p>'+html+'</p></div>'+
-      '</div>';
-  } catch(e) {
-    container.innerHTML = '<div style="font-size:13px;color:var(--red);padding:8px;">Error: '+e.message+'</div>';
-  }
-}
-async function generarConfigWaxwing(i) {
-  const d = state.library[i];
-  if (!d) return;
-  const container = document.getElementById('waxwing-container-'+i);
-  const waxwingKey = 'waxwing_'+i+'_'+(d.discogs_id||d.album.replace(/\s/g,''));
-  const guardado = localStorage.getItem(waxwingKey);
-
-  if (guardado) {
-    container.innerHTML = crearPanelWaxwing(guardado, i, waxwingKey);
-    return;
-  }
-
-  container.innerHTML = '<div style="text-align:center;padding:1rem;color:var(--text2);"><span class="spinner"></span> Calculando configuración óptima...</div>';
-
-  const prompt =
-    'Sos un experto en reproducción de vinilos y en el preamplificador phono Waxwing de Parks Audio.\n\n'+
-    'Generá la configuración óptima del Waxwing para el siguiente disco:\n\n'+
-    'Álbum: "'+d.album+'"\n'+
-    'Artista: '+d.artist+'\n'+
-    (d.year?'Año: '+d.year+'\n':'')+
-    'Género: '+d.genre+'\n'+
-    (d.tracks&&d.tracks.length?'Tracklist: '+d.tracks.map(t=>t.titulo).join(', ')+'\n':'')+
-    '\nConsiderá: el género musical, la década de grabación/prensado, el tipo de masterización típica de esa época, '+
-    'si es mono o stereo, si puede tener ruido de superficie, saturación de graves, brillos excesivos, etc.\n\n'+
-    'Respondé SOLO con este formato JSON exacto, sin texto adicional, sin explicaciones fuera del JSON:\n\n'+
-    '{\n'+
-    '  "WARMTH": 0,\n'+
-    '  "AIR": 0,\n'+
-    '  "TREBLE": 0,\n'+
-    '  "BASS": 0,\n'+
-    '  "BASS_BOOST": "Off",\n'+
-    '  "HI": "20kHz",\n'+
-    '  "LO": "25Hz",\n'+
-    '  "MODE": "Stereo",\n'+
-    '  "MAGIC": "On",\n'+
-    '  "FX": "Off",\n'+
-    '  "DERUMBLE": "Off",\n'+
-    '  "EQ": "Phono",\n'+
-    '  "razon": "Explicación breve de 2-3 oraciones justificando la configuración"\n'+
-    '}\n\n'+
-    'Rangos válidos:\n'+
-    '- WARMTH, AIR, TREBLE, BASS: enteros de -6 a +6\n'+
-    '- BASS_BOOST: "Off" o "On"\n'+
-    '- HI: uno de estos valores: "5kHz","7kHz","8kHz","9kHz","10kHz","11kHz","12kHz","13kHz","15kHz","20kHz","30kHz","48kHz"\n'+
-    '- LO: uno de estos valores: "25Hz","30Hz","35Hz","40Hz","45Hz","50Hz","70Hz","100Hz"\n'+
-    '- MODE: "Stereo", "Mono", "Super Mono"\n'+
-    '- MAGIC: "Off" o "On"\n'+
-    '- FX: "Off", "Tube 2H", "Tape 3H"\n'+
-    '- DERUMBLE: "Off" o "On"\n'+
-    '- EQ: "Phono", "Teldec LP", "London LP", "AES LP", "NAB LP", "Columbia LP", "CCIR 78", "Columbia 78"\n';
-
-  try {
-    const res = await fetch('/api/recomendar', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ prompt })
-    });
-    const data = await res.json();
-    if (data.error) throw new Error(data.error);
-
-    const texto = data.resultado.replace(/```json|```/g,'').trim();
-    const config = JSON.parse(texto);
-    const configStr = JSON.stringify(config);
-    try { localStorage.setItem(waxwingKey, configStr); } catch(e) {}
-    container.innerHTML = crearPanelWaxwing(configStr, i, waxwingKey);
-  } catch(e) {
-    container.innerHTML =
-      '<div style="font-size:13px;color:var(--red);padding:8px;">Error: '+e.message+'</div>'+
-      '<button onclick="generarConfigWaxwing('+i+')" style="width:100%;margin-top:8px;padding:10px;background:#2c2c2a;border:none;border-radius:8px;font-size:13px;cursor:pointer;color:#f1efe8;">Reintentar</button>';
-  }
-}
-
-function crearPanelWaxwing(configStr, i, waxwingKey) {
-  let config;
-  try { config = JSON.parse(configStr); } catch(e) { return '<div style="color:var(--red);font-size:13px;">Error al leer configuración</div>'; }
-
-  const param = (label, valor, color) =>
-    '<div style="display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:0.5px solid var(--border);">'+
-      '<span style="font-size:12px;color:var(--text2);font-weight:500;">'+label+'</span>'+
-      '<span style="font-size:13px;font-weight:600;color:'+(color||'var(--text)')+';">'+valor+'</span>'+
-    '</div>';
-
-  const colorNum = v => {
-    const n = parseInt(v);
-    if (n > 0) return '#1d9e75';
-    if (n < 0) return '#d85a30';
-    return 'var(--text)';
-  };
-
-  const fmt = v => (parseInt(v) > 0 ? '+'+v : ''+v);
-
-  return '<div style="background:var(--bg2);border-radius:8px;padding:1rem;margin-top:4px;">'+
-    '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">'+
-      '<div style="font-size:11px;font-weight:500;color:var(--text2);text-transform:uppercase;letter-spacing:0.05em;">🎛️ Config Waxwing</div>'+
-      '<button onclick="localStorage.removeItem(\''+waxwingKey+'\');generarConfigWaxwing('+i+')" style="font-size:11px;padding:4px 10px;background:none;border:0.5px solid var(--border);border-radius:6px;cursor:pointer;color:var(--text2);">🔄 Recalcular</button>'+
-    '</div>'+
-    '<div style="display:grid;grid-template-columns:1fr 1fr;gap:0 16px;">'+
-      '<div>'+
-        param('WARMTH', fmt(config.WARMTH), colorNum(config.WARMTH))+
-        param('AIR', fmt(config.AIR), colorNum(config.AIR))+
-        param('TREBLE', fmt(config.TREBLE), colorNum(config.TREBLE))+
-        param('BASS', fmt(config.BASS), colorNum(config.BASS))+
-        param('BASS BOOST', config.BASS_BOOST, config.BASS_BOOST==='On'?'#1d9e75':'var(--text)')+
-        param('FX', config.FX)+
-      '</div>'+
-      '<div>'+
-        param('HI', config.HI)+
-        param('LO', config.LO)+
-        param('MODE', config.MODE)+
-        param('MAGIC', config.MAGIC, config.MAGIC==='On'?'#1d9e75':'var(--text)')+
-        param('DERUMBLE', config.DERUMBLE, config.DERUMBLE==='On'?'#1d9e75':'var(--text)')+
-        param('EQ', config.EQ)+
-      '</div>'+
-    '</div>'+
-    (config.razon ?
-      '<div style="margin-top:10px;padding:8px;background:var(--bg);border-radius:6px;font-size:12px;color:var(--text2);line-height:1.6;">'+config.razon+'</div>'
-    : '')+
-  '</div>';
+    const res=await fetch('/api/recomendar',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({prompt})});
+    const data=await res.json(); if(data.error)throw new Error(data.error);
+    const html=data.resultado.replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>').replace(/\n\n/g,'</p><p>').replace(/\n/g,'<br/>');
+    try{localStorage.setItem(resenaKey,'<p>'+html+'</p>');}catch(e){}
+    container.innerHTML='<div style="background:var(--bg2);border-radius:8px;padding:1rem;"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;"><div style="font-size:11px;font-weight:500;color:var(--text2);text-transform:uppercase;letter-spacing:0.05em;">📖 Reseña del artista</div><button onclick="generarResenaArtista(window._artistaResena,window._discografiaResena,\''+resenaKey+'\',true)" style="font-size:11px;padding:4px 10px;background:none;border:0.5px solid var(--border);border-radius:6px;cursor:pointer;color:var(--text2);">🔄 Actualizar</button></div><div style="font-size:13px;line-height:1.8;color:var(--text);"><p>'+html+'</p></div></div>';
+  } catch(e) { container.innerHTML='<div style="font-size:13px;color:var(--red);padding:8px;">Error: '+e.message+'</div>'; }
 }
 
 function renderLibrary() {
-  const filter = (document.getElementById('lib-filter')?.value || '').toLowerCase();
-  const filtered = state.library.filter(d =>
-    !filter || d.album.toLowerCase().includes(filter) ||
-    d.artist.toLowerCase().includes(filter) ||
-    (d.genre||'').toLowerCase().includes(filter)
-  );
-  document.getElementById('lib-count').textContent = '('+state.library.length+' discos)';
-  const list = document.getElementById('library-list');
-  document.getElementById('pager').innerHTML = '';
-  if (!state.library.length) { list.innerHTML = '<div class="empty-state">No hay discos.<br/>Importá un Excel o agregá manualmente.</div>'; return; }
-  if (!filtered.length) { list.innerHTML = '<div class="empty-state">Sin resultados.</div>'; return; }
-
-  const porArtista = {};
-  filtered.forEach(d => {
-    const key = d.artist || 'Sin artista';
-    if (!porArtista[key]) porArtista[key] = [];
-    porArtista[key].push(d);
-  });
-  _artistasCache = artistas;
-  const artistas = Object.keys(porArtista).sort((a,b) => a.localeCompare(b));
-
-  list.innerHTML = artistas.map(artista => {
-    const discos = porArtista[artista];
-    const expandido = artistaExpandido === artista;
-    const imagen = discos.find(d => d.imagen)?.imagen || null;
-    const discosHtml = expandido ? discos.map(d => {
-      const i = state.library.indexOf(d);
+  const filter=(document.getElementById('lib-filter')?.value||'').toLowerCase();
+  const filtered=state.library.filter(d=>!filter||d.album.toLowerCase().includes(filter)||d.artist.toLowerCase().includes(filter)||(d.genre||'').toLowerCase().includes(filter));
+  document.getElementById('lib-count').textContent='('+state.library.length+' discos)';
+  const list=document.getElementById('library-list');
+  document.getElementById('pager').innerHTML='';
+  if(!state.library.length){list.innerHTML='<div class="empty-state">No hay discos.<br/>Importá un Excel o agregá manualmente.</div>';return;}
+  if(!filtered.length){list.innerHTML='<div class="empty-state">Sin resultados.</div>';return;}
+  const porArtista={};
+  filtered.forEach(d=>{const k=d.artist||'Sin artista';if(!porArtista[k])porArtista[k]=[];porArtista[k].push(d);});
+  const artistas=Object.keys(porArtista).sort((a,b)=>a.localeCompare(b));
+  _artistasCache=artistas;
+  list.innerHTML=artistas.map((artista,artistaIdx)=>{
+    const discos=porArtista[artista];
+    const expandido=artistaExpandido===artista;
+    const imagen=discos.find(d=>d.imagen)?.imagen||null;
+    const discosHtml=expandido?discos.map(d=>{
+      const i=state.library.indexOf(d);
       return '<div class="library-row" onclick="verDetalle('+i+')" style="cursor:pointer;padding-left:48px;">'+
-        '<div class="disc-icon" style="overflow:hidden;border-radius:50%;width:32px;height:32px;min-width:32px;">'+
-          (d.imagen ? '<img src="'+d.imagen+'" style="width:32px;height:32px;object-fit:cover;border-radius:50%;" onerror="this.parentElement.innerHTML=\''+(d.type==='vinyl'?'⚫':'💿')+'\'"/>' : (d.type==='vinyl'?'⚫':'💿'))+
-        '</div>'+
-        '<div class="disc-info">'+
-          '<div class="disc-title">'+d.album+'</div>'+
-          '<div class="disc-sub">'+(d.year?d.year+' · ':'')+d.genre+(d.rating?' · ⭐'+d.rating:'')+'</div>'+
-        '</div>'+
+        '<div class="disc-icon" style="overflow:hidden;border-radius:50%;width:32px;height:32px;min-width:32px;">'+(d.imagen?'<img src="'+d.imagen+'" style="width:32px;height:32px;object-fit:cover;border-radius:50%;" onerror="this.parentElement.innerHTML=\''+(d.type==='vinyl'?'⚫':'💿')+'\'"/>':(d.type==='vinyl'?'⚫':'💿'))+'</div>'+
+        '<div class="disc-info"><div class="disc-title">'+d.album+'</div><div class="disc-sub">'+(d.year?d.year+' · ':'')+d.genre+(d.rating?' · ⭐'+d.rating:'')+'</div></div>'+
         '<span class="disc-type">'+(d.type==='vinyl'?'Vinilo':'CD')+'</span>'+
-        '<button onclick="event.stopPropagation();verResenaArtistaByIndex(\''+artistas.indexOf(artista)+'\')" style="font-size:11px;padding:4px 8px;background:var(--purple-bg);border:0.5px solid #7f77dd;border-radius:6px;cursor:pointer;color:var(--purple);white-space:nowrap;margin-right:8px;">📖 Artista</button>'+
-        '</div>'+
-    }).join('') : '';
-
-    const artistaEsc = artista.replace(/\\/g,'\\\\').replace(/'/g,"\\'");
+        '<button class="del-btn" onclick="event.stopPropagation();eliminarDisco('+i+')" style="flex-shrink:0;">✕</button>'+
+      '</div>';
+    }).join(''):'';
     return '<div>'+
-      '<div onclick="toggleArtista(\''+artistaEsc+'\')" style="display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:0.5px solid var(--border);cursor:pointer;">'+
-        '<div style="width:40px;height:40px;border-radius:50%;background:var(--bg2);border:0.5px solid var(--border);display:flex;align-items:center;justify-content:center;flex-shrink:0;overflow:hidden;">'+
-          (imagen ? '<img src="'+imagen+'" style="width:40px;height:40px;object-fit:cover;border-radius:50%;"/>' : '<span style="font-size:18px;">🎵</span>')+
-        '</div>'+
-        '<div style="flex:1;min-width:0;">'+
-          '<div style="font-size:14px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">'+artista+'</div>'+
-          '<div style="font-size:12px;color:var(--text2);">'+discos.length+' disco'+(discos.length>1?'s':'')+'</div>'+
-        '</div>'+
-        '<button onclick="event.stopPropagation();verResenaArtistaIdx(\''+artistaEsc+'\')" style="font-size:11px;padding:4px 8px;background:var(--purple-bg);border:0.5px solid #7f77dd;border-radius:6px;cursor:pointer;color:var(--purple);white-space:nowrap;margin-right:8px;">📖 Artista</button>'+
+      '<div onclick="toggleArtista('+artistaIdx+')" style="display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:0.5px solid var(--border);cursor:pointer;">'+
+        '<div style="width:40px;height:40px;border-radius:50%;background:var(--bg2);border:0.5px solid var(--border);display:flex;align-items:center;justify-content:center;flex-shrink:0;overflow:hidden;">'+(imagen?'<img src="'+imagen+'" style="width:40px;height:40px;object-fit:cover;border-radius:50%;"/>':'<span style="font-size:18px;">🎵</span>')+'</div>'+
+        '<div style="flex:1;min-width:0;"><div style="font-size:14px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">'+artista+'</div><div style="font-size:12px;color:var(--text2);">'+discos.length+' disco'+(discos.length>1?'s':'')+'</div></div>'+
+        '<button onclick="event.stopPropagation();verResenaArtistaByIndex('+artistaIdx+')" style="font-size:11px;padding:4px 8px;background:var(--purple-bg);border:0.5px solid #7f77dd;border-radius:6px;cursor:pointer;color:var(--purple);white-space:nowrap;margin-right:8px;">📖 Artista</button>'+
         '<span style="font-size:14px;color:var(--text3);">'+(expandido?'▾':'▸')+'</span>'+
       '</div>'+
-      (expandido ? '<div style="background:var(--bg2);border-radius:var(--radius);margin:4px 0 8px 0;">'+discosHtml+'</div>' : '')+
+      (expandido?'<div style="background:var(--bg2);border-radius:var(--radius);margin:4px 0 8px 0;">'+discosHtml+'</div>':'')+
     '</div>';
   }).join('');
 }
 
-function toggleArtista(artista) {
-  artistaExpandido = artistaExpandido === artista ? null : artista;
+function toggleArtista(idx) {
+  const artista=_artistasCache[idx];
+  artistaExpandido=artistaExpandido===artista?null:artista;
   renderLibrary();
 }
 
-function changePage(dir) { currentPage += dir; renderLibrary(); }
+function changePage(dir){currentPage+=dir;renderLibrary();}
 
 function agregarDisco() {
-  const album = document.getElementById('new-album').value.trim();
-  const artist = document.getElementById('new-artist').value.trim();
-  if (!album || !artist) { alert('Completá álbum y artista.'); return; }
-  state.library.push({ album, artist, genre: document.getElementById('new-genre').value, type: document.getElementById('new-type').value, year: document.getElementById('new-year').value.trim() });
-  saveLibrary(); renderLibrary(); renderGeneros();
-  ['new-album','new-artist','new-year'].forEach(id => document.getElementById(id).value = '');
+  const album=document.getElementById('new-album').value.trim(),artist=document.getElementById('new-artist').value.trim();
+  if(!album||!artist){alert('Completá álbum y artista.');return;}
+  state.library.push({album,artist,genre:document.getElementById('new-genre').value,type:document.getElementById('new-type').value,year:document.getElementById('new-year').value.trim()});
+  saveLibrary();renderLibrary();renderGeneros();
+  ['new-album','new-artist','new-year'].forEach(id=>document.getElementById(id).value='');
 }
 
-function eliminarDisco(i) { state.library.splice(i, 1); saveLibrary(); renderLibrary(); renderGeneros(); }
+function eliminarDisco(i){state.library.splice(i,1);saveLibrary();renderLibrary();renderGeneros();}
 
-function limpiarBiblioteca() {
-  if (!confirm('¿Vaciar toda la biblioteca? ('+state.library.length+' discos)')) return;
-  state.library = []; saveLibrary(); renderLibrary(); renderGeneros();
+function limpiarBiblioteca(){
+  if(!confirm('¿Vaciar toda la biblioteca? ('+state.library.length+' discos)'))return;
+  state.library=[];saveLibrary();renderLibrary();renderGeneros();
 }
 
 function importarExcel(input) {
-  const file = input.files[0]; if (!file) return;
-  const resultEl = document.getElementById('import-result');
-  resultEl.innerHTML = '<div class="import-result warning">Leyendo archivo...</div>';
-  const reader = new FileReader();
-  reader.onload = function(e) {
-    try {
-      const wb = XLSX.read(new Uint8Array(e.target.result), { type: 'array' });
-      const rows = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]], { defval: '' });
-      if (!rows.length) { resultEl.innerHTML = '<div class="import-result error">El archivo está vacío.</div>'; return; }
-      let added = 0, skipped = 0;
-      rows.forEach(row => {
-        const album = (row['Album']||row['album']||row['ALBUM']||'').toString().trim();
-        const artist = (row['Artista']||row['artista']||row['Artist']||row['artist']||'').toString().trim();
-        if (!album || !artist) { skipped++; return; }
-        const typeRaw = (row['Tipo']||row['tipo']||'vinyl').toString().trim().toLowerCase();
-        if (state.library.some(d => d.album.toLowerCase()===album.toLowerCase() && d.artist.toLowerCase()===artist.toLowerCase())) { skipped++; return; }
-        state.library.push({ album, artist, genre: (row['Genero']||row['genero']||row['Género']||'Otro').toString().trim()||'Otro', type: typeRaw==='cd'?'cd':'vinyl', year: (row['Año']||row['año']||row['Year']||'').toString().trim() });
+  const file=input.files[0];if(!file)return;
+  const resultEl=document.getElementById('import-result');
+  resultEl.innerHTML='<div class="import-result warning">Leyendo archivo...</div>';
+  const reader=new FileReader();
+  reader.onload=function(e){
+    try{
+      const wb=XLSX.read(new Uint8Array(e.target.result),{type:'array'});
+      const rows=XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]],{defval:''});
+      if(!rows.length){resultEl.innerHTML='<div class="import-result error">El archivo está vacío.</div>';return;}
+      let added=0,skipped=0;
+      rows.forEach(row=>{
+        const album=(row['Album']||row['album']||row['ALBUM']||'').toString().trim();
+        const artist=(row['Artista']||row['artista']||row['Artist']||row['artist']||'').toString().trim();
+        if(!album||!artist){skipped++;return;}
+        const typeRaw=(row['Tipo']||row['tipo']||'vinyl').toString().trim().toLowerCase();
+        if(state.library.some(d=>d.album.toLowerCase()===album.toLowerCase()&&d.artist.toLowerCase()===artist.toLowerCase())){skipped++;return;}
+        state.library.push({album,artist,genre:(row['Genero']||row['genero']||row['Género']||'Otro').toString().trim()||'Otro',type:typeRaw==='cd'?'cd':'vinyl',year:(row['Año']||row['año']||row['Year']||'').toString().trim()});
         added++;
       });
-      saveLibrary(); renderLibrary(); renderGeneros();
-      resultEl.innerHTML = added > 0 ? '<div class="import-result success">✓ '+added+' discos importados.'+(skipped>0?' '+skipped+' omitidos.':'')+'</div>' : '<div class="import-result warning">Sin discos nuevos. '+skipped+' omitidos.</div>';
-    } catch(err) { resultEl.innerHTML = '<div class="import-result error">Error: '+err.message+'</div>'; }
+      saveLibrary();renderLibrary();renderGeneros();
+      resultEl.innerHTML=added>0?'<div class="import-result success">✓ '+added+' discos importados.'+(skipped>0?' '+skipped+' omitidos.':'')+'</div>':'<div class="import-result warning">Sin discos nuevos. '+skipped+' omitidos.</div>';
+    }catch(err){resultEl.innerHTML='<div class="import-result error">Error: '+err.message+'</div>';}
   };
-  reader.readAsArrayBuffer(file); input.value = '';
+  reader.readAsArrayBuffer(file);input.value='';
 }
 
-const zone = document.getElementById('import-zone');
-zone.addEventListener('dragover', e => { e.preventDefault(); zone.style.borderColor = '#7f77dd'; });
-zone.addEventListener('dragleave', () => { zone.style.borderColor = ''; });
-zone.addEventListener('drop', e => {
-  e.preventDefault(); zone.style.borderColor = '';
-  const file = e.dataTransfer.files[0];
-  if (file) { const dt = new DataTransfer(); dt.items.add(file); document.getElementById('xlsx-input').files = dt.files; importarExcel(document.getElementById('xlsx-input')); }
-});
+const zone=document.getElementById('import-zone');
+zone.addEventListener('dragover',e=>{e.preventDefault();zone.style.borderColor='#7f77dd';});
+zone.addEventListener('dragleave',()=>{zone.style.borderColor='';});
+zone.addEventListener('drop',e=>{e.preventDefault();zone.style.borderColor='';const file=e.dataTransfer.files[0];if(file){const dt=new DataTransfer();dt.items.add(file);document.getElementById('xlsx-input').files=dt.files;importarExcel(document.getElementById('xlsx-input'));}});
 
 renderLibrary();
 renderGeneros();
