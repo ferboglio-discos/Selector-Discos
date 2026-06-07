@@ -1037,26 +1037,20 @@ function renderDeseos() {
 }
 
 function renderListaDelDia(texto, resultDiv) {
-  const lineas = texto.split('\n');
   let arco = '';
-  const bloques = [];
-  let bloqueActual = '';
+  const arcoMatch = texto.match(/\*\*ARCO DE LA SESIÓN:\*\*\s*(.+?)(?=\n\*\*1\.|\n\n\*\*1\.)/s);
+  if (arcoMatch) arco = arcoMatch[1].trim();
 
-  lineas.forEach(linea => {
-    if (linea.startsWith('**ARCO DE LA SESIÓN:**')) {
-      arco = linea.replace('**ARCO DE LA SESIÓN:**', '').trim();
-    } else if (linea.match(/^\*\*\d+\./)) {
-      if (bloqueActual) bloques.push(bloqueActual.trim());
-      bloqueActual = linea + '\n';
-    } else {
-      bloqueActual += linea + '\n';
-    }
-  });
-  if (bloqueActual.trim()) bloques.push(bloqueActual.trim());
+  // Extraer los 5 bloques numerados
+  const bloques = [];
+  const regex = /\*\*(\d+)\.\s+"(.+?)"[^*]*\*\*([\s\S]*?)(?=\*\*\d+\.|---$|$)/g;
+  let match;
+  while ((match = regex.exec(texto)) !== null) {
+    bloques.push(match[0].trim());
+  }
 
   const colors = ['#7f77dd','#1d9e75','#d85a30','#0c447c','#633806'];
   const discosRecomendados = [];
-
   let html = '';
 
   if (arco) {
@@ -1083,14 +1077,13 @@ function renderListaDelDia(texto, resultDiv) {
           '<div style="font-size:14px;line-height:1.6;"><p>'+bloqueHtml+'</p></div>'+
         '</div>'+
       '</div>'+
-      (info&&!esSpotify?'<button id="spotify-lista-btn-'+i+'" class="spotify-search-btn" onclick="buscarEnSpotifyLista('+i+',\''+( info.album).replace(/'/g,"\\'")+'\',\''+( info.artist).replace(/'/g,"\\'")+'\')">🎵 Buscar en Spotify</button>':'')+
+      (info&&!esSpotify?'<button id="spotify-lista-btn-'+i+'" class="spotify-search-btn" onclick="buscarEnSpotifyLista('+i+',\''+info.album.replace(/'/g,"\\'")+'\',\''+info.artist.replace(/'/g,"\\'")+'\')">🎵 Buscar en Spotify</button>':'')+
     '</div>';
   }).join('');
 
-  resultDiv.innerHTML = html;
+  resultDiv.innerHTML = html || '<div class="rec-card" style="color:var(--red)">No se pudo generar la lista.</div>';
   if (discosRecomendados.length) guardarHistorialLocal(discosRecomendados);
 }
-
 async function buscarEnSpotifyLista(i, album, artist) {
   const btn = document.getElementById('spotify-lista-btn-'+i);
   if (btn) { btn.disabled = true; btn.textContent = 'Buscando...'; }
