@@ -593,7 +593,10 @@ function recomendar() {
     'Sos un sommelier musical experto y estricto.\n\nFECHA DE HOY: '+hoy.getDate()+' de '+hoy.toLocaleString('es-AR',{month:'long'})+' de '+hoy.getFullYear()+'\n\n'+
     'EFEMÉRIDES: Si hoy es fecha notable en la historia del rock (nacimiento/muerte de músico, hito cultural) escribí "📅 EFEMÉRIDE:" terminando en "---". NO menciones lanzamientos de álbumes. Omití si no hay nada certero.\n\n'+
     'BIBLIOTECA (SOLO podés recomendar de esta lista):\n\n'+libraryText+'\n\nREGLA ABSOLUTA: Solo discos de la lista. NUNCA inventes.\n\n'+
-    histReciente+'\n\nCONTEXTO:\n- Momento: '+tod.name+' ('+timeStr+'), '+getDayType()+'\n- Época: '+s.name+' (hemisferio sur)\n- '+weatherText+'\n- Estado de ánimo: '+state.mood+'\n- Ocasión: '+ocasion+'\n- '+generoTexto+'\n'+(nota?'- Nota: '+nota+'\n':'')+
+    histReciente+'\n\nCONTEXTO:\n- Momento: '+tod.name+' ('+timeStr+'), '+getDayType()+'\n- Época: '+s.name+' (hemisferio sur)\n- '+weatherText+'- Estado de ánimo: '+state.mood+'\n'+
+'- Ocasión: '+ocasion+'\n'+
+'- Contexto de la ocasión: '+getContextoOcasion(ocasion)+'\n'+
+'- '+generoTexto+'\n'+'\n'+(nota?'- Nota: '+nota+'\n':'')+
     '\nRecomendá exactamente 3 discos:\n\n**1. "Álbum" — Artista (Año)**\n[género] [formato]\n\nRazón: 2-3 oraciones.\n\nCómo escucharlo: sugerencia.\n\n---\n\n**2. "Álbum" — Artista (Año)**\n[género] [formato]\n\nRazón: 2-3 oraciones.\n\nCómo escucharlo: sugerencia.\n\n---\n\n**3. "Álbum" — Artista (Año)**\n[género] [formato]\n\nRazón: 2-3 oraciones.\n\nCómo escucharlo: sugerencia.\n\n---';
   fetch('/api/recomendar',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({prompt})})
     .then(r=>r.json()).then(data=>{if(data.error)throw new Error(data.error);renderResultados(data.resultado,resultDiv);})
