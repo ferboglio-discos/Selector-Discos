@@ -961,7 +961,155 @@ function renderDeseos() {
     '</div>'
   ).join('');
 }
-  
+  async function listaDelDia() {
+  if (!state.mood) { alert('Seleccioná un estado de ánimo.'); return; }
+  const btn = document.getElementById('btn-playlist');
+  const resultDiv = document.getElementById('resultado');
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner"></span>Armando lista del día...';
+  resultDiv.innerHTML = '';
+
+  const s = getSeason(), tod = getTimeOfDay(), w = state.weather;
+  const weatherText = w ? 'Clima: '+w.desc+', '+w.temp+'°C' : 'Clima no disponible';
+  const ocasion = document.getElementById('ocasion').value || 'Sin especificar';
+  const nota = document.getElementById('nota-extra').value.trim();
+  const hoy = new Date();
+  const histReciente = getHistorialTexto();
+
+  // Obtener discos de biblioteca
+  const libTexto = state.library
+    .map((d,i) => (i+1)+'. "'+d.album+'" de '+d.artist+(d.year?' ('+d.year+')':'')+(d.genre?', '+d.genre:'')+' ['+(d.type==='vinyl'?'Vinilo':'CD')+']')
+    .join('\n');
+
+  // Obtener candidatos de Spotify
+  let spotifyTexto = '';
+  const pref = JSON.parse(localStorage.getItem('preferencias') || '{"generos":[],"decadas":[]}');
+  if (pref.generos.length || pref.decadas.length) {
+    try {
+      const spotRes = await fetch('/api/spotify/recomendar', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ generos: pref.generos, decadas: pref.decadas, mood: state.mood, ocasion, clima: weatherText })
+      });
+      const spotData = await spotRes.json();
+      if (spotData.resultados && spotData.resultados.length) {
+        spotifyTexto = '\n\nCANDIDATOS SPOTIFY (podés incluir hasta 2 de estos):\n'+
+          spotData.resultados.map((d,i) => (i+1)+'. "'+d.album+'" de '+d.artist+(d.year?' ('+d.year+')':'')).join('\n');
+        window._spotifyResultados = spotData.resultados;
+      }
+    } catch(e) {}
+  }
+
+  const prompt =
+    'Sos un sommelier musical experto y DJ de sesiones de vinilo.\n\n'+
+    'FECHA: '+hoy.getDate()+' de '+hoy.toLocaleString('es-AR',{month:'long'})+' de '+hoy.getFullYear()+'\n\n'+
+    'Tu tarea es armar una LISTA DE REPRODUCCIÓN DEL DÍA de exactamente 5 discos que formen una experiencia musical coherente y progresiva.\n\n'+
+    'BIBLIOTECA DISPONIBLE:\n\n'+libTexto+'\n\n'+
+    'REGLA: Al menos 3 discos deben venir de la biblioteca. Máximo 2 de Spotify.'+spotifyTexto+'\n\n'+
+    histReciente+'\n\n'+
+    'CONTEXTO:\n- Momento: '+tod.name+', '+getDayType()+'\n- Época: '+s.name+'\n- '+weatherText+'\n'+
+    '- Estado de ánimo: '+state.mood+'\n- Ocasión: '+ocasion+'\n- Contexto: '+getContextoOcasion(ocasion)+'\n'+
+    (nota?'- Nota: '+nota+'\n':'')+
+    '\nIMPORTANTE: Los 5 discos deben tener un ARCO NARRATIVO — pensá en la energía, el tempo y la emoción de cada disco y cómo fluyen uno tras otro. Explicá brevemente la lógica de la secuencia.\n\n'+
+    'Formato:\n\n'+
+    '**ARCO DE LA SESIÓN:** [Una oración describiendo el viaje musical propuesto]\n\n'+
+    '**1. "Álbum" — Artista (Año)** [Biblioteca/Spotify]\n[género]\nRol en la sesión: por qué va en esta posición.\n\n'+
+    '**2. "Álbum" — Artista (Año)** [Biblioteca/Spotify]\n[género]\nRol en la sesión: por qué va en esta posición.\n\n'+
+    '**3. "Álbum" — Artista (Año)** [Biblioteca/Spotify]\n[género]\nRol en la sesión: por qué va en esta posición.\n\n'+
+    '**4. "Álbum" — Artista (Año)** [Biblioteca/Spotify]\n[género]\nRol en la sesión: por qué va en esta posición.\n\n'+
+    '**5. "Álbum" — Artista (Año)** [Biblioteca/Spotify]\n[género]\nRol en la sesión: por qué va en esta posición.\n\n---';
+
+  try {
+    const res = await fetch('/api/recomendar', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ prompt })
+    });
+    const data = await res.json();
+    if (data.error) throw new Error(data.error);
+    renderListaDelDia(data.resultado, resultDiv);
+  } catch(e) {
+    resultDiv.innerHTML = '<div class="rec-card" style="color:var(--red)">Error: '+e.message+'</div>';
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = '🎵 Lista del día';
+  }
+}
+
+function renderListaDelDia(texto, resultDiv) {
+  const lineas = texto.split('\n');
+  let arco = '';
+  const bloques = [];
+  let bloqueActual = '';
+
+  lineas.forEach(linea => {
+    if (linea.startsWith('**ARCO DE LA SESIÓN:**')) {
+      arco = linea.replace('**ARCO DE LA SESIÓN:**', '').trim();
+    } else if (linea.match(/^\*\*\d+\./)) {
+      if (bloqueActual) bloques.push(bloqueActual.trim());
+      bloqueActual = linea + '\n';
+    } else {
+      bloqueActual += linea + '\n';
+    }
+  });
+  if (bloqueActual.trim()) bloques.push(bloqueActual.trim());
+
+  const colors = ['#7f77dd','#1d9e75','#d85a30','#0c447c','#633806'];
+  const discosRecomendados = [];
+
+  let html = '';
+
+  if (arco) {
+    html += '<div style="background:var(--bg);border:0.5px solid var(--border);border-radius:var(--radius-lg);padding:1rem 1.25rem;margin-top:16px;margin-bottom:4px;">'+
+      '<div style="font-size:11px;font-weight:500;color:var(--text2);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:6px;">🎵 Lista del día · Arco de la sesión</div>'+
+      '<div style="font-size:14px;color:var(--text);font-style:italic;">'+arco+'</div>'+
+    '</div>';
+  }
+
+  html += bloques.slice(0,5).map((bloque, i) => {
+    const info = extraerAlbumArtista(bloque);
+    if (info) discosRecomendados.push(info.album+(info.artist?' — '+info.artist:''));
+    const esSpotify = bloque.includes('[Spotify]');
+    const bloqueHtml = bloque
+      .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+      .replace(/\n\n/g, '</p><p>')
+      .replace(/\n/g, '<br/>');
+    return '<div class="rec-card" style="border-left:4px solid '+colors[i]+';">'+
+      '<div style="display:flex;gap:14px;align-items:flex-start;margin-bottom:8px;">'+
+        '<div style="background:'+colors[i]+';color:white;width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:600;flex-shrink:0;">'+(i+1)+'</div>'+
+        '<div id="rec-cover-lista-'+i+'" class="rec-cover-placeholder" style="width:56px;height:56px;">⚫</div>'+
+        '<div style="flex:1;min-width:0;">'+
+          '<div style="font-size:11px;color:var(--text3);margin-bottom:2px;">'+(esSpotify?'Spotify':'Mi biblioteca')+'</div>'+
+          '<div style="font-size:14px;line-height:1.6;"><p>'+bloqueHtml+'</p></div>'+
+        '</div>'+
+      '</div>'+
+      (info&&!esSpotify?'<button id="spotify-lista-btn-'+i+'" class="spotify-search-btn" onclick="buscarEnSpotifyLista('+i+',\''+( info.album).replace(/'/g,"\\'")+'\',\''+( info.artist).replace(/'/g,"\\'")+'\')">🎵 Buscar en Spotify</button>':'')+
+    '</div>';
+  }).join('');
+
+  resultDiv.innerHTML = html;
+  if (discosRecomendados.length) guardarHistorialLocal(discosRecomendados);
+}
+
+async function buscarEnSpotifyLista(i, album, artist) {
+  const btn = document.getElementById('spotify-lista-btn-'+i);
+  if (btn) { btn.disabled = true; btn.textContent = 'Buscando...'; }
+  try {
+    const res = await fetch('/api/spotify/buscar?album='+encodeURIComponent(album)+'&artist='+encodeURIComponent(artist));
+    const data = await res.json();
+    if (data.found) {
+      if (data.image) {
+        const cover = document.getElementById('rec-cover-lista-'+i);
+        if (cover) cover.innerHTML = '<img src="'+data.image+'" style="width:56px;height:56px;object-fit:cover;border-radius:var(--radius);" alt="cover"/>';
+      }
+      if (btn) btn.outerHTML = '<a href="'+data.url+'" target="_blank" class="spotify-link" style="margin-top:8px;">Abrir en Spotify</a>';
+    } else {
+      if (btn) { btn.disabled = false; btn.textContent = 'No encontrado en Spotify'; }
+    }
+  } catch(e) {
+    if (btn) { btn.disabled = false; btn.textContent = 'Error al buscar'; }
+  }
+}
   function renderLibrary() {
   const filter=(document.getElementById('lib-filter')?.value||'').toLowerCase();
   const filtered=state.library.filter(d=>!filter||d.album.toLowerCase().includes(filter)||d.artist.toLowerCase().includes(filter)||(d.genre||'').toLowerCase().includes(filter));
