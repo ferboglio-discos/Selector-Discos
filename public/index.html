@@ -1105,6 +1105,182 @@ async function buscarEnSpotifyLista(i, album, artist) {
     if (btn) { btn.disabled = false; btn.textContent = 'Error al buscar'; }
   }
 }
+  
+  async function modoDescubrir() {
+  if (!state.library.length) { alert('Tu biblioteca está vacía.'); return; }
+  const btn = document.getElementById('btn-descubrir');
+  const resultDiv = document.getElementById('resultado');
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner"></span>Analizando tu colección...';
+  resultDiv.innerHTML = '';
+
+  const hoy = new Date();
+  const pref = JSON.parse(localStorage.getItem('preferencias') || '{"generos":[],"decadas":[]}');
+
+  // Analizar colección
+  const generos = [...new Set(state.library.map(d => d.genre).filter(Boolean))];
+  const artistas = [...new Set(state.library.map(d => d.artist).filter(Boolean))].slice(0, 20);
+  const decadas = [...new Set(state.library.map(d => {
+    if (!d.year) return null;
+    return Math.floor(parseInt(d.year) / 10) * 10 + 's';
+  }).filter(Boolean))];
+
+  // Obtener valoraciones positivas
+  let gustaron = '';
+  try {
+    const vr = await fetch('/api/valoraciones');
+    const vd = await vr.json();
+    const positivos = vd.valoraciones.filter(v => v.valor === '👍').map(v => v.album+' de '+v.artist);
+    if (positivos.length) gustaron = '\nDISCOS QUE LE GUSTARON DE SPOTIFY: '+positivos.join(', ');
+  } catch(e) {}
+
+  // Obtener candidatos de Spotify basados en preferencias
+  let spotifyCandidatos = [];
+  if (pref.generos.length || pref.decadas.length) {
+    try {
+      const spotRes = await fetch('/api/spotify/recomendar', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ generos: pref.generos.length ? pref.generos : generos.slice(0,3), decadas: pref.decadas.length ? pref.decadas : decadas.slice(0,3), mood: state.mood || 'Tranquilo', ocasion: 'Sin especificar', clima: '' })
+      });
+      const spotData = await spotRes.json();
+      if (spotData.resultados && spotData.resultados.length) {
+        // Filtrar los que ya están en biblioteca
+        spotifyCandidatos = spotData.resultados.filter(s =>
+          !state.library.some(d => d.album.toLowerCase() === s.album.toLowerCase() && d.artist.toLowerCase() === s.artist.toLowerCase())
+        );
+      }
+    } catch(e) {}
+  }
+
+  const listaCandidatos = spotifyCandidatos.length
+    ? '\n\nCANDIDATOS DE SPOTIFY (no están en su biblioteca):\n' + spotifyCandidatos.map((d,i) => (i+1)+'. "'+d.album+'" de '+d.artist+(d.year?' ('+d.year+')':'')).join('\n')
+    : '';
+
+  const prompt =
+    'Sos un experto en música con profundo conocimiento de la historia del rock, jazz y géneros relacionados.\n\n'+
+    'FECHA: '+hoy.getDate()+' de '+hoy.toLocaleString('es-AR',{month:'long'})+' de '+hoy.getFullYear()+'\n\n'+
+    'MISIÓN: Analizá el perfil musical del usuario y recomendá 3 discos que NO tiene en su colección pero que probablemente le encantarían.\n\n'+
+    'PERFIL DE SU COLECCIÓN:\n'+
+    '- Géneros: '+generos.join(', ')+'\n'+
+    '- Décadas: '+decadas.join(', ')+'\n'+
+    '- Artistas que tiene: '+artistas.join(', ')+'\n'+
+    gustaron+
+    listaCandidatos+'\n\n'+
+    'REGLA: Los discos recomendados NO deben estar en su colección actual. Preferí discos de los candidatos de Spotify si los hay, pero también podés recomendar otros que no estén en la lista si creés que son perfectos para su perfil.\n\n'+
+    'Para cada disco explicá:\n'+
+    '1. Por qué encaja con su perfil musical\n'+
+    '2. A qué artistas de su colección se parece\n'+
+    '3. Por qué vale la pena conseguirlo\n\n'+
+    'Formato:\n\n'+
+    '**1. "Álbum" — Artista (Año)**\n[género]\n\nPor qué te va a gustar: 2-3 oraciones conectando con tu colección.\n\nSimilar a: artistas de tu biblioteca que comparten estilo.\n\n---\n\n'+
+    '**2. "Álbum" — Artista (Año)**\n[género]\n\nPor qué te va a gustar: 2-3 oraciones.\n\nSimilar a: artistas de tu biblioteca.\n\n---\n\n'+
+    '**3. "Álbum" — Artista (Año)**\n[género]\n\nPor qué te va a gustar: 2-3 oraciones.\n\nSimilar a: artistas de tu biblioteca.\n\n---';
+
+  try {
+    const res = await fetch('/api/recomendar', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ prompt })
+    });
+    const data = await res.json();
+    if (data.error) throw new Error(data.error);
+    renderDescubrir(data.resultado, spotifyCandidatos, resultDiv);
+  } catch(e) {
+    resultDiv.innerHTML = '<div class="rec-card" style="color:var(--red)">Error: '+e.message+'</div>';
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = '🔭 Descubrir';
+  }
+}
+
+function renderDescubrir(texto, spotifyCandidatos, resultDiv) {
+  const bloques = texto.split(/\n---\n|\n---$/).map(b => b.trim()).filter(b => b.length > 30 && b.match(/\*\*\d+\./));
+  const colors = ['#7f77dd','#1d9e75','#d85a30'];
+
+  let html = '<div style="background:var(--teal-bg);border:0.5px solid var(--teal);border-radius:var(--radius-lg);padding:1rem 1.25rem;margin-top:16px;margin-bottom:4px;">'+
+    '<div style="font-size:11px;font-weight:500;color:var(--teal);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:4px;">🔭 Modo Descubrir</div>'+
+    '<div style="font-size:13px;color:var(--teal);">Discos que no tenés pero que encajan perfectamente con tu gusto musical</div>'+
+  '</div>';
+
+  html += bloques.slice(0,3).map((bloque, i) => {
+    const info = extraerAlbumArtista(bloque);
+    const spotMatch = info && spotifyCandidatos ? spotifyCandidatos.find(s =>
+      s && s.album && (
+        s.album.toLowerCase().includes((info.album||'').toLowerCase().substring(0,10)) ||
+        (info.album||'').toLowerCase().includes(s.album.toLowerCase().substring(0,10))
+      )
+    ) : null;
+    const bloqueHtml = bloque
+      .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+      .replace(/\n\n/g, '</p><p>')
+      .replace(/\n/g, '<br/>');
+    return '<div class="rec-card" style="border-left:4px solid '+colors[i]+';">'+
+      '<div style="display:flex;gap:14px;align-items:flex-start;margin-bottom:12px;">'+
+        '<div id="rec-cover-desc-'+i+'" class="rec-cover-placeholder">'+(spotMatch&&spotMatch.image?'<img src="'+spotMatch.image+'" class="rec-cover" alt="cover"/>':'🔭')+'</div>'+
+        '<div style="flex:1;min-width:0;">'+
+          '<div style="font-size:11px;color:var(--text3);margin-bottom:3px;">Descubrimiento '+(i+1)+' de '+bloques.length+'</div>'+
+          '<div style="font-size:14px;line-height:1.6;"><p>'+bloqueHtml+'</p></div>'+
+        '</div>'+
+      '</div>'+
+      (spotMatch ?
+        '<div class="spotify-box">'+
+          '<div class="spotify-box-title">✓ Disponible en Spotify</div>'+
+          '<div class="spotify-box-album">'+spotMatch.album+'</div>'+
+          '<div class="spotify-box-artist">'+spotMatch.artist+'</div>'+
+          '<a href="'+spotMatch.url+'" target="_blank" class="spotify-link">Abrir en Spotify</a>'+
+        '</div>' :
+        (info ?
+          '<div id="desc-spotify-'+i+'"><button id="desc-btn-'+i+'" class="spotify-search-btn" onclick="buscarDescubrir('+i+',\''+( info.album||'').replace(/'/g,"\\'")+'\',\''+(info.artist||'').replace(/'/g,"\\'")+'\')">🎵 Buscar en Spotify</button></div>' : ''
+        )
+      )+
+      (info ?
+        '<button onclick="agregarADeseos(\''+( info.album||'').replace(/'/g,"\\'")+'\',\''+(info.artist||'').replace(/'/g,"\\'")+'\',\''+( bloque.match(/\[(.+?)\]/)?.[1]||'Otro')+'\')" style="width:100%;margin-top:8px;padding:8px;background:var(--bg2);border:0.5px solid var(--border);border-radius:var(--radius);font-size:13px;cursor:pointer;color:var(--text);">♡ Agregar a lista de deseos</button>' : ''
+      )+
+    '</div>';
+  }).join('');
+
+  resultDiv.innerHTML = html;
+}
+
+async function buscarDescubrir(i, album, artist) {
+  const btn = document.getElementById('desc-btn-'+i);
+  if (btn) { btn.disabled = true; btn.textContent = 'Buscando...'; }
+  try {
+    const res = await fetch('/api/spotify/buscar?album='+encodeURIComponent(album)+'&artist='+encodeURIComponent(artist));
+    const data = await res.json();
+    const container = document.getElementById('desc-spotify-'+i);
+    if (data.found) {
+      if (data.image) {
+        const cover = document.getElementById('rec-cover-desc-'+i);
+        if (cover) cover.innerHTML = '<img src="'+data.image+'" class="rec-cover" alt="cover"/>';
+      }
+      if (container) container.innerHTML =
+        '<div class="spotify-box">'+
+          '<div class="spotify-box-title">✓ Disponible en Spotify</div>'+
+          '<div class="spotify-box-album">'+data.name+'</div>'+
+          '<div class="spotify-box-artist">'+data.artist+'</div>'+
+          '<a href="'+data.url+'" target="_blank" class="spotify-link">Abrir en Spotify</a>'+
+        '</div>';
+    } else {
+      if (btn) { btn.disabled = false; btn.textContent = 'No encontrado en Spotify'; }
+    }
+  } catch(e) {
+    if (btn) { btn.disabled = false; btn.textContent = 'Error al buscar'; }
+  }
+}
+
+function agregarADeseos(album, artist, genre) {
+  const deseos = JSON.parse(localStorage.getItem('lista_deseos') || '[]');
+  if (deseos.some(d => d.album.toLowerCase() === album.toLowerCase() && d.artist.toLowerCase() === artist.toLowerCase())) {
+    alert('Este disco ya está en tu lista de deseos.');
+    return;
+  }
+  deseos.unshift({ album, artist, genre: genre||'Otro', type: 'vinyl', nota: 'Sugerido por Descubrir', fecha: new Date().toLocaleDateString('es-AR') });
+  localStorage.setItem('lista_deseos', JSON.stringify(deseos));
+  renderDeseos();
+  alert('✓ "'+album+'" agregado a tu lista de deseos.');
+}
   function renderLibrary() {
   const filter=(document.getElementById('lib-filter')?.value||'').toLowerCase();
   const filtered=state.library.filter(d=>!filter||d.album.toLowerCase().includes(filter)||d.artist.toLowerCase().includes(filter)||(d.genre||'').toLowerCase().includes(filter));
