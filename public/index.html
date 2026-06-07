@@ -263,6 +263,34 @@
     <div class="card"><div class="card-title">Artistas más recomendados</div><div id="stats-artistas"></div></div>
   </div>
 
+ <div class="section" id="sec-deseos">
+  <div class="card">
+    <div class="card-title">Agregar a lista de deseos</div>
+    <div class="add-form">
+      <div><label>Álbum</label><input type="text" id="deseo-album" placeholder="Título"/></div>
+      <div><label>Artista</label><input type="text" id="deseo-artist" placeholder="Artista"/></div>
+    </div>
+    <div class="add-form">
+      <div><label>Género</label>
+        <select id="deseo-genre">
+          <option>Rock</option><option>Jazz</option><option>Clásica</option><option>Pop</option>
+          <option>Blues</option><option>Folk</option><option>Electrónica</option>
+          <option>Tango</option><option>Folklore</option><option>Rock progresivo</option><option>Otro</option>
+        </select>
+      </div>
+      <div><label>Formato</label>
+        <select id="deseo-type"><option value="vinyl">Vinilo</option><option value="cd">CD</option></select>
+      </div>
+    </div>
+    <div style="margin-bottom:8px;"><label>Notas (opcional)</label><input type="text" id="deseo-nota" placeholder="Ej: lo vi en Mercado Libre, edición japonesa..."/></div>
+    <button class="add-btn" style="width:100%;" onclick="agregarDeseo()">+ Agregar a lista de deseos</button>
+  </div>
+  <div class="card">
+    <div class="card-title">Mi lista de deseos <span id="deseos-count" style="font-weight:400;color:var(--text2)"></span></div>
+    <div id="deseos-list"><div class="empty-state">Tu lista de deseos está vacía.</div></div>
+  </div>
+</div>
+  
   <div class="section" id="sec-preferencias">
     <div class="card">
       <div class="card-title">Géneros favoritos</div>
