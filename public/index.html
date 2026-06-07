@@ -696,8 +696,22 @@ function mostrarStats() {
   const hist=JSON.parse(localStorage.getItem('historial_recomendaciones')||'[]');
   if(!hist.length){document.getElementById('stats-resumen').innerHTML='<div class="empty-state">Todavía no hay estadísticas.</div>';['stats-discos','stats-generos','stats-artistas'].forEach(id=>document.getElementById(id).innerHTML='');return;}
   const todos=hist.flatMap(h=>h.discos),total=hist.length,totalR=todos.length;
-  document.getElementById('stats-resumen').innerHTML='<div style="display:flex;justify-content:space-around;padding:8px 0;"><div style="text-align:center"><div style="font-size:24px;font-weight:500;">'+total+'</div><div style="font-size:12px;color:var(--text2)">Sesiones</div></div><div style="text-align:center"><div style="font-size:24px;font-weight:500;">'+totalR+'</div><div style="font-size:12px;color:var(--text2)">Recomendaciones</div></div><div style="text-align:center"><div style="font-size:24px;font-weight:500;">'+state.library.length+'</div><div style="font-size:12px;color:var(--text2)">Discos</div></div></div>';
-  const cD={};todos.forEach(d=>{const k=d.toLowerCase();cD[k]=(cD[k]||0)+1;});
+  const valorTotal = state.library
+  .filter(d => d.source === 'discogs' && d.precio_min)
+  .reduce((sum, d) => sum + parseFloat(d.precio_min), 0);
+  const discosSinPrecio = state.library.filter(d => d.source === 'discogs' && !d.precio_min).length;
+  const valorTexto = valorTotal > 0 ? 'USD '+valorTotal.toFixed(0) : 'Sin datos';
+  document.getElementById('stats-resumen').innerHTML=
+  '<div style="display:flex;justify-content:space-around;padding:8px 0;">'+
+    '<div style="text-align:center"><div style="font-size:24px;font-weight:500;">'+total+'</div><div style="font-size:12px;color:var(--text2)">Sesiones</div></div>'+
+    '<div style="text-align:center"><div style="font-size:24px;font-weight:500;">'+totalR+'</div><div style="font-size:12px;color:var(--text2)">Recomendaciones</div></div>'+
+    '<div style="text-align:center"><div style="font-size:24px;font-weight:500;">'+state.library.length+'</div><div style="font-size:12px;color:var(--text2)">Discos</div></div>'+
+  '</div>'+
+  '<div style="margin-top:12px;padding:12px;background:var(--bg2);border-radius:var(--radius);text-align:center;">'+
+    '<div style="font-size:11px;color:var(--text2);margin-bottom:4px;text-transform:uppercase;letter-spacing:0.05em;">Valor estimado de la colección</div>'+
+    '<div style="font-size:28px;font-weight:500;color:var(--green);">'+valorTexto+'</div>'+
+    (discosSinPrecio>0?'<div style="font-size:11px;color:var(--text3);margin-top:4px;">'+discosSinPrecio+' discos sin precio — sincronizá Discogs para actualizar</div>':'')+
+  '</div>';  const cD={};todos.forEach(d=>{const k=d.toLowerCase();cD[k]=(cD[k]||0)+1;});
   document.getElementById('stats-discos').innerHTML=Object.entries(cD).sort((a,b)=>b[1]-a[1]).slice(0,5).map((d,i)=>'<div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:0.5px solid var(--border);"><div style="font-size:18px;font-weight:500;color:var(--text3);min-width:24px;">'+(i+1)+'</div><div style="flex:1;font-size:13px;">'+d[0]+'</div><div style="font-size:12px;background:var(--purple-bg);color:var(--purple);padding:2px 8px;border-radius:20px;">'+d[1]+'x</div></div>').join('')||'<div class="empty-state">Sin datos</div>';
   const cG={};todos.forEach(disco=>{const info=state.library.find(d=>(d.album+' — '+d.artist).toLowerCase()===disco.toLowerCase());if(info&&info.genre)cG[info.genre]=(cG[info.genre]||0)+1;});
   document.getElementById('stats-generos').innerHTML=Object.entries(cG).sort((a,b)=>b[1]-a[1]).slice(0,5).map(g=>{const p=Math.round(g[1]/totalR*100);return'<div style="padding:6px 0;"><div style="display:flex;justify-content:space-between;margin-bottom:4px;"><span style="font-size:13px;">'+g[0]+'</span><span style="font-size:12px;color:var(--text2);">'+g[1]+' ('+p+'%)</span></div><div style="height:6px;background:var(--bg2);border-radius:3px;"><div style="height:6px;background:#7f77dd;border-radius:3px;width:'+p+'%"></div></div></div>';}).join('')||'<div class="empty-state">Sin datos</div>';
