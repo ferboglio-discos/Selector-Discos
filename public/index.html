@@ -566,8 +566,23 @@ function renderResultadosSpotify(texto, spotifyResultados, resultDiv) {
       '</div></div>';
   }).join('');
 }
+function getContextoOcasion(ocasion) {
+  const contextos = {
+    'Tarde de lluvia': 'Ambiente íntimo y contemplativo, lluvia de fondo, ideal para música atmosférica y envolvente que acompañe el momento sin distraer',
+    'Ejercicio': 'Actividad física, necesita ritmo sostenido y energía, música que motive y mantenga el pulso elevado',
+    'Trabajo en casa': 'Concentración prolongada, música de fondo que no distraiga, sin letras dominantes o cambios bruscos de tempo',
+    'Para escuchar y reflexionar': 'Escucha activa e intencional, sin distracciones, música con profundidad conceptual o emocional que invite al pensamiento',
+    'Solo en casa': 'Ambiente relajado y personal, libertad para cualquier estilo según el estado de ánimo',
+    'Con amigos': 'Ambiente social y festivo, música que genere buen clima grupal sin ser invasiva',
+    'Cena romántica': 'Ambiente íntimo y cálido, música suave que favorezca la conversación',
+    'Trabajo o estudio': 'Concentración y foco, preferentemente instrumental o con letras no dominantes',
+    'Fiesta': 'Energía alta, ritmo bailable, música que impulse el movimiento',
+    'Meditación': 'Calma profunda, música minimalista o ambiental que facilite la introspección',
+  };
+  return contextos[ocasion] || 'Contexto general sin especificaciones adicionales';
+}
 
-function recomendar() {
+  function recomendar() {
   if (!state.library.length && state.fuente==='biblioteca') { alert('Tu biblioteca está vacía.'); showTab('biblioteca'); return; }
   if (!state.mood) { alert('Seleccioná un estado de ánimo.'); return; }
   const btn = document.getElementById('btn-rec');
