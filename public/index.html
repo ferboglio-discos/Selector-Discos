@@ -482,16 +482,13 @@ function extraerEfemeride(texto) {
 function extraerAlbumArtista(bloque) {
   const yearMatch = bloque.match(/\((\d{4})\)/);
   const year = yearMatch ? yearMatch[1] : '';
-  const match = bloque.match(/\*\*\d+\.\s*"(.+?)"[^—\-]*[—\-]\s*(.+?)[\n\*\(]/);
+  const match = bloque.match(/\*\*(.+?)\*\*[^—\-]*[—\-]\s*(.+?)[\n\*]/);
   if (match) return { album: match[1].trim(), artist: match[2].trim(), year };
-  const match2 = bloque.match(/\*\*\d+\.\s*"(.+?)"\s*[—\-]\s*(.+?)\s*\(/);
-  if (match2) return { album: match2[1].trim(), artist: match2[2].trim(), year };
-  const match3 = bloque.match(/\*\*(.+?)\*\*/);
-  if (match3) {
-    const limpio = match3[1].replace(/^\d+\.\s*/, '').replace(/^"(.+)"$/, '$1');
-    const parts = limpio.split(/[—\-]/);
-    if (parts.length >= 2) return { album: parts[0].trim().replace(/^"|"$/g,''), artist: parts[1].trim(), year };
-    return { album: limpio.trim(), artist: '', year };
+  const match2 = bloque.match(/\*\*(.+?)\*\*/);
+  if (match2) {
+    const parts = match2[1].split(/[—\-]/);
+    if (parts.length >= 2) return { album: parts[0].trim(), artist: parts[1].trim(), year };
+    return { album: match2[1].trim(), artist: '', year };
   }
   return null;
 }
