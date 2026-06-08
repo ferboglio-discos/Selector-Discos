@@ -588,6 +588,7 @@ function getContextoOcasion(ocasion) {
   if (!state.mood) { alert('Seleccioná un estado de ánimo.'); return; }
   const btn = document.getElementById('btn-rec');
   const resultDiv = document.getElementById('resultado');
+  if (!resultDiv) { console.error('No se encontró #resultado'); btn.disabled=false; btn.innerHTML='Recomendar discos'; return; }
   btn.disabled = true; btn.innerHTML = '<span class="spinner"></span>Analizando...'; resultDiv.innerHTML = '';
   const s=getSeason(), tod=getTimeOfDay(), w=state.weather;
   const timeStr = new Date().toLocaleTimeString('es-AR',{hour:'2-digit',minute:'2-digit'});
