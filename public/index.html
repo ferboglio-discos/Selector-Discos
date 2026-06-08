@@ -1116,8 +1116,11 @@ function renderDescubrir(texto, spotifyCandidatos, resultDiv) {
     '<div style="font-size:13px;color:var(--teal);">Discos que no tenés pero que encajan con tu gusto musical</div>'+
   '</div>';
 
+  window._descubrirInfo = [];
+
   html += bloques.slice(0,3).map((bloque, i) => {
     const info = extraerAlbumArtista(bloque);
+    window._descubrirInfo[i] = info;
     const bloqueHtml = bloque
       .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
       .replace(/\n\n/g, '</p><p>')
@@ -1126,22 +1129,57 @@ function renderDescubrir(texto, spotifyCandidatos, resultDiv) {
       '<div style="display:flex;gap:14px;align-items:flex-start;margin-bottom:12px;">'+
         '<div id="rec-cover-desc-'+i+'" class="rec-cover-placeholder">🔭</div>'+
         '<div style="flex:1;min-width:0;">'+
-          '<div style="font-size:11px;color:var(--text3);margin-bottom:3px;">Descubrimiento '+(i+1)+' de '+bloques.length+'</div>'+
+          '<div style="font-size:11px;color:var(--text3);margin-bottom:3px;">Descubrimiento '+(i+1)+'</div>'+
           '<div style="font-size:14px;line-height:1.6;"><p>'+bloqueHtml+'</p></div>'+
         '</div>'+
       '</div>'+
-      (info ?
-        '<div id="desc-spotify-'+i+'"><button id="desc-btn-'+i+'" class="spotify-search-btn" onclick="buscarDescubrir('+i+',\''+( info.album||'').replace(/'/g,"\\'")+'\',\''+(info.artist||'').replace(/'/g,"\\'")+'\')">🎵 Buscar en Spotify</button></div>' : ''
-      )+
-      (info ?
-        '<button onclick="agregarADeseos(\''+( info.album||'').replace(/'/g,"\\'")+'\',\''+(info.artist||'').replace(/'/g,"\\'")+'\',\'Otro\')" style="width:100%;margin-top:8px;padding:8px;background:var(--bg2);border:0.5px solid var(--border);border-radius:var(--radius);font-size:13px;cursor:pointer;color:var(--text);">♡ Agregar a lista de deseos</button>' : ''
-      )+
+      (info ? '<div id="desc-spotify-'+i+'"><button id="desc-btn-'+i+'" class="spotify-search-btn" onclick="buscarDescubrir('+i+')">🎵 Buscar en Spotify</button></div>' : '')+
+      (info ? '<button onclick="agregarDescubrirADeseos('+i+')" style="width:100%;margin-top:8px;padding:8px;background:var(--bg2);border:0.5px solid var(--border);border-radius:var(--radius);font-size:13px;cursor:pointer;color:var(--text);">♡ Agregar a lista de deseos</button>' : '')+
     '</div>';
   }).join('');
 
   resultDiv.innerHTML = html;
 }
 
+async function buscarDescubrir(i) {
+  const info = window._descubrirInfo[i]; if (!info) return;
+  const btn = document.getElementById('desc-btn-'+i);
+  if (btn) { btn.disabled = true; btn.textContent = 'Buscando...'; }
+  try {
+    const res = await fetch('/api/spotify/buscar?album='+encodeURIComponent(info.album)+'&artist='+encodeURIComponent(info.artist));
+    const data = await res.json();
+    const container = document.getElementById('desc-spotify-'+i);
+    if (data.found) {
+      if (data.image) {
+        const cover = document.getElementById('rec-cover-desc-'+i);
+        if (cover) cover.innerHTML = '<img src="'+data.image+'" class="rec-cover" alt="cover"/>';
+      }
+      if (container) container.innerHTML =
+        '<div class="spotify-box">'+
+          '<div class="spotify-box-title">✓ Disponible en Spotify</div>'+
+          '<div class="spotify-box-album">'+data.name+'</div>'+
+          '<div class="spotify-box-artist">'+data.artist+'</div>'+
+          '<a href="'+data.url+'" target="_blank" class="spotify-link">Abrir en Spotify</a>'+
+        '</div>';
+    } else {
+      if (btn) { btn.disabled = false; btn.textContent = 'No encontrado en Spotify'; }
+    }
+  } catch(e) {
+    if (btn) { btn.disabled = false; btn.textContent = 'Error al buscar'; }
+  }
+}
+
+function agregarDescubrirADeseos(i) {
+  const info = window._descubrirInfo[i]; if (!info) return;
+  const deseos = JSON.parse(localStorage.getItem('lista_deseos') || '[]');
+  if (deseos.some(d => d.album.toLowerCase()===info.album.toLowerCase() && d.artist.toLowerCase()===info.artist.toLowerCase())) {
+    alert('Este disco ya está en tu lista de deseos.'); return;
+  }
+  deseos.unshift({ album: info.album, artist: info.artist, genre: 'Otro', type: 'vinyl', nota: 'Sugerido por Descubrir', fecha: new Date().toLocaleDateString('es-AR') });
+  localStorage.setItem('lista_deseos', JSON.stringify(deseos));
+  renderDeseos();
+  alert('✓ "'+info.album+'" agregado a tu lista de deseos.');
+}
 async function buscarDescubrir(i, album, artist) {
   const btn = document.getElementById('desc-btn-'+i);
   if (btn) { btn.disabled = true; btn.textContent = 'Buscando...'; }
