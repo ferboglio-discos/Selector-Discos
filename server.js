@@ -1,6 +1,7 @@
 const express = require('express');
 const cors = require('cors');
 const path = require('path');
+const fs = require('fs');
 
 const app = express();
 app.use(cors());
@@ -89,7 +90,7 @@ app.get('/api/spotify/buscar', async (req, res) => {
 app.post('/api/recomendar', async (req, res) => {
   const { prompt } = req.body;
   if (!prompt) return res.status(400).json({ error: 'Falta el prompt' });
-  
+
   const timeoutPromise = new Promise((_, reject) =>
     setTimeout(() => reject(new Error('Timeout: la respuesta tardó demasiado')), 25000)
   );
@@ -117,8 +118,8 @@ app.post('/api/recomendar', async (req, res) => {
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
-  
-const fs = require('fs');
+});
+
 const HISTORIAL_FILE = '/tmp/historial.json';
 
 function leerHistorial() {
@@ -189,6 +190,7 @@ app.post('/api/spotify/recomendar', async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 });
+
 const VALORACIONES_FILE = '/tmp/valoraciones.json';
 
 function leerValoraciones() {
@@ -223,7 +225,6 @@ app.get('/api/valoraciones', (req, res) => {
   res.json({ valoraciones });
 });
 
-// Endpoint rápido — solo datos básicos
 app.get('/api/discogs/coleccion', async (req, res) => {
   const usuario = 'ferboglio';
   const token = process.env.DISCOGS_TOKEN;
@@ -234,10 +235,7 @@ app.get('/api/discogs/coleccion', async (req, res) => {
     do {
       const r = await fetch(
         `https://api.discogs.com/users/${usuario}/collection/folders/0/releases?per_page=100&page=${pagina}`,
-        { headers: {
-          'Authorization': 'Discogs token=' + token,
-          'User-Agent': 'SelectorDiscos/1.0'
-        }}
+        { headers: { 'Authorization': 'Discogs token=' + token, 'User-Agent': 'SelectorDiscos/1.0' }}
       );
       const texto = await r.text();
       if (!texto || texto.trim() === '') break;
@@ -256,9 +254,7 @@ app.get('/api/discogs/coleccion', async (req, res) => {
           source: 'discogs',
           discogs_id: info.id,
           imagen: info.cover_image || info.thumb || null,
-          rating: null,
-          precio_min: null,
-          tracks: []
+          rating: null, precio_min: null, tracks: []
         });
       });
       pagina++;
@@ -269,25 +265,19 @@ app.get('/api/discogs/coleccion', async (req, res) => {
   }
 });
 
-// Endpoint de detalle — imagen HD, tracks y rating de UN disco
 app.get('/api/discogs/detalle/:id', async (req, res) => {
   const token = process.env.DISCOGS_TOKEN;
   const releaseId = req.params.id;
   try {
     const r = await fetch(
       `https://api.discogs.com/releases/${releaseId}`,
-      { headers: {
-        'Authorization': 'Discogs token=' + token,
-        'User-Agent': 'SelectorDiscos/1.0'
-      }}
+      { headers: { 'Authorization': 'Discogs token=' + token, 'User-Agent': 'SelectorDiscos/1.0' }}
     );
     const texto = await r.text();
     if (!texto || texto.trim() === '') return res.json({});
     const data = JSON.parse(texto);
     const imagen = data.images?.[0]?.uri || null;
-    const rating = data.community?.rating?.average
-      ? Math.round(data.community.rating.average * 10) / 10
-      : null;
+    const rating = data.community?.rating?.average ? Math.round(data.community.rating.average * 10) / 10 : null;
     const precio_min = data.lowest_price || null;
     const tracks = (data.tracklist || [])
       .filter(t => t.type_ === 'track' && t.title)
