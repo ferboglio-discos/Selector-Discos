@@ -1203,19 +1203,20 @@ async function modoDescubrir() {
     if (pos.length) gustaron = '\nDiscos que le gustaron: '+pos.slice(0,10).join(', ');
   } catch(e) {}
 
-  const prompt =
-    'Sos un experto en música.\n\n'+
-    'Analizá este perfil musical y recomendá 3 discos que NO tiene pero que le encantarían.\n\n'+
-    'PERFIL:\n'+
-    '- Géneros: '+generos.join(', ')+'\n'+
-    '- Décadas: '+decadas.join(', ')+'\n'+
-    '- Artistas en su colección: '+artistas.join(', ')+'\n'+
-    gustaron+'\n\n'+
-    'Recomendá discos que complementen su colección — artistas relacionados, discos esenciales del género que probablemente no tiene, obras maestras afines a su gusto.\n\n'+
-    '**1. "Álbum" — Artista (Año)**\n[género]\n\nPor qué te va a gustar: 2-3 oraciones.\n\nSimilar a: artistas de su colección.\n\n---\n\n'+
-    '**2. "Álbum" — Artista (Año)**\n[género]\n\nPor qué te va a gustar: 2-3 oraciones.\n\nSimilar a: artistas de su colección.\n\n---\n\n'+
-    '**3. "Álbum" — Artista (Año)**\n[género]\n\nPor qué te va a gustar: 2-3 oraciones.\n\nSimilar a: artistas de su colección.\n\n---';
+  const albumsQueYaTiene = state.library.map(d => d.album+' de '+d.artist).join(' | ');
 
+const prompt =
+  'Sos un experto en música. Recomendá exactamente 3 discos REALES que existen y que el usuario NO tiene.\n\n'+
+  'PERFIL:\n'+
+  '- Géneros: '+generos.join(', ')+'\n'+
+  '- Décadas: '+decadas.join(', ')+'\n'+
+  '- Artistas en su colección: '+artistas.join(', ')+'\n'+
+  gustaron+'\n\n'+
+  'DISCOS QUE YA TIENE — NO recomendés ninguno de estos:\n'+albumsQueYaTiene+'\n\n'+
+  'IMPORTANTE: Solo recomendá discos que existan realmente. No inventes títulos.\n\n'+
+  '**1. "Álbum" — Artista (Año)**\n[género]\n\nPor qué te va a gustar: 2-3 oraciones.\n\nSimilar a: artistas de su colección.\n\n---\n\n'+
+  '**2. "Álbum" — Artista (Año)**\n[género]\n\nPor qué te va a gustar: 2-3 oraciones.\n\nSimilar a: artistas de su colección.\n\n---\n\n'+
+  '**3. "Álbum" — Artista (Año)**\n[género]\n\nPor qué te va a gustar: 2-3 oraciones.\n\nSimilar a: artistas de su colección.\n\n---';
   try {
     const res = await fetch('/api/recomendar', {
       method: 'POST',
