@@ -1118,8 +1118,16 @@ function renderDescubrir(texto, spotifyCandidatos, resultDiv) {
   window._descubrirInfo = [];
 
   html += bloques.slice(0,3).map((bloque, i) => {
-    const info = extraerAlbumArtista(bloque);
-    window._descubrirInfo[i] = info;
+    // Extracción específica para formato Descubrir: **1. "Álbum" — Artista (Año)**
+let info = null;
+const dm = bloque.match(/\*\*\d+\.\s*"(.+?)"\s*[—\-]\s*(.+?)\s*\((\d{4})\)/);
+if (dm) {
+  info = { album: dm[1].trim(), artist: dm[2].trim(), year: dm[3] };
+} else {
+  const dm2 = bloque.match(/\*\*\d+\.\s*"(.+?)"\s*[—\-]\s*(.+?)\*\*/);
+  if (dm2) info = { album: dm2[1].trim(), artist: dm2[2].trim(), year: '' };
+}
+window._descubrirInfo[i] = info;
     const bloqueHtml = bloque
       .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
       .replace(/\n\n/g, '</p><p>')
