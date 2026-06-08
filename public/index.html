@@ -1142,12 +1142,15 @@ function renderDescubrir(texto, spotifyCandidatos, resultDiv) {
 }
 
 async function buscarDescubrir(i) {
-  const info = window._descubrirInfo[i]; if (!info) return;
+  const info = window._descubrirInfo[i];
+  if (!info) { console.log('No info para índice', i); return; }
+  console.log('Buscando:', i, info.album, info.artist);
   const btn = document.getElementById('desc-btn-'+i);
   if (btn) { btn.disabled = true; btn.textContent = 'Buscando...'; }
   try {
     const res = await fetch('/api/spotify/buscar?album='+encodeURIComponent(info.album)+'&artist='+encodeURIComponent(info.artist));
     const data = await res.json();
+    console.log('Resultado:', i, data);
     const container = document.getElementById('desc-spotify-'+i);
     if (data.found) {
       if (data.image) {
@@ -1168,7 +1171,6 @@ async function buscarDescubrir(i) {
     if (btn) { btn.disabled = false; btn.textContent = 'Error al buscar'; }
   }
 }
-
 function agregarDescubrirADeseos(i) {
   const info = window._descubrirInfo[i]; if (!info) return;
   const deseos = JSON.parse(localStorage.getItem('lista_deseos') || '[]');
