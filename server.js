@@ -89,8 +89,13 @@ app.get('/api/spotify/buscar', async (req, res) => {
 app.post('/api/recomendar', async (req, res) => {
   const { prompt } = req.body;
   if (!prompt) return res.status(400).json({ error: 'Falta el prompt' });
+  
+  const timeoutPromise = new Promise((_, reject) =>
+    setTimeout(() => reject(new Error('Timeout: la respuesta tardó demasiado')), 25000)
+  );
+
   try {
-    const response = await fetch('https://api.anthropic.com/v1/messages', {
+    const fetchPromise = fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -98,11 +103,13 @@ app.post('/api/recomendar', async (req, res) => {
         'anthropic-version': '2023-06-01'
       },
       body: JSON.stringify({
-        model: 'claude-sonnet-4-5',
+        model: 'claude-haiku-4-5-20251001',
         max_tokens: 1500,
         messages: [{ role: 'user', content: prompt }]
       })
     });
+
+    const response = await Promise.race([fetchPromise, timeoutPromise]);
     const data = await response.json();
     if (data.error) return res.status(500).json({ error: data.error.message });
     const text = data.content.map(c => c.text || '').join('');
@@ -110,7 +117,7 @@ app.post('/api/recomendar', async (req, res) => {
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
-});
+  
 const fs = require('fs');
 const HISTORIAL_FILE = '/tmp/historial.json';
 
