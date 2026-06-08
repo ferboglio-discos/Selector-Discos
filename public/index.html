@@ -1106,7 +1106,7 @@ async function buscarEnSpotifyLista(i, album, artist) {
   }
 }
   
-  async function modoDescubrir() {
+async function modoDescubrir() {
   if (!state.library.length) { alert('Tu biblioteca está vacía.'); return; }
   const btn = document.getElementById('btn-descubrir');
   const resultDiv = document.getElementById('resultado');
@@ -1115,15 +1115,15 @@ async function buscarEnSpotifyLista(i, album, artist) {
   resultDiv.innerHTML = '';
 
   const hoy = new Date();
-  const pref = JSON.parse(localStorage.getItem('preferencias') || '{"generos":[],"decadas":[]}');
 
   // Analizar colección
   const generos = [...new Set(state.library.map(d => d.genre).filter(Boolean))];
-  const artistas = [...new Set(state.library.map(d => d.artist).filter(Boolean))].slice(0, 20);
+  const artistas = [...new Set(state.library.map(d => d.artist).filter(Boolean))].slice(0, 25);
   const decadas = [...new Set(state.library.map(d => {
     if (!d.year) return null;
     return Math.floor(parseInt(d.year) / 10) * 10 + 's';
   }).filter(Boolean))];
+  const albumsQueYaTiene = state.library.map(d => '"'+d.album+'" de '+d.artist).join(', ');
 
   // Obtener valoraciones positivas
   let gustaron = '';
@@ -1131,51 +1131,25 @@ async function buscarEnSpotifyLista(i, album, artist) {
     const vr = await fetch('/api/valoraciones');
     const vd = await vr.json();
     const positivos = vd.valoraciones.filter(v => v.valor === '👍').map(v => v.album+' de '+v.artist);
-    if (positivos.length) gustaron = '\nDISCOS QUE LE GUSTARON DE SPOTIFY: '+positivos.join(', ');
+    if (positivos.length) gustaron = '\nDISCOS QUE LE GUSTARON EN SPOTIFY: '+positivos.join(', ');
   } catch(e) {}
 
-  // Obtener candidatos de Spotify basados en preferencias
-  let spotifyCandidatos = [];
-  if (pref.generos.length || pref.decadas.length) {
-    try {
-      const spotRes = await fetch('/api/spotify/recomendar', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ generos: pref.generos.length ? pref.generos : generos.slice(0,3), decadas: pref.decadas.length ? pref.decadas : decadas.slice(0,3), mood: state.mood || 'Tranquilo', ocasion: 'Sin especificar', clima: '' })
-      });
-      const spotData = await spotRes.json();
-      if (spotData.resultados && spotData.resultados.length) {
-        // Filtrar los que ya están en biblioteca
-        spotifyCandidatos = spotData.resultados.filter(s =>
-          !state.library.some(d => d.album.toLowerCase() === s.album.toLowerCase() && d.artist.toLowerCase() === s.artist.toLowerCase())
-        );
-      }
-    } catch(e) {}
-  }
-
-  const listaCandidatos = spotifyCandidatos.length
-    ? '\n\nCANDIDATOS DE SPOTIFY (no están en su biblioteca):\n' + spotifyCandidatos.map((d,i) => (i+1)+'. "'+d.album+'" de '+d.artist+(d.year?' ('+d.year+')':'')).join('\n')
-    : '';
-
   const prompt =
-    'Sos un experto en música con profundo conocimiento de la historia del rock, jazz y géneros relacionados.\n\n'+
+    'Sos un experto en música con profundo conocimiento de rock, jazz y géneros relacionados.\n\n'+
     'FECHA: '+hoy.getDate()+' de '+hoy.toLocaleString('es-AR',{month:'long'})+' de '+hoy.getFullYear()+'\n\n'+
-    'MISIÓN: Analizá el perfil musical del usuario y recomendá 3 discos que NO tiene en su colección pero que probablemente le encantarían.\n\n'+
+    'MISIÓN: Analizá el perfil musical y recomendá exactamente 3 discos que NO tiene en su colección pero que le encantarían.\n\n'+
     'PERFIL DE SU COLECCIÓN:\n'+
     '- Géneros: '+generos.join(', ')+'\n'+
     '- Décadas: '+decadas.join(', ')+'\n'+
     '- Artistas que tiene: '+artistas.join(', ')+'\n'+
-    gustaron+
-    listaCandidatos+'\n\n'+
-    'REGLA: Los discos recomendados NO deben estar en su colección actual. Preferí discos de los candidatos de Spotify si los hay, pero también podés recomendar otros que no estén en la lista si creés que son perfectos para su perfil.\n\n'+
-    'Para cada disco explicá:\n'+
-    '1. Por qué encaja con su perfil musical\n'+
-    '2. A qué artistas de su colección se parece\n'+
-    '3. Por qué vale la pena conseguirlo\n\n'+
-    'Formato:\n\n'+
-    '**1. "Álbum" — Artista (Año)**\n[género]\n\nPor qué te va a gustar: 2-3 oraciones conectando con tu colección.\n\nSimilar a: artistas de tu biblioteca que comparten estilo.\n\n---\n\n'+
-    '**2. "Álbum" — Artista (Año)**\n[género]\n\nPor qué te va a gustar: 2-3 oraciones.\n\nSimilar a: artistas de tu biblioteca.\n\n---\n\n'+
-    '**3. "Álbum" — Artista (Año)**\n[género]\n\nPor qué te va a gustar: 2-3 oraciones.\n\nSimilar a: artistas de tu biblioteca.\n\n---';
+    gustaron+'\n\n'+
+    'DISCOS QUE YA TIENE (NO recomendés ninguno de estos): '+albumsQueYaTiene+'\n\n'+
+    'Recomendá 3 discos que NO estén en esa lista. Para cada uno:\n\n'+
+    '**1. "Álbum" — Artista (Año)**\n[género]\n\n'+
+    'Por qué te va a gustar: 2-3 oraciones conectando con su colección.\n\n'+
+    'Similar a: artistas de su biblioteca que comparten estilo.\n\n---\n\n'+
+    '**2. "Álbum" — Artista (Año)**\n[género]\n\nPor qué te va a gustar: 2-3 oraciones.\n\nSimilar a: artistas de su biblioteca.\n\n---\n\n'+
+    '**3. "Álbum" — Artista (Año)**\n[género]\n\nPor qué te va a gustar: 2-3 oraciones.\n\nSimilar a: artistas de su biblioteca.\n\n---';
 
   try {
     const res = await fetch('/api/recomendar', {
@@ -1185,15 +1159,14 @@ async function buscarEnSpotifyLista(i, album, artist) {
     });
     const data = await res.json();
     if (data.error) throw new Error(data.error);
-    renderDescubrir(data.resultado, spotifyCandidatos, resultDiv);
+    renderDescubrir(data.resultado, [], resultDiv);
   } catch(e) {
     resultDiv.innerHTML = '<div class="rec-card" style="color:var(--red)">Error: '+e.message+'</div>';
   } finally {
     btn.disabled = false;
     btn.innerHTML = '🔭 Descubrir';
   }
-}
-
+}  
 function renderDescubrir(texto, spotifyCandidatos, resultDiv) {
   const bloques = texto.split(/\n---\n|\n---$/).map(b => b.trim()).filter(b => b.length > 30 && b.match(/\*\*\d+\./));
   const colors = ['#7f77dd','#1d9e75','#d85a30'];
