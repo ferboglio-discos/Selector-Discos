@@ -1111,45 +1111,37 @@ async function modoDescubrir() {
   const btn = document.getElementById('btn-descubrir');
   const resultDiv = document.getElementById('resultado');
   btn.disabled = true;
-  btn.innerHTML = '<span class="spinner"></span>Analizando tu colección...';
+  btn.innerHTML = '<span class="spinner"></span>Descubriendo...';
   resultDiv.innerHTML = '';
 
   const hoy = new Date();
-
-  // Analizar colección
   const generos = [...new Set(state.library.map(d => d.genre).filter(Boolean))];
-  const artistas = [...new Set(state.library.map(d => d.artist).filter(Boolean))].slice(0, 25);
+  const artistas = [...new Set(state.library.map(d => d.artist).filter(Boolean))].slice(0, 30);
   const decadas = [...new Set(state.library.map(d => {
     if (!d.year) return null;
-    return Math.floor(parseInt(d.year) / 10) * 10 + 's';
+    return Math.floor(parseInt(d.year)/10)*10+'s';
   }).filter(Boolean))];
-  const albumsQueYaTiene = state.library.map(d => '"'+d.album+'" de '+d.artist).join(', ');
 
-  // Obtener valoraciones positivas
   let gustaron = '';
   try {
     const vr = await fetch('/api/valoraciones');
     const vd = await vr.json();
-    const positivos = vd.valoraciones.filter(v => v.valor === '👍').map(v => v.album+' de '+v.artist);
-    if (positivos.length) gustaron = '\nDISCOS QUE LE GUSTARON EN SPOTIFY: '+positivos.join(', ');
+    const pos = vd.valoraciones.filter(v => v.valor==='👍').map(v => v.album+' de '+v.artist);
+    if (pos.length) gustaron = '\nDiscos que le gustaron: '+pos.slice(0,10).join(', ');
   } catch(e) {}
 
   const prompt =
-    'Sos un experto en música con profundo conocimiento de rock, jazz y géneros relacionados.\n\n'+
-    'FECHA: '+hoy.getDate()+' de '+hoy.toLocaleString('es-AR',{month:'long'})+' de '+hoy.getFullYear()+'\n\n'+
-    'MISIÓN: Analizá el perfil musical y recomendá exactamente 3 discos que NO tiene en su colección pero que le encantarían.\n\n'+
-    'PERFIL DE SU COLECCIÓN:\n'+
+    'Sos un experto en música.\n\n'+
+    'Analizá este perfil musical y recomendá 3 discos que NO tiene pero que le encantarían.\n\n'+
+    'PERFIL:\n'+
     '- Géneros: '+generos.join(', ')+'\n'+
     '- Décadas: '+decadas.join(', ')+'\n'+
-    '- Artistas que tiene: '+artistas.join(', ')+'\n'+
+    '- Artistas en su colección: '+artistas.join(', ')+'\n'+
     gustaron+'\n\n'+
-    'DISCOS QUE YA TIENE (NO recomendés ninguno de estos): '+albumsQueYaTiene+'\n\n'+
-    'Recomendá 3 discos que NO estén en esa lista. Para cada uno:\n\n'+
-    '**1. "Álbum" — Artista (Año)**\n[género]\n\n'+
-    'Por qué te va a gustar: 2-3 oraciones conectando con su colección.\n\n'+
-    'Similar a: artistas de su biblioteca que comparten estilo.\n\n---\n\n'+
-    '**2. "Álbum" — Artista (Año)**\n[género]\n\nPor qué te va a gustar: 2-3 oraciones.\n\nSimilar a: artistas de su biblioteca.\n\n---\n\n'+
-    '**3. "Álbum" — Artista (Año)**\n[género]\n\nPor qué te va a gustar: 2-3 oraciones.\n\nSimilar a: artistas de su biblioteca.\n\n---';
+    'Recomendá discos que complementen su colección — artistas relacionados, discos esenciales del género que probablemente no tiene, obras maestras afines a su gusto.\n\n'+
+    '**1. "Álbum" — Artista (Año)**\n[género]\n\nPor qué te va a gustar: 2-3 oraciones.\n\nSimilar a: artistas de su colección.\n\n---\n\n'+
+    '**2. "Álbum" — Artista (Año)**\n[género]\n\nPor qué te va a gustar: 2-3 oraciones.\n\nSimilar a: artistas de su colección.\n\n---\n\n'+
+    '**3. "Álbum" — Artista (Año)**\n[género]\n\nPor qué te va a gustar: 2-3 oraciones.\n\nSimilar a: artistas de su colección.\n\n---';
 
   try {
     const res = await fetch('/api/recomendar', {
@@ -1166,56 +1158,7 @@ async function modoDescubrir() {
     btn.disabled = false;
     btn.innerHTML = '🔭 Descubrir';
   }
-}  
-function renderDescubrir(texto, spotifyCandidatos, resultDiv) {
-  const bloques = texto.split(/\n---\n|\n---$/).map(b => b.trim()).filter(b => b.length > 30 && b.match(/\*\*\d+\./));
-  const colors = ['#7f77dd','#1d9e75','#d85a30'];
-
-  let html = '<div style="background:var(--teal-bg);border:0.5px solid var(--teal);border-radius:var(--radius-lg);padding:1rem 1.25rem;margin-top:16px;margin-bottom:4px;">'+
-    '<div style="font-size:11px;font-weight:500;color:var(--teal);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:4px;">🔭 Modo Descubrir</div>'+
-    '<div style="font-size:13px;color:var(--teal);">Discos que no tenés pero que encajan perfectamente con tu gusto musical</div>'+
-  '</div>';
-
-  html += bloques.slice(0,3).map((bloque, i) => {
-    const info = extraerAlbumArtista(bloque);
-    const spotMatch = info && spotifyCandidatos ? spotifyCandidatos.find(s =>
-      s && s.album && (
-        s.album.toLowerCase().includes((info.album||'').toLowerCase().substring(0,10)) ||
-        (info.album||'').toLowerCase().includes(s.album.toLowerCase().substring(0,10))
-      )
-    ) : null;
-    const bloqueHtml = bloque
-      .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
-      .replace(/\n\n/g, '</p><p>')
-      .replace(/\n/g, '<br/>');
-    return '<div class="rec-card" style="border-left:4px solid '+colors[i]+';">'+
-      '<div style="display:flex;gap:14px;align-items:flex-start;margin-bottom:12px;">'+
-        '<div id="rec-cover-desc-'+i+'" class="rec-cover-placeholder">'+(spotMatch&&spotMatch.image?'<img src="'+spotMatch.image+'" class="rec-cover" alt="cover"/>':'🔭')+'</div>'+
-        '<div style="flex:1;min-width:0;">'+
-          '<div style="font-size:11px;color:var(--text3);margin-bottom:3px;">Descubrimiento '+(i+1)+' de '+bloques.length+'</div>'+
-          '<div style="font-size:14px;line-height:1.6;"><p>'+bloqueHtml+'</p></div>'+
-        '</div>'+
-      '</div>'+
-      (spotMatch ?
-        '<div class="spotify-box">'+
-          '<div class="spotify-box-title">✓ Disponible en Spotify</div>'+
-          '<div class="spotify-box-album">'+spotMatch.album+'</div>'+
-          '<div class="spotify-box-artist">'+spotMatch.artist+'</div>'+
-          '<a href="'+spotMatch.url+'" target="_blank" class="spotify-link">Abrir en Spotify</a>'+
-        '</div>' :
-        (info ?
-          '<div id="desc-spotify-'+i+'"><button id="desc-btn-'+i+'" class="spotify-search-btn" onclick="buscarDescubrir('+i+',\''+( info.album||'').replace(/'/g,"\\'")+'\',\''+(info.artist||'').replace(/'/g,"\\'")+'\')">🎵 Buscar en Spotify</button></div>' : ''
-        )
-      )+
-      (info ?
-        '<button onclick="agregarADeseos(\''+( info.album||'').replace(/'/g,"\\'")+'\',\''+(info.artist||'').replace(/'/g,"\\'")+'\',\''+( bloque.match(/\[(.+?)\]/)?.[1]||'Otro')+'\')" style="width:100%;margin-top:8px;padding:8px;background:var(--bg2);border:0.5px solid var(--border);border-radius:var(--radius);font-size:13px;cursor:pointer;color:var(--text);">♡ Agregar a lista de deseos</button>' : ''
-      )+
-    '</div>';
-  }).join('');
-
-  resultDiv.innerHTML = html;
 }
-
 async function buscarDescubrir(i, album, artist) {
   const btn = document.getElementById('desc-btn-'+i);
   if (btn) { btn.disabled = true; btn.textContent = 'Buscando...'; }
